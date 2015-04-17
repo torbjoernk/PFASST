@@ -49,21 +49,12 @@ namespace simple_physics_solver
                                  double* forces)
   {
     UNUSED(t);
-//     cout << "SimplePhysicsSolver::evaluate_external_e_field(t=" << t << ")" << endl;
     double pre_factor = (- config->epsilon) * (config->omega_e * config->omega_e);
     double factor = double(0.0);
     for (size_t i = 0; i < num_particles; ++i) {
-//       cout << "  particle " << i << endl;
       factor = pre_factor / (charges[i] / masses[i]);
-//       cout << "    position: ";
-//       internal::print_vec(positions + (i * DIM));
-//       cout << endl << "    factor: " << factor << endl;
       internal::scale_mat_mul_vec(config->external_e_field_matrix, positions + (i * DIM), factor, forces + (i * DIM));
-//       cout << "    force: ";
-//       internal::print_vec(forces + (i * DIM));
-//       cout << endl;
     }
-//     cout << "DONE SimplePhysicsSolver::evaluate_external_e_field(t=" << t << ")" << endl;
   }
 
   void evaluate_internal_e_field(const double* positions, const double* charges, const double* masses,
@@ -72,7 +63,6 @@ namespace simple_physics_solver
                                  double* exyz, double* phis)
   {
     UNUSED(masses); UNUSED(t);
-//     cout << "SimplePhysicsSolver::evaluate_internal_e_field(t=" << t << ")" << endl;
     double r = double(0.0),
            r3 = double(0.0),
            dist2 = double(0.0);
@@ -80,7 +70,6 @@ namespace simple_physics_solver
 
     // computing forces on particle i
     for (size_t i = 0; i < num_particles; ++i) {
-//       cout << "  particle " << i << endl;
 
       // null result values
       phis[i] = double(0.0);
@@ -98,7 +87,6 @@ namespace simple_physics_solver
           dist[d] = positions[i * DIM + d] - positions[j * DIM + d];
           dist2 += dist[d] * dist[d];
         }
-//         cout << "      dist = " << dist << endl;
         r = sqrt(dist2 + config->sigma2);
 //         cout << "      r = " << r << " (= sqrt(dist^2+" << config->sigma2 << ")" << endl;
         phis[i] += charges[j] / r;
@@ -106,7 +94,6 @@ namespace simple_physics_solver
         r3 = r * r * r;
         for (size_t d = 0; d < DIM; ++d) {
           exyz[i * DIM + d] += dist[d] / r3 * charges[j];
-//           cout << "      exyz[" << i * DIM + d << "] += " << positions[j * DIM + d] << " / " << r3 << " * " << charges[j] << "(q) => " << exyz[i * DIM + d] << endl;
         }
       }
 
@@ -116,7 +103,6 @@ namespace simple_physics_solver
 //            << "    phi_i = " << phis[i] << endl;
     }
     delete[] dist;
-//     cout << "DONE SimplePhysicsSolver::evaluate_internal_e_field(t=" << t << ")" << endl;
   }
 
 
@@ -125,22 +111,18 @@ namespace simple_physics_solver
                         const SimplePhysicsSolverConfig* config,
                         double* forces)
   {
-//     cout << "SimplePhysicsSolver::evaluate_e_field(t=" << t << ")" << endl;
     double* external = new double[num_particles * DIM];
     double* internal = new double[num_particles * DIM];
     double* phis = new double[num_particles];
+
     evaluate_external_e_field(positions, charges, masses, num_particles, t, config, external);
     evaluate_internal_e_field(positions, charges, masses, num_particles, t, config, internal, phis);
-//     cout << "  -> e_forces = [ " << endl;
     for (size_t i = 0; i < num_particles; ++i) {
-//       cout << "                  ";
       for (size_t d = 0; d < DIM; ++d) {
         forces[i * DIM + d] = external[i * DIM + d] + internal[i * DIM + d];
       }
-//       internal::print_vec(forces + (i * DIM));
-//       cout << endl;
     }
-//     cout << "                ]" << endl;
+
     delete[] external;
     delete[] internal;
     delete[] phis;
@@ -163,15 +145,10 @@ namespace simple_physics_solver
                         const SimplePhysicsSolverConfig* config, double* forces)
   {
     UNUSED(t);
-//     cout << "SimplePhysicsSolver::evaluate_b_field(t=" << t << ")" << endl;
     for (size_t i = 0; i < num_particles; ++i) {
-//       cout << "  particle " << i << endl;
       internal::scale_mat_mul_vec(config->b_field_matrix, velocities + (i * DIM),
                                   config->omega_b / (charges[i] / masses[i]),
                                   forces + (i * DIM));
-//       cout << "    force = ";
-//       internal::print_vec(forces + (i * DIM));
-//       cout << endl;
     }
   }
 
@@ -181,7 +158,6 @@ namespace simple_physics_solver
                         const size_t num_particles, const double t,
                         const SimplePhysicsSolverConfig* config)
   {
-//     cout << "SimplePhysicsSolver::compute_energy(t=" << t << ")" << endl;
     double e_kin = double(0.0);
     double e_pot = double(0.0);
 
@@ -193,33 +169,20 @@ namespace simple_physics_solver
     evaluate_internal_e_field(positions, charges, masses, num_particles, t, config, exyz, phis);
 
     for (size_t i = 0; i < num_particles; ++i) {
-//       cout << "  particle " << i << endl;
       // potential energy (induced by external electric field, position and internal electric field (i.e. phis))
       internal::scale_mat_mul_vec(config->external_e_field_matrix, positions + (i * DIM),
                                   (- config->epsilon * config->omega_e * config->omega_e / double(2.0) * (charges[i] / masses[i])),
                                   temp);
       e_pot += (charges[i] * phis[i]) - internal::scalar_prod(temp, positions + (i * DIM));
-//       cout << "    e_pot += " << charges[i] << " * " << phis[i] << " - <";
-//       internal::print_vec(temp);
-//       cout << ", ";
-//       internal::print_vec(positions + (i * DIM));
-//       cout << "> (=" << internal::scalar_prod(temp, positions + (i * DIM)) << ")" << endl;
 
       // kinetic energy (induced by velocity)
       v2 = internal::scalar_prod(velocities + (i * DIM), velocities + (i * DIM));
       e_kin += masses[i] / double(2.0) * v2;
-//       cout << "    e_kin += " << masses[i] << "(m) / 2.0" << " * <";
-//       internal::print_vec(velocities + (i * DIM));
-//       cout << " , ";
-//       internal::print_vec(velocities + (i * DIM));
-//       cout << "> (=" << v2 << ")" << endl;
     }
 
     delete[] exyz;
     delete[] phis;
     delete[] temp;
-//     cout << "  -> energy = " << e_kin << " + " << e_pot << endl;
-//     cout << "DONE SimplePhysicsSolver::compute_energy(t=" << t << ")" << endl;
     return e_kin + e_pot;
   }
 
