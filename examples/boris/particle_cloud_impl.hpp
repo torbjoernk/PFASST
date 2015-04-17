@@ -274,7 +274,12 @@ namespace pfasst
       }
 
       template<typename precision>
+#ifdef WITH_MPI
+      void ParticleCloud<precision>::distribute_around_center(const shared_ptr<Particle<precision>>& center,
+                                                              pfasst::mpi::MPICommunicator& space_comm)
+#else
       void ParticleCloud<precision>::distribute_around_center(const shared_ptr<Particle<precision>>& center)
+#endif
       {
         VLOG_FUNC_START("ParticleCloud") << " center:" << center;
         VLOG(3) << LOG_INDENT << "distributing " << this->size() << " particles around center " << center;
@@ -291,14 +296,35 @@ namespace pfasst
         VLOG(4) << LOG_INDENT << " ... position: " << boost::format("[%.4f, %.4f]") % dist_pos.min() % dist_pos.max();
         VLOG(4) << LOG_INDENT << " ... velocity: " << boost::format("[%.4f, %.4f]") % dist_vel.min() % dist_vel.max();
 
-        size_t p = 0;
-
-        if (this->size() % 2 == 1) {
-          this->set_at(p, center);
-          VLOG(5) << LOG_INDENT << "setting p=1 to center";
-          p++;
+#ifdef WITH_MPI
+        // make sure the same random numbers are drawn independent of the degree of spatial parallelization
+        if (space_comm.size() > 1) {
+          VLOG(4) << LOG_INDENT << "skipping a total of "
+                                << space_comm.rank() * this->size() * this->dim()
+                                << " random numbers each for positions and velocities";
+          for (size_t skip = 0; skip < space_comm.rank() * this->size() * this->dim(); ++skip) {
+            dist_pos(rd_gen);
+            dist_vel(rd_gen);
+          }
         }
-        for (;p < this->size(); ++p) {
+#endif
+
+//         size_t p = 0;
+//
+//         if (this->size() % 2 == 1) {
+// #ifdef WITH_MPI
+//           if (space_comm.rank() == 0) {
+// #endif
+//             this->set_at(p, center);
+//             VLOG(5) << LOG_INDENT << "setting p=1 to center";
+//             p++;
+// #ifdef WITH_MPI
+//           } else {
+//             VLOG(5) << LOG_INDENT << "only rank 0 will have the center particle";
+//           }
+// #endif
+//         }
+        for (size_t p = 0; p < this->size(); ++p) {
           ParticleComponent<precision> pos_rand(this->dim());
           ParticleComponent<precision> vel_rand(this->dim());
           std::transform(center->pos().cbegin(), center->pos().cend(), pos_rand.begin(),
@@ -309,7 +335,7 @@ namespace pfasst
           std::copy(vel_rand.cbegin(), vel_rand.cend(), this->velocities().begin() + (p * this->dim()));
           VLOG(5) << LOG_INDENT << "p=" << (p+1) << ": " << this->at(p);
         }
-        assert(p == this->size());
+//         assert(p == this->size());
         VLOG(3) << LOG_INDENT << "center after distribute: " << this->center_of_mass();
       }
 

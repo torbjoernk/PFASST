@@ -92,7 +92,12 @@ namespace pfasst
           // !! VERY !! EXPENSIVE !! (i.e. never use for production code)
           vector<shared_ptr<Particle<precision>>> particles() const;
 
+#ifdef WITH_MPI
+          void distribute_around_center(const shared_ptr<Particle<precision>>& center,
+                                        pfasst::mpi::MPICommunicator& space_comm);
+#else
           void distribute_around_center(const shared_ptr<Particle<precision>>& center);
+#endif
 
           // TODO: unify behaviour with particle_util::norm0 (e.g. norm_max vs. norm0 (==sqrt(^2))
           virtual precision norm0() const;
