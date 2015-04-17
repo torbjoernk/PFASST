@@ -33,6 +33,8 @@ namespace simple_physics_solver
       double b_field_matrix[3][3];
 #ifdef WITH_MPI
       MPI_Comm space_comm;
+      int size;
+      int rank;
 #endif
 
       SimplePhysicsSolverConfig(const double omega_e = double(-4.9), const double omega_b = double(25.0),

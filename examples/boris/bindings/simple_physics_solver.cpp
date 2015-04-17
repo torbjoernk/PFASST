@@ -68,40 +68,88 @@ namespace simple_physics_solver
            dist2 = double(0.0);
     double* dist = new double[DIM];
 
-    // computing forces on particle i
+    // copy this ranks particles; these copies will get reused as send-recv buffers later on
+    double* other_positions = new double[num_particles * DIM];
+    double* other_charges = new double[num_particles];
+    double* other_masses = new double[num_particles];
     for (size_t i = 0; i < num_particles; ++i) {
-
       // null result values
       phis[i] = double(0.0);
-      for (size_t d = 0; d < DIM; ++d) { exyz[i * DIM + d] = double(0.0); }
 
-      // effects of particle j on particle i
-      for (size_t j = 0; j < num_particles; ++j) {
-//         cout << "    particle " << j << endl;
-        if (j == i) {
-//           cout << "      skipping" << endl;
-          continue;
-        }
-        dist2 = double(0.0);
-        for (size_t d = 0; d < DIM; ++d) {
-          dist[d] = positions[i * DIM + d] - positions[j * DIM + d];
-          dist2 += dist[d] * dist[d];
-        }
-        r = sqrt(dist2 + config->sigma2);
-//         cout << "      r = " << r << " (= sqrt(dist^2+" << config->sigma2 << ")" << endl;
-        phis[i] += charges[j] / r;
+      for (size_t d = 0 ; d < DIM; ++d) {
+        other_positions[i * DIM + d] = positions[i * DIM + d];
+        exyz[i * DIM + d] = double(0.0);
+      }
+      other_charges[i] = charges[i];
+      other_masses[i] = masses[i];
+    }
 
-        r3 = r * r * r;
-        for (size_t d = 0; d < DIM; ++d) {
-          exyz[i * DIM + d] += dist[d] / r3 * charges[j];
+#ifdef WITH_MPI
+    // rank_id where the other particles origin from
+    int current_paired = config->rank;
+    // rank_id where other particles in the next round will origin from
+    int next_recv = (config->rank == 0) ? config->size - 1 : config->rank - 1;
+    // rank_id where other particles will be send to after the loop
+    int next_send = (config->rank == config->size - 1) ? 0 : config->rank + 1;
+
+    const int prev_rank = next_recv;
+    const int next_rank = next_send;
+
+    // The Hot-Potato-Ring-Parallelization-Loop
+    do {
+#endif
+      // computing forces on particle i
+      for (size_t i = 0; i < num_particles; ++i) {
+
+        // null result values
+        phis[i] = double(0.0);
+        for (size_t d = 0; d < DIM; ++d) { exyz[i * DIM + d] = double(0.0); }
+
+        // effects of particle j on particle i
+        for (size_t j = 0; j < num_particles; ++j) {
+
+          dist2 = double(0.0);
+          for (size_t d = 0; d < DIM; ++d) {
+            dist[d] = positions[i * DIM + d] - other_positions[j * DIM + d];
+            dist2 += dist[d] * dist[d];
+          }
+          r = sqrt(dist2 + config->sigma2);
+          phis[i] += other_charges[j] / r;
+
+          r3 = r * r * r;
+          for (size_t d = 0; d < DIM; ++d) {
+            exyz[i * DIM + d] += dist[d] / r3 * other_charges[j];
+          }
         }
       }
+#ifdef WITH_MPI
+      // send-recv
+      MPI_Status stat_pos, stat_charge, stat_mass;
+      // NOTE: this will probably only work for spacial parallelization up to 10,000 cores
+      MPI_Sendrecv_replace(other_positions, num_particles * DIM, MPI_DOUBLE,
+                           next_rank, 10000 + current_paired,
+                           prev_rank, 10000 + next_recv,
+                           config->space_comm, &stat_pos);
+      MPI_Sendrecv_replace(other_charges, num_particles, MPI_DOUBLE,
+                           next_rank, 20000 + current_paired,
+                           prev_rank, 20000 + next_recv,
+                           config->space_comm, &stat_charge);
+      MPI_Sendrecv_replace(other_masses, num_particles, MPI_DOUBLE,
+                           next_rank, 30000 + current_paired,
+                           prev_rank, 30000 + next_recv,
+                           config->space_comm, &stat_mass);
 
-//       cout << "    exyz = ";
-//       internal::print_vec(exyz+(i*DIM));
-//       cout << endl
-//            << "    phi_i = " << phis[i] << endl;
-    }
+      // update loop
+      current_paired = next_recv;
+      next_recv = (next_recv == 0) ? config->size - 1 : next_recv - 1;
+      next_send = (next_send == config->size - 1) ? 0 : next_send + 1;
+    } while (next_recv != config->rank);
+#endif
+
+    delete[] other_positions;
+    delete[] other_charges;
+    delete[] other_masses;
+
     delete[] dist;
   }
 
