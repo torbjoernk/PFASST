@@ -9,6 +9,10 @@
 #include <utility>
 using namespace std;
 
+#ifdef WITH_MPI
+  #include <mpi.h>
+#endif
+
 #include "../particle_cloud.hpp"
 #include "wrapper_interface.hpp"
 
@@ -37,6 +41,11 @@ namespace pfasst
           private:
             shared_ptr<solver::SimplePhysicsSolverConfig> config;
 
+          protected:
+#ifdef WITH_MPI
+            MPI_Comm space_comm;
+#endif
+
           public:
             typedef shared_ptr<ParticleCloud<scalar>> particle_cloud_type;
 
@@ -61,7 +70,11 @@ namespace pfasst
                                                              const size_t num_particles);
 
           public:
+#ifdef WITH_MPI
+            WrapperSimplePhysicsSolver(MPI_Comm space_comm = MPI_COMM_WORLD);
+#else
             WrapperSimplePhysicsSolver();
+#endif
             virtual ~WrapperSimplePhysicsSolver();
 
             virtual ParticleCloudComponent<scalar> external_e_field_evaluate(const particle_cloud_type& particles, const time t) override;

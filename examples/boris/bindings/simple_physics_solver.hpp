@@ -8,6 +8,10 @@
 #include <cstdlib>
 using namespace std;
 
+#ifdef WITH_MPI
+  #include <mpi.h>
+#endif
+
 #ifndef DIM
   #define DIM 3
 #endif
@@ -27,6 +31,9 @@ namespace simple_physics_solver
       double sigma2;
       double external_e_field_matrix[3][3];
       double b_field_matrix[3][3];
+#ifdef WITH_MPI
+      MPI_Comm space_comm;
+#endif
 
       SimplePhysicsSolverConfig(const double omega_e = double(-4.9), const double omega_b = double(25.0),
                                 const double epsilon = double(-1.0), const double sigma = double(0.1));

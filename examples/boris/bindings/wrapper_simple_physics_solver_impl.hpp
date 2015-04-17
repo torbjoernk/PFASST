@@ -99,9 +99,17 @@ namespace pfasst
         }
 
 
+#ifdef WITH_MPI
+        template<typename scalar, typename time>
+        WrapperSimplePhysicsSolver<scalar, time>::WrapperSimplePhysicsSolver(MPI_Comm space_comm)
+        {
+          this->space_comm = space_comm;
+        }
+#else
         template<typename scalar, typename time>
         WrapperSimplePhysicsSolver<scalar, time>::WrapperSimplePhysicsSolver()
         {}
+#endif
 
         template<typename scalar, typename time>
         WrapperSimplePhysicsSolver<scalar, time>::~WrapperSimplePhysicsSolver()
@@ -251,6 +259,9 @@ namespace pfasst
         WrapperSimplePhysicsSolver<scalar, time>::set_config(shared_ptr<solver::SimplePhysicsSolverConfig> config)
         {
           this->config = config;
+#ifdef WITH_MPI
+          this->config->space_comm = this->space_comm;
+#endif
         }
 
         template<typename scalar, typename time>
