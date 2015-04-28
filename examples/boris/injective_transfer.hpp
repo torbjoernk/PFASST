@@ -5,6 +5,9 @@
 #ifndef _EXAMPLES__BORIS__INJECTIVE_TRANSFER__HPP_
 #define _EXAMPLES__BORIS__INJECTIVE_TRANSFER__HPP_
 
+#include <memory>
+using namespace std;
+
 #include <pfasst/logging.hpp>
 #include <pfasst/interfaces.hpp>
 #include <pfasst/encap/encapsulation.hpp>
@@ -45,24 +48,28 @@ namespace pfasst
             assert(fine);
             auto crse = dynamic_pointer_cast<const BorisSweeper<scalar, time>>(src);
             assert(crse);
-            CVLOG(5, "BorisTransfer") << "coarse:       " << crse->get_start_state();
+            CVLOG(5, "BorisTransfer") << "coarse:       " << *(dynamic_pointer_cast<const encap_type>(crse->get_start_state()));
 
             auto crse_factory = crse->get_factory();
             auto fine_factory = fine->get_factory();
 
+            CVLOG(5, "BorisTransfer") << "compute coarse delta";
             shared_ptr<encap_type> crse_delta = dynamic_pointer_cast<encap_type>(crse_factory->create(solution));
             this->restrict(crse_delta, dynamic_pointer_cast<const encap_type>(fine->get_start_state()));
             crse_delta->positions() -= dynamic_pointer_cast<const encap_type>(crse->get_start_state())->positions();
             crse_delta->velocities() -= dynamic_pointer_cast<const encap_type>(crse->get_start_state())->velocities();
 
+            CVLOG(5, "BorisTransfer") << "compute fine delta";
             shared_ptr<encap_type> fine_delta = dynamic_pointer_cast<encap_type>(fine_factory->create(solution));
             this->interpolate(fine_delta, crse_delta);
+
+            CVLOG(5, "BorisTransfer") << "apply deltas";
             shared_ptr<encap_type> fine_start = dynamic_pointer_cast<encap_type>(fine->get_start_state());
             fine_start->positions() -= fine_delta->positions();
             fine_start->velocities() -= fine_delta->velocities();
 
             fine->set_start_state(fine_start);
-            CVLOG(5, "BorisTransfer") << "interpolated: " << fine->get_start_state();
+            CVLOG(5, "BorisTransfer") << "interpolated: " << *(dynamic_pointer_cast<const encap_type>(fine->get_start_state()));
           }
 
           virtual void interpolate(shared_ptr<ISweeper<time>> dst,
@@ -138,9 +145,9 @@ namespace pfasst
             assert(coarse);
             auto fine = dynamic_pointer_cast<const BorisSweeper<scalar, time>>(src);
             assert(fine);
-            CVLOG(5, "BorisTransfer") << "fine:       " << fine->get_start_state();
+            CVLOG(5, "BorisTransfer") << "fine:       " << *(dynamic_pointer_cast<ParticleCloud<double>>(fine->get_start_state()));
             coarse->set_start_state(dynamic_pointer_cast<typename BorisSweeper<scalar, time>::encap_type>(fine->get_start_state()));
-            CVLOG(5, "BorisTransfer") << "restricted: " << coarse->get_start_state();
+            CVLOG(5, "BorisTransfer") << "restricted: " << *(dynamic_pointer_cast<ParticleCloud<double>>(coarse->get_start_state()));
           }
 
           virtual void restrict(shared_ptr<ISweeper<time>> dst,

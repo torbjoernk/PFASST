@@ -73,11 +73,16 @@ namespace pfasst
         shared_ptr<ParticleCloud<double>> q0 = \
           dynamic_pointer_cast<ParticleCloud<double>>(fine_sweeper->get_start_state());
         q0->distribute_around_center(center);
-        CLOG(INFO, "Boris") << "Initial Particle (fine) : "
+        CLOG(INFO, "Boris") << "Initial Particle (fine): "
                             << *(dynamic_pointer_cast<ParticleCloud<double>>(fine_sweeper->get_start_state()));
         fine_sweeper->set_initial_energy();
 
         controller.run();
+
+        CLOG(INFO, "Boris") << "Final Particles (coarse): "
+                            << *(dynamic_pointer_cast<ParticleCloud<double>>(controller.get_coarsest<BorisSweeper<double, double>>()->get_end_state()));
+        CLOG(INFO, "Boris") << "Final Particles (fine): "
+                            << *(dynamic_pointer_cast<ParticleCloud<double>>(controller.get_finest<BorisSweeper<double, double>>()->get_end_state()));
 
         return fine_sweeper->get_errors();
       }
