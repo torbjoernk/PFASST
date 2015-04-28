@@ -73,6 +73,9 @@ namespace simple_physics_solver
     double* other_charges = new double[num_particles];
     double* other_masses = new double[num_particles];
     for (size_t i = 0; i < num_particles; ++i) {
+//       cout << "[" << config->mpi_rank << "] p[" << i << "] = ";
+//       internal::print_vec(positions + i * DIM);
+//       cout << endl;
       // null result values
       phis[i] = double(0.0);
 
@@ -84,52 +87,68 @@ namespace simple_physics_solver
       other_masses[i] = masses[i];
     }
 
-#ifdef WITH_MPI
     // rank_id where the other particles origin from
-    int current_paired = config->rank;
+    int current_paired = config->mpi_rank;
     // rank_id where other particles in the next round will origin from
-    int next_recv = (config->rank == 0) ? config->size - 1 : config->rank - 1;
+    int next_recv = (config->mpi_rank == 0) ? config->mpi_size - 1 : config->mpi_rank - 1;
     // rank_id where other particles will be send to after the loop
-    int next_send = (config->rank == config->size - 1) ? 0 : config->rank + 1;
+    int next_send = (config->mpi_rank == config->mpi_size - 1) ? 0 : config->mpi_rank + 1;
 
     const int prev_rank = next_recv;
     const int next_rank = next_send;
 
+//     cout << "[" << config->mpi_rank << "] start hot-potato" << endl;
     // The Hot-Potato-Ring-Parallelization-Loop
-    do {
-#endif
+    for (size_t proc = 0; proc < config->mpi_size; ++proc) {
       // computing forces on particle i
       for (size_t i = 0; i < num_particles; ++i) {
-
-        // null result values
-        phis[i] = double(0.0);
-        for (size_t d = 0; d < DIM; ++d) { exyz[i * DIM + d] = double(0.0); }
-
         // effects of particle j on particle i
         for (size_t j = 0; j < num_particles; ++j) {
+          // skip pairing the very same particle
+          if (proc == 0 && i == j) {
+            continue;
+          }
+//           cout << "[" << config->mpi_rank << "] pairing " << i << " with " << j << endl;
 
+          // compute distance between the two particles
           dist2 = double(0.0);
           for (size_t d = 0; d < DIM; ++d) {
             dist[d] = positions[i * DIM + d] - other_positions[j * DIM + d];
             dist2 += dist[d] * dist[d];
           }
+//           cout << "[" << config->mpi_rank << "] dist(p[" << i << "], p[" << j << "]) = ";
+//           internal::print_vec(dist);
+//           cout << endl;
+
+          // compute the phi
           r = sqrt(dist2 + config->sigma2);
           phis[i] += other_charges[j] / r;
 
+          // compute the Coulomb force
           r3 = r * r * r;
           for (size_t d = 0; d < DIM; ++d) {
             exyz[i * DIM + d] += dist[d] / r3 * other_charges[j];
           }
+//           cout << "[" << config->mpi_rank << "] updated force for p[" << i << "] = ";
+//           internal::print_vec(exyz + i * DIM);
+//           cout << endl;
         }
       }
 #ifdef WITH_MPI
       // send-recv
+//       cout << "[" << config->mpi_rank << "] exchaning data" << endl;
       MPI_Status stat_pos, stat_charge, stat_mass;
-      // NOTE: this will probably only work for spacial parallelization up to 10,000 cores
+      // NOTE: this will probably only work for spacial parallelization up to 10,000 ranks
       MPI_Sendrecv_replace(other_positions, num_particles * DIM, MPI_DOUBLE,
                            next_rank, 10000 + current_paired,
                            prev_rank, 10000 + next_recv,
                            config->space_comm, &stat_pos);
+//       cout << "[" << config->mpi_rank << "] got positions: ";
+//       for (size_t p = 0; p < num_particles; ++p) {
+//         internal::print_vec(other_positions + p * DIM);
+//         cout << "\t";
+//       }
+//       cout << endl;
       MPI_Sendrecv_replace(other_charges, num_particles, MPI_DOUBLE,
                            next_rank, 20000 + current_paired,
                            prev_rank, 20000 + next_recv,
@@ -141,15 +160,15 @@ namespace simple_physics_solver
 
       // update loop
       current_paired = next_recv;
-      next_recv = (next_recv == 0) ? config->size - 1 : next_recv - 1;
-      next_send = (next_send == config->size - 1) ? 0 : next_send + 1;
-    } while (next_recv != config->rank);
+      next_recv = (next_recv == 0) ? config->mpi_size - 1 : next_recv - 1;
+      next_send = (next_send == config->mpi_size - 1) ? 0 : next_send + 1;
 #endif
+    }
+//     cout << "[" << config->mpi_rank << "] done" << endl;
 
     delete[] other_positions;
     delete[] other_charges;
     delete[] other_masses;
-
     delete[] dist;
   }
 

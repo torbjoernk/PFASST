@@ -261,8 +261,11 @@ namespace pfasst
           this->config = config;
 #ifdef WITH_MPI
           this->config->space_comm = this->space_comm;
-          MPI_Comm_size(this->config->space_comm, &(this->config->size));
-          MPI_Comm_rank(this->config->space_comm, &(this->config->rank));
+          MPI_Comm_size(this->config->space_comm, &(this->config->mpi_size));
+          MPI_Comm_rank(this->config->space_comm, &(this->config->mpi_rank));
+#else
+          this->config->mpi_size = 1;
+          this->config->mpi_rank = 0;
 #endif
         }
 
