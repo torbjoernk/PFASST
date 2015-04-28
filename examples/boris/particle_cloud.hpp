@@ -94,7 +94,7 @@ namespace pfasst
 
 #ifdef WITH_MPI
           void distribute_around_center(const shared_ptr<Particle<precision>>& center,
-                                        pfasst::mpi::MPICommunicator& space_comm);
+                                        pfasst::mpi::MPICommunicator space_comm = pfasst::mpi::MPICommunicator(MPI_COMM_WORLD));
 #else
           void distribute_around_center(const shared_ptr<Particle<precision>>& center);
 #endif

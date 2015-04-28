@@ -69,6 +69,7 @@ namespace pfasst
       static void init_logs()
       {
         pfasst::log::add_custom_logger("Boris");
+        pfasst::log::add_custom_logger("BorisTransfer");
         pfasst::log::add_custom_logger("SolverBinding");
         pfasst::log::add_custom_logger("Solver");
       }
@@ -283,6 +284,12 @@ namespace pfasst
       shared_ptr<Encapsulation<time>> BorisSweeper<scalar, time>::get_start_state() const
       {
         return this->start_particles;
+      }
+
+      template<typename scalar, typename time>
+      shared_ptr<Encapsulation<time>> BorisSweeper<scalar, time>::get_end_state()
+      {
+        return this->end_particles;
       }
 
       template<typename scalar, typename time>
@@ -618,15 +625,18 @@ namespace pfasst
         BCVLOG(2) << "advancing to next step";
         this->log_indent->increment(2);
         this->start_particles->copy(this->end_particles);
-        this->energy_evals.front() = this->energy_evals.back();
-        this->forces.front() = this->forces.back();
-        this->b_vecs.front() = this->b_vecs.back();
-        this->exact_updated = false;
         BCVLOG(9) << "new starting values:";
         BCVLOG(9) << "  => start_particles: " << this->start_particles;
-        BCVLOG(9) << "  => energies:        " << this->energy_evals.front();
-        BCVLOG(9) << "  => forces:          " << this->forces.front();
-        BCVLOG(9) << "  => b_vecs:          " << this->b_vecs.front();
+        if (this->quadrature->left_is_node()) {
+          this->particles[0]->copy(this->start_particles);
+          this->energy_evals.front() = this->energy_evals.back();
+          this->forces.front() = this->forces.back();
+          this->b_vecs.front() = this->b_vecs.back();
+          this->exact_updated = false;
+          BCVLOG(9) << "  => energies:        " << this->energy_evals.front();
+          BCVLOG(9) << "  => forces:          " << this->forces.front();
+          BCVLOG(9) << "  => b_vecs:          " << this->b_vecs.front();
+        }
         this->log_indent->decrement(2);
       }
 
@@ -813,8 +823,8 @@ namespace pfasst
       template<typename scalar, typename time>
       void BorisSweeper<scalar, time>::spread()
       {
-        for (size_t m = 1; m < this->particles.size(); ++m) {
-          this->set_state(const_pointer_cast<const encap_type>(this->particles[0]), m);
+        for (size_t m = 0; m < this->particles.size(); ++m) {
+          this->set_state(const_pointer_cast<const encap_type>(this->start_particles), m);
         }
       }
 

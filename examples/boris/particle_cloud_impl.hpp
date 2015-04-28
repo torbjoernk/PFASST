@@ -95,73 +95,6 @@ namespace pfasst
         this->_default_mass = other_c->_default_mass;
       }
 
-      /*
-      template<typename precision>
-      void ParticleCloud<precision>::extend(const size_t new_size)
-      {
-        if (new_size <= this->_num_particles) {
-          throw invalid_argument("new size (" + to_string(new_size) + ") is not larger current size (" 
-                                 + to_string(this->_num_particles) + ")");
-        }
-
-        this->_positions.resize(new_size * this->dim());
-        fill(this->_positions.begin() + this->_num_particles, this->_positions.end(), precision(0.0));
-        this->_velocities.resize(new_size * this->dim());
-        fill(this->_velocities.begin() + this->_num_particles, this->_velocities.end(), precision(0.0));
-        this->_masses.resize(new_size);
-        fill(this->_masses.begin() + this->_num_particles, this->_masses.end(), this->_default_mass);
-        this->_charges.resize(new_size);
-        fill(this->_charges.begin() + this->_num_particles, this->_charges.end(), this->_default_charge);
-
-        this->_num_particles = new_size;
-      }
-
-      template<typename precision>
-      void ParticleCloud<precision>::erase(const size_t pos)
-      {
-        if (pos >= this->_num_particles) {
-          throw out_of_range("index to erase (" + to_string(pos) + ") is out of bounds ("
-                             + to_string(this->_num_particles) + ")");
-        }
-
-        this->_positions.erase(this->_positions.cbegin() + pos, this->_positions.cbegin() + pos + 1);
-        this->_velocities.erase(this->_velocities.cbegin() + pos, this->_velocities.cbegin() + pos + 1);
-        this->_charges.erase(this->_charges.cbegin() + pos, this->_charges.cbegin() + pos + 1);
-        this->_masses.erase(this->_masses.cbegin() + pos, this->_masses.cbegin() + pos + 1);
-        this->_num_particles--;
-      }
-
-      template<typename precision>
-      void ParticleCloud<precision>::push_back(const shared_ptr<Particle<precision>>& particle)
-      {
-        if (particle->DIM() != this->_dim) {
-          throw invalid_argument("particles dimension (" + to_string(particle->DIM())
-                                 + ") does not match cloud dimension ("+to_string(this->_dim)+")");
-        }
-
-        this->_positions.push_back(particle->pos());
-        this->_velocities.push_back(particle->vel());
-        this->_charges.push_back(particle->charge());
-        this->_masses.push_back(particle->mass());
-        this->_num_particles++;
-      }
-
-      template<typename precision>
-      void ParticleCloud<precision>::insert(const size_t pos, const shared_ptr<Particle<precision>>& particle)
-      {
-        if (particle->DIM() != this->_dim) {
-          throw invalid_argument("particles dimension (" + to_string(particle->DIM())
-                                 + ") does not match cloud dimension ("+to_string(this->_dim)+")");
-        }
-
-        this->_positions.insert(pos, particle->pos());
-        this->_velocities.insert(pos, particle->vel());
-        this->_charges.insert(pos, particle->charge());
-        this->_masses.insert(pos, particle->mass());
-        this->_num_particles++;
-      }
-      */
-
       template<typename precision>
       inline size_t ParticleCloud<precision>::size() const
       {
@@ -232,6 +165,9 @@ namespace pfasst
         return particles;
       }
 
+      /**
+       * @todo take particles of other ranks into account!
+       */
       template<typename precision>
       ParticleComponent<precision> ParticleCloud<precision>::center_of_mass() const
       {
@@ -276,13 +212,13 @@ namespace pfasst
       template<typename precision>
 #ifdef WITH_MPI
       void ParticleCloud<precision>::distribute_around_center(const shared_ptr<Particle<precision>>& center,
-                                                              pfasst::mpi::MPICommunicator& space_comm)
+                                                              pfasst::mpi::MPICommunicator space_comm)
 #else
       void ParticleCloud<precision>::distribute_around_center(const shared_ptr<Particle<precision>>& center)
 #endif
       {
-        VLOG_FUNC_START("ParticleCloud") << " center:" << center;
-        VLOG(3) << LOG_INDENT << "distributing " << this->size() << " particles around center " << center;
+        CVLOG(3, "Boris") << LOG_INDENT << "distributing " << this->size()
+                                        << " particles around center " << center;
         assert(this->size() > 0);
 
         precision scale = 1000.0;
@@ -292,16 +228,18 @@ namespace pfasst
         precision max_vel = max(center->vel());
         uniform_real_distribution<precision> dist_pos(- max_pos / scale, max_pos / scale);
         uniform_real_distribution<precision> dist_vel(- max_vel / scale, max_vel / scale);
-        VLOG(4) << LOG_INDENT << "random displacement range for";
-        VLOG(4) << LOG_INDENT << " ... position: " << boost::format("[%.4f, %.4f]") % dist_pos.min() % dist_pos.max();
-        VLOG(4) << LOG_INDENT << " ... velocity: " << boost::format("[%.4f, %.4f]") % dist_vel.min() % dist_vel.max();
+        CVLOG(4, "Boris") << LOG_INDENT << "random displacement range for";
+        CVLOG(4, "Boris") << LOG_INDENT << " ... position: "
+                                        << boost::format("[%.4f, %.4f]") % dist_pos.min() % dist_pos.max();
+        CVLOG(4, "Boris") << LOG_INDENT << " ... velocity: "
+                                        << boost::format("[%.4f, %.4f]") % dist_vel.min() % dist_vel.max();
 
 #ifdef WITH_MPI
         // make sure the same random numbers are drawn independent of the degree of spatial parallelization
         if (space_comm.size() > 1) {
-          VLOG(4) << LOG_INDENT << "skipping a total of "
-                                << space_comm.rank() * this->size() * this->dim()
-                                << " random numbers each for positions and velocities";
+          CVLOG(4, "Boris") << LOG_INDENT << "skipping a total of "
+                                          << space_comm.rank() * this->size() * this->dim()
+                                          << " random numbers each for positions and velocities";
           for (size_t skip = 0; skip < space_comm.rank() * this->size() * this->dim(); ++skip) {
             dist_pos(rd_gen);
             dist_vel(rd_gen);
@@ -309,21 +247,6 @@ namespace pfasst
         }
 #endif
 
-//         size_t p = 0;
-//
-//         if (this->size() % 2 == 1) {
-// #ifdef WITH_MPI
-//           if (space_comm.rank() == 0) {
-// #endif
-//             this->set_at(p, center);
-//             VLOG(5) << LOG_INDENT << "setting p=1 to center";
-//             p++;
-// #ifdef WITH_MPI
-//           } else {
-//             VLOG(5) << LOG_INDENT << "only rank 0 will have the center particle";
-//           }
-// #endif
-//         }
         for (size_t p = 0; p < this->size(); ++p) {
           ParticleComponent<precision> pos_rand(this->dim());
           ParticleComponent<precision> vel_rand(this->dim());
@@ -333,10 +256,9 @@ namespace pfasst
                          [&](const precision& c) { return c + dist_vel(rd_gen); });
           std::copy(pos_rand.cbegin(), pos_rand.cend(), this->positions().begin() + (p * this->dim()));
           std::copy(vel_rand.cbegin(), vel_rand.cend(), this->velocities().begin() + (p * this->dim()));
-          VLOG(5) << LOG_INDENT << "p=" << (p+1) << ": " << this->at(p);
+          CVLOG(5, "Boris") << LOG_INDENT << "p=" << (p+1) << ": " << this->at(p);
         }
-//         assert(p == this->size());
-        VLOG(3) << LOG_INDENT << "center after distribute: " << this->center_of_mass();
+        CVLOG(3, "Boris") << LOG_INDENT << "center after distribute: " << this->center_of_mass();
       }
 
       template<typename precision>
@@ -350,40 +272,66 @@ namespace pfasst
       void ParticleCloud<precision>::post(ICommunicator* comm, int tag)
       {
         auto& mpi = as_mpi(comm);
-        if (mpi.size() == 1) { return; }
-        if (mpi.rank() == 0) { return; }
+        if (mpi.size() == 1) {
+          CLOG(DEBUG, "Communicator") << "no posted data to receive as only one rank in communicator '" << mpi.name() << "'";
+          return;
+        }
+        if (mpi.rank() == 0) {
+          CLOG(DEBUG, "Communicator") << "first rank will not receive posted data";
+          return;
+        }
 
+        int src_rank = (mpi.rank() - 1) % mpi.size();
+        CVLOG(9, "Communicator") << "receiving posted data with tag " << tag
+                                 << " from rank " << src_rank << " of communicator " << mpi.name();
         int err = MPI_Irecv(this->positions().data(),
                             sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
-                            (mpi.rank() - 1) % mpi.size(), tag, mpi.comm, &(this->recv_request[0]));
+                            src_rank, tag, mpi.comm, &(this->recv_request[0]));
         if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+        CVLOG(9, "Communicator") << "received posted positions: " << this->positions();
+
         err = MPI_Irecv(this->velocities().data(),
                         sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
-                        (mpi.rank() - 1) % mpi.size(), tag + 1, mpi.comm, &(this->recv_request[1]));
+                        src_rank, tag + 1, mpi.comm, &(this->recv_request[1]));
         if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+        CVLOG(9, "Communicator") << "received posted velocities: " << this->velocities();
       }
 
       template<typename precision>
       void ParticleCloud<precision>::recv(ICommunicator* comm, int tag, bool blocking)
       {
         auto& mpi = as_mpi(comm);
-        if (mpi.size() == 1) { return; }
-        if (mpi.rank() == 0) { return; }
+        if (mpi.size() == 1) {
+          CLOG(DEBUG, "Communicator") << "nothing to receive as only one rank in communicator '" << mpi.name() << "'";
+          return;
+        }
+        if (mpi.rank() == 0) {
+          CLOG(DEBUG, "Communicator") << "first rank will not receive";
+          return;
+        }
 
         int err;
         MPI_Status stat;
         if (blocking) {
+          int src_rank = (mpi.rank() - 1) % mpi.size();
+          CVLOG(9, "Communicator") << "blocked receive with tag " << tag
+                                   << " from rank " << src_rank << " of communicator " << mpi.name();
           err = MPI_Recv(this->positions().data(),
                          sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
-                         (mpi.rank() - 1) % mpi.size(), tag, mpi.comm, &stat);
+                         src_rank, tag, mpi.comm, &stat);
           if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+          CVLOG(9, "Communicator") << "received positions: " << this->positions();
 
           err = MPI_Recv(this->velocities().data(),
                          sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
-                         (mpi.rank() - 1) % mpi.size(), tag + 1, mpi.comm, &stat);
+                         src_rank, tag + 1, mpi.comm, &stat);
           if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+          CVLOG(9, "Communicator") << "received velocities: " << this->positions();
         } else {
+          CVLOG(9, "Communicator") << "immediate receiving with tag " << tag
+                                   << " in communicator " << mpi.name();
           for (auto req : this->recv_request) {
+            CVLOG(9, "Communicator") << "waiting for previous request";
             err = MPI_Wait(&req, &stat);
             if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
           }
@@ -394,34 +342,52 @@ namespace pfasst
       void ParticleCloud<precision>::send(ICommunicator* comm, int tag, bool blocking)
       {
         auto& mpi = as_mpi(comm);
-        if (mpi.size() == 1) { return; }
-        if (mpi.rank() == mpi.size() - 1) { return; }
+        if (mpi.size() == 1) {
+          CLOG(DEBUG, "Communicator") << "nothing to send as only one rank in communicator '" << mpi.name() << "'";
+          return;
+        }
+        if (mpi.rank() == mpi.size() - 1) {
+          CLOG(DEBUG, "Communicator") << "last rank will not send";
+          return;
+        }
 
+        int dest_rank = (mpi.rank() + 1) % mpi.size();
         int err = MPI_SUCCESS;
         if (blocking) {
+          CVLOG(9, "Communicator") << "blocked sending with tag " << tag
+                                   << " to rank " << dest_rank << " of communicator " << mpi.name();
           err = MPI_Send(this->positions().data(),
                          sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
-                         (mpi.rank() + 1) % mpi.size(), tag, mpi.comm);
+                         dest_rank, tag, mpi.comm);
           if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+          CVLOG(9, "Communicator") << "sent positions: " << this->positions();
+
           err = MPI_Send(this->velocities().data(),
                          sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
-                         (mpi.rank() + 1) % mpi.size(), tag + 1, mpi.comm);
+                         dest_rank, tag + 1, mpi.comm);
           if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+          CVLOG(9, "Communicator") << "sent velocities: " << this->velocities();
         } else {
+          CVLOG(9, "Communicator") << "immediate sending with tag " << tag
+                                   << " to rank " << dest_rank << " of communicator " << mpi.name();
           MPI_Status stat;
           for (auto req : this->send_request) {
+            CVLOG(9, "Communicator") << "waiting for previous request";
             err = MPI_Wait(&req, &stat);
             if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
           }
 
           err = MPI_Isend(this->positions().data(),
-                         sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
-                          (mpi.rank() + 1) % mpi.size(), tag, mpi.comm, &send_request[0]);
+                          sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
+                          dest_rank, tag, mpi.comm, &send_request[0]);
           if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+          CVLOG(9, "Communicator") << "sent positions: " << this->positions();
+
           err = MPI_Isend(this->velocities().data(),
-                         sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
-                          (mpi.rank() + 1) % mpi.size(), tag + 1, mpi.comm, &send_request[1]);
+                          sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
+                          dest_rank, tag + 1, mpi.comm, &send_request[1]);
           if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+          CVLOG(9, "Communicator") << "sent velocities: " << this->velocities();
         }
       }
 
@@ -429,14 +395,20 @@ namespace pfasst
       void ParticleCloud<precision>::broadcast(ICommunicator* comm)
       {
         auto& mpi = as_mpi(comm);
+
+        int root_rank = comm->size() - 1;
+        CVLOG(9, "Communicator") << "broadcasting with root " << root_rank << " of '" << mpi.name() << "'";
         int err = MPI_Bcast(this->positions().data(),
                             sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
-                            comm->size() - 1, mpi.comm);
+                            root_rank, mpi.comm);
         if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+        CVLOG(9, "Communicator") << "broadcasted positions: " << this->positions();
+
         err = MPI_Bcast(this->velocities().data(),
                         sizeof(precision) * this->size() * this->dim(), MPI_CHAR,
-                        comm->size() - 1, mpi.comm);
+                        root_rank, mpi.comm);
         if (err != MPI_SUCCESS) { throw mpi::MPIError(); }
+        CVLOG(9, "Communicator") << "broadcasted velocities: " << this->velocities();
       }
 #endif
 
