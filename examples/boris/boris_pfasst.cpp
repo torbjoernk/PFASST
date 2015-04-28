@@ -33,31 +33,29 @@ namespace pfasst
         MPI_Comm BORIS_COMM_SPACE;
         MPI_Comm BORIS_COMM_TIME;
 
-        CLOG(DEBUG, "default") << "splitting up communicators into " << nblocks << " time blocks";
+        CVLOG(1, "default") << "splitting up communicators into " << nblocks << " time blocks";
 
         int color_time = rank_world / (size_world / nblocks);
         int err_split_time = MPI_Comm_split(MPI_COMM_WORLD, color_time, rank_world, &BORIS_COMM_TIME);
         if (err_split_time != MPI_SUCCESS) {
           throw pfasst::mpi::MPIError("failed to split MPI_COMM_WORLD into time blocks");
         }
-        int size_time = -1, rank_time = -1;
-        MPI_Comm_size(BORIS_COMM_TIME, &size_time);
-        MPI_Comm_rank(BORIS_COMM_TIME, &rank_time);
-        CLOG(DEBUG, "default") << "got time rank " << rank_time << " of " << size_time << " ranks in time block " << color_time;
+        char time_comm_name[] = "TimeCommunicator";
+        MPI_Comm_set_name(BORIS_COMM_TIME, time_comm_name);
+        mpi::MPICommunicator comm_time(BORIS_COMM_TIME);
+        CVLOG(1, "default") << "got rank " << comm_time.rank() << " of " << comm_time.size() << " ranks in time block '" << comm_time.name() << "'";
 
-        int color_space = rank_world % size_time;
+        int color_space = rank_world % comm_time.size();
         int err_split_space = MPI_Comm_split(MPI_COMM_WORLD, color_space, rank_world, &BORIS_COMM_SPACE);
         if (err_split_space != MPI_SUCCESS) {
           throw pfasst::mpi::MPIError("failed to split MPI_COMM_WORLD into space blocks");
         }
-        int size_space = -1, rank_space = -1;
-        MPI_Comm_size(BORIS_COMM_SPACE, &size_space);
-        MPI_Comm_rank(BORIS_COMM_SPACE, &rank_space);
-        CLOG(DEBUG, "default") << "got space rank " << rank_space << " of " << size_space << " ranks in space block " << color_space;
+        char space_comm_name[] = "SpaceCommunicator";
+        MPI_Comm_set_name(BORIS_COMM_SPACE, space_comm_name);
+        mpi::MPICommunicator comm_space(BORIS_COMM_SPACE);
+        CVLOG(1, "default") << "got rank " << comm_space.rank() << " of " << comm_space.size() << " ranks in space block '" << comm_space.name() << "'";
 
         PFASST<> controller;
-        mpi::MPICommunicator comm_time(BORIS_COMM_TIME);
-        mpi::MPICommunicator comm_space(BORIS_COMM_SPACE);
         controller.set_comm(&comm_time);
 
         const double mass = 1.0;
@@ -67,16 +65,16 @@ namespace pfasst
           make_shared<bindings::WrapperSimplePhysicsSolver<double, double>>(BORIS_COMM_SPACE);
         bindings::setup(dynamic_pointer_cast<bindings::WrapperSimplePhysicsSolver<double, double>>(impl_solver));
 
-        if (nparticles % size_space != 0) {
+        if (nparticles % comm_space.size() != 0) {
           CLOG(ERROR, "Boris") << "Total number of particles (" << nparticles << ") "
-                               << "must be a multiple of number of ranks in space blocks (" << size_space << ")";
+                               << "must be a multiple of number of ranks in space blocks (" << comm_space.size() << ")";
           throw pfasst::ValueError("number of particles must be multiple of ranks in space blocks");
         }
 
         // fine level
         auto quad1        = quadrature::quadrature_factory<double>(nnodes,
                                                                    quadrature::QuadratureType::GaussLobatto);
-        auto factory1     = make_shared<ParticleCloudFactory<double>>(nparticles / size_space, 3, mass, charge);
+        auto factory1     = make_shared<ParticleCloudFactory<double>>(nparticles / comm_space.size(), 3, mass, charge);
         string data_file1 = "s" + to_string(nsteps) + "_i" + to_string(niters)
                             + "_dt" + to_string(dt) + "_m" + to_string(nnodes)
                             + "_p" + to_string(nparticles)
@@ -92,7 +90,7 @@ namespace pfasst
         // coarse level
         auto quad2        = quadrature::quadrature_factory<double>(nnodes,
                                                                    quadrature::QuadratureType::GaussLobatto);
-        auto factory2     = make_shared<ParticleCloudFactory<double>>(nparticles / size_space, 3, mass, charge);
+        auto factory2     = make_shared<ParticleCloudFactory<double>>(nparticles / comm_space.size(), 3, mass, charge);
         string data_file2 = "s" + to_string(nsteps) + "_i" + to_string(niters)
                             + "_dt" + to_string(dt) + "_m" + to_string(nnodes)
                             + "_p" + to_string(nparticles)
@@ -117,11 +115,16 @@ namespace pfasst
         shared_ptr<ParticleCloud<double>> q0 = \
           dynamic_pointer_cast<ParticleCloud<double>>(fine_sweeper->get_start_state());
         q0->distribute_around_center(center, comm_space);
-        CLOG(INFO, "Boris") << "Initial Particles (fine) : "
+        CLOG(INFO, "Boris") << "Initial Particles (fine): "
                             << *(dynamic_pointer_cast<ParticleCloud<double>>(fine_sweeper->get_start_state()));
         fine_sweeper->set_initial_energy();
 
         controller.run();
+
+        CLOG(INFO, "Boris") << "Final Particles (coarse): "
+                            << *(dynamic_pointer_cast<ParticleCloud<double>>(controller.get_coarsest<BorisSweeper<double, double>>()->get_end_state()));
+        CLOG(INFO, "Boris") << "Final Particles (fine): "
+                            << *(dynamic_pointer_cast<ParticleCloud<double>>(controller.get_finest<BorisSweeper<double, double>>()->get_end_state()));
 
         return fine_sweeper->get_errors();
       }
