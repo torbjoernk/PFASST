@@ -9,8 +9,18 @@ set(TESTS
 #     test_boris_physics
     test_boris_sweeper
 )
+if(NOT ${pfasst_WITH_MPI})
+    list(APPEND TESTS
+        test_particle_cloud
+    )
+else()
+    set(MPI_TESTS
+#        test_particle_cloud
+    )
+endif()
 
-foreach(test ${TESTS})
+include_directories(${MPI_CXX_INCLUDE_PATH})
+foreach(test ${TESTS} ${MPI_TESTS})
     message(STATUS "  ${test}")
     add_executable(${test} ${test}.cpp)
     if(${pfasst_NUM_DEPENDEND_TARGETS} GREATER 0)
@@ -30,8 +40,17 @@ foreach(test ${TESTS})
                        LINK_FLAGS "-fprofile-arcs"
         )
     endif()
+endforeach(test)
+
+foreach(test ${TESTS})
     add_test(NAME ${test}
         COMMAND ${CMAKE_BINARY_DIR}/tests/examples/boris/${test} --gtest_output=xml:${test}_out.xml
+    )
+endforeach(test)
+
+foreach(test ${MPI_TESTS})
+    add_test(NAME ${test}
+        COMMAND ${MPIEXEC} ${MPIEXEC_NUMPROC_FLAG} 2 ${CMAKE_BINARY_DIR}/tests/examples/boris/${test} --gtest_output=xml:${test}_out.xml
     )
 endforeach(test)
 

@@ -40,6 +40,19 @@ TEST(EnergyDriftAndResidual, MultiStep)
 int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  pfasst::log::start_log(argc, argv);
-  return RUN_ALL_TESTS();
+#ifdef WITH_MPI
+  MPI_Init(&argc, &argv);
+#endif
+  pfasst::init(argc, argv,
+               pfasst::examples::boris::init_opts<>,
+               pfasst::examples::boris::init_logs<>);
+  int result = 1, max_result;  // GTest return value 1 (failure), 0 (success)
+  result = RUN_ALL_TESTS();
+#ifdef WITH_MPI
+  MPI_Allreduce(&result, &max_result, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Finalize();
+  return max_result;
+#else
+  return result;
+#endif
 }
