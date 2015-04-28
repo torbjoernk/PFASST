@@ -29,11 +29,13 @@ namespace pfasst
     /**
      * Get MPI rank during initialization.
      *
-     * When running without MPI (ie, without using mpirun/mpiexec), returns 0.  When running with
-     * MPI, returns the MPI rank.
+     * @returns 0 when running without MPI (i.e. without using `mpirun`/`mpiexec`), elsewise the
+     *   MPI rank with respect to `MPI_COMM_WORLD`.
      *
-     * If the user is running with MPI and MPI_Init hasn't been called yet, this will return 0.  I
-     * hope this is rare.
+     * @note If the user is running with MPI and `MPI_Init` hasn't been called yet, this will also
+     *   return 0.
+     *
+     * @since v1.0.0
      */
     int get_rank()
     {

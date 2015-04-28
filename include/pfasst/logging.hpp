@@ -216,7 +216,7 @@ namespace pfasst
      *
      * @returns rank-local log file name
      *
-     * @since v1.0.0
+     * @since v0.5.0
      *
      * @ingroup Internals
      */
