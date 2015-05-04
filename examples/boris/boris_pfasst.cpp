@@ -33,7 +33,7 @@ namespace pfasst
         MPI_Comm BORIS_COMM_SPACE;
         MPI_Comm BORIS_COMM_TIME;
 
-        CVLOG(1, "default") << "splitting up communicators into " << nblocks << " time blocks";
+        CLOG(INFO, "default") << "splitting up communicators into " << nblocks << " time blocks";
 
         int color_time = rank_world / (size_world / nblocks);
         int err_split_time = MPI_Comm_split(MPI_COMM_WORLD, color_time, rank_world, &BORIS_COMM_TIME);
@@ -43,7 +43,7 @@ namespace pfasst
         char time_comm_name[] = "TimeCommunicator";
         MPI_Comm_set_name(BORIS_COMM_TIME, time_comm_name);
         mpi::MPICommunicator comm_time(BORIS_COMM_TIME);
-        CVLOG(1, "default") << "got rank " << comm_time.rank() << " of " << comm_time.size() << " ranks in time block '" << comm_time.name() << "'";
+        CLOG(INFO, "default") << "got rank " << comm_time.rank() << " of " << comm_time.size() << " ranks in time block '" << comm_time.name() << "'";
 
         int color_space = rank_world % comm_time.size();
         int err_split_space = MPI_Comm_split(MPI_COMM_WORLD, color_space, rank_world, &BORIS_COMM_SPACE);
@@ -53,7 +53,7 @@ namespace pfasst
         char space_comm_name[] = "SpaceCommunicator";
         MPI_Comm_set_name(BORIS_COMM_SPACE, space_comm_name);
         mpi::MPICommunicator comm_space(BORIS_COMM_SPACE);
-        CVLOG(1, "default") << "got rank " << comm_space.rank() << " of " << comm_space.size() << " ranks in space block '" << comm_space.name() << "'";
+        CLOG(INFO, "default") << "got rank " << comm_space.rank() << " of " << comm_space.size() << " ranks in space block '" << comm_space.name() << "'";
 
         PFASST<> controller;
         controller.set_comm(&comm_time);
