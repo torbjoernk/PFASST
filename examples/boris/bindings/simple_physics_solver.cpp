@@ -250,7 +250,10 @@ namespace simple_physics_solver
     delete[] exyz;
     delete[] phis;
     delete[] temp;
-    return e_kin + e_pot;
+
+    double e = e_kin + e_pot;
+    int err = MPI_Allreduce(MPI_IN_PLACE, &e, 1, MPI_DOUBLE, MPI_SUM, config->space_comm);
+    return e;
   }
 
   namespace internal
