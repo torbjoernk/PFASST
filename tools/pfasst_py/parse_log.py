@@ -173,7 +173,7 @@ class ScaleStudy(object):
     utilities for a scaling study
     """
     RE_RUNJOB_NP = re.compile(r'^runjob.*--np\s(?P<np>[0-9]+).*')
-    RE_RUNJOB_NPN = re.compile(r'^runjob.*--ranks-per-node\s(?P<npn>[0-9]+).*')
+    RE_RUNJOB_CPN = re.compile(r'^runjob.*--ranks-per-node\s(?P<cpn>[0-9]+).*')
 
     def __init__(self, path, pattern, attach=None):
         self._path = pathlib.Path(path).resolve()
@@ -203,10 +203,10 @@ class ScaleStudy(object):
                             if np_match is not None:
                                 d['np'] = int(np_match.groupdict()['np'])
                                 print("      np        : %d" % d['np'])
-                            npn_match = self.RE_RUNJOB_NPN.match(line)
+                            npn_match = self.RE_RUNJOB_CPN.match(line)
                             if npn_match is not None:
-                                d['npn'] = int(npn_match.groupdict()['npn'])
-                                print("      npn       : %d" % d['npn'])
+                                d['cpn'] = int(npn_match.groupdict()['cpn'])
+                                print("      cpn       : %d" % d['cpn'])
                     if d['np'] is not None and isinstance(d['np'], int):
                         d['parser_set'] = LogParserSet(run_dir.__str__(), 'mpi-rank-', d['np'], self._pattern)
                         d['parser_set'].load_and_parse()
@@ -223,12 +223,19 @@ class ScaleStudy(object):
     def plot_np_vs_duration(self):
         df = self.as_dataframe().drop('dir', 1).sort('np')
         print(df)
+
         nruns = tuple(df['np'].as_matrix().tolist())
         ind = np.arange(len(nruns))
+
+        seq_time = df['duration'].apply(lambda x: float(x) / 1000.0 / 1000000.0).as_matrix()[0]
+        ideal_scale = np.asarray([seq_time] * len(nruns)) / nruns
+        ideal_scale[0] = seq_time
+
         fig, ax = plt.subplots()
-        ax.plot(ind, df['duration'])
+        ax.plot(ind, ideal_scale, 'k--')
+        ax.bar(ind - 0.45, df['duration'].apply(lambda x: float(x) / 1000.0 / 1000000.0), 0.9, color='b')
         ax.set_title('num particles %d' % df['nparticles'].max())
-        ax.set_ylabel('duration (ns)')
+        ax.set_ylabel('duration (sec)')
         ax.set_yscale('log')
         ax.set_xticks(ind)
         ax.set_xlabel('num procs')
