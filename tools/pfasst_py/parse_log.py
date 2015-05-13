@@ -217,8 +217,11 @@ class ScaleStudy(object):
                     self._runs.append(d)
         return self
 
-    def as_dataframe(self):
-        return pd.DataFrame(self._runs).drop('parser_set', 1)
+    def as_dataframe(self, drop=True):
+        if drop:
+            return pd.DataFrame(self._runs).drop('parser_set', 1)
+        else:
+            return pd.DataFrame(self._runs)
 
     def plot_np_vs_duration(self):
         df = self.as_dataframe().drop('dir', 1).sort('np')
@@ -234,7 +237,8 @@ class ScaleStudy(object):
         fig, ax = plt.subplots()
         ax.plot(ind, ideal_scale, 'k--')
         ax.bar(ind - 0.45, df['duration'].apply(lambda x: float(x) / 1000.0 / 1000000.0), 0.9, color='b')
-        ax.set_title('num particles %d' % df['nparticles'].max())
+        if 'nparticles' in df.keys():
+            ax.set_title('num particles %d' % df['nparticles'].max())
         ax.set_ylabel('duration (sec)')
         ax.set_yscale('log')
         ax.set_xticks(ind)
@@ -247,6 +251,7 @@ class ScaleStudy(object):
         with open(str(self._path / name) + '.pickle', mode='wb') as f:
             print("pickling into: '%s'" % f.name)
             pickle.dump(self, f)
+        return self
 
     @classmethod
     def from_pickle(self, file):
