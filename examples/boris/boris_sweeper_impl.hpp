@@ -62,6 +62,7 @@ namespace pfasst
         pfasst::config::options::add_option<precision>("Boris-SDC", "epsilon", "Boris' epsilon");
         pfasst::config::options::add_option<precision>("Boris-SDC", "omega_e", "E-field constant");
         pfasst::config::options::add_option<precision>("Boris-SDC", "omega_b", "B-field constant");
+        pfasst::config::options::add_option<size_t>("PFASST", "num_blocks", "number parallel steps, i.e. into how many MPI blocks all ranks should be divided computing one time step with space-parallelizm");
       }
 
       template<typename precision>

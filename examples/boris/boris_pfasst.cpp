@@ -24,10 +24,33 @@ namespace pfasst
       template<typename scalar>
       error_map<scalar> run_boris_pfasst(const size_t nsteps, const scalar dt, const size_t nnodes,
                                          const size_t nparticles, const size_t niters,
-                                         const double abs_res_tol, const double rel_res_tol)
+                                         const double abs_res_tol, const double rel_res_tol,
+                                         const size_t nblocks)
       {
+        int size_world = -1, rank_world = -1;
+        MPI_Comm_size(MPI_COMM_WORLD, &size_world);
+        MPI_Comm_rank(MPI_COMM_WORLD, &rank_world);
+        MPI_Comm BORIS_COMM_SPACE;
+        MPI_Comm BORIS_COMM_TIME;
+
+        CLOG(DEBUG, "default") << "splitting up communicators into " << nblocks << " time blocks";
+
+        int color_time = rank_world / (size_world / nblocks);
+        int err_split_time = MPI_Comm_split(MPI_COMM_WORLD, color_time, rank_world, &BORIS_COMM_TIME);
+        int size_time = -1, rank_time = -1;
+        MPI_Comm_size(BORIS_COMM_TIME, &size_time);
+        MPI_Comm_rank(BORIS_COMM_TIME, &rank_time);
+        CLOG(DEBUG, "default") << "got time rank " << rank_time << " of " << size_time << " ranks in time block " << color_time;
+
+        int color_space = rank_world % size_time;
+        int err_split_space = MPI_Comm_split(MPI_COMM_WORLD, color_space, rank_world, &BORIS_COMM_SPACE);
+        int size_space = -1, rank_space = -1;
+        MPI_Comm_size(BORIS_COMM_SPACE, &size_space);
+        MPI_Comm_rank(BORIS_COMM_SPACE, &rank_space);
+        CLOG(DEBUG, "default") << "got space rank " << rank_space << " of " << size_space << " ranks in space block " << color_space;
+
         PFASST<> controller;
-        mpi::MPICommunicator comm(MPI_COMM_WORLD);
+        mpi::MPICommunicator comm(BORIS_COMM_TIME);
         controller.set_comm(&comm);
 
         const double mass = 1.0;
@@ -104,6 +127,7 @@ int main(int argc, char** argv)
   const size_t niters     = pfasst::config::get_value<size_t>("num_iter", 2);
   const double abs_res_tol = pfasst::config::get_value<double>("abs_res_tol", 0.0);
   const double rel_res_tol = pfasst::config::get_value<double>("rel_res_tol", 0.0);
+  const size_t num_blocks = pfasst::config::get_value<size_t>("num_blocks", 1);
 
   CLOG(INFO, "Boris") << "nsteps=" << nsteps << ", "
                       << "dt=" << dt << ", "
@@ -111,9 +135,10 @@ int main(int argc, char** argv)
                       << "nparticles=" << nparticles << ", "
                       << "niter=" << niters << ", "
                       << "abs res=" << abs_res_tol << ", "
-                      << "rel res=" << rel_res_tol;
+                      << "rel res=" << rel_res_tol << ", "
+                      << "nblocks=" << num_blocks;
 
-  pfasst::examples::boris::run_boris_pfasst<double>(nsteps, dt, nnodes, nparticles, niters, abs_res_tol, rel_res_tol);
+  pfasst::examples::boris::run_boris_pfasst<double>(nsteps, dt, nnodes, nparticles, niters, abs_res_tol, rel_res_tol, num_blocks);
   MPI_Finalize();
 }
 #endif
