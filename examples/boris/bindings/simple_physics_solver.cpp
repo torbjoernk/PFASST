@@ -73,9 +73,6 @@ namespace simple_physics_solver
     double* other_charges = new double[num_particles];
     double* other_masses = new double[num_particles];
     for (size_t i = 0; i < num_particles; ++i) {
-//       cout << "[" << config->mpi_rank << "] p[" << i << "] = ";
-//       internal::print_vec(positions + i * DIM);
-//       cout << endl;
       // null result values
       phis[i] = double(0.0);
 
@@ -97,7 +94,6 @@ namespace simple_physics_solver
     const int prev_rank = next_recv;
     const int next_rank = next_send;
 
-//     cout << "[" << config->mpi_rank << "] start hot-potato" << endl;
     // The Hot-Potato-Ring-Parallelization-Loop
     for (size_t proc = 0; proc < config->mpi_size; ++proc) {
       // computing forces on particle i
@@ -108,7 +104,6 @@ namespace simple_physics_solver
           if (proc == 0 && i == j) {
             continue;
           }
-//           cout << "[" << config->mpi_rank << "] pairing " << i << " with " << j << endl;
 
           // compute distance between the two particles
           dist2 = double(0.0);
@@ -116,9 +111,6 @@ namespace simple_physics_solver
             dist[d] = positions[i * DIM + d] - other_positions[j * DIM + d];
             dist2 += dist[d] * dist[d];
           }
-//           cout << "[" << config->mpi_rank << "] dist(p[" << i << "], p[" << j << "]) = ";
-//           internal::print_vec(dist);
-//           cout << endl;
 
           // compute the phi
           r = sqrt(dist2 + config->sigma2);
@@ -129,26 +121,16 @@ namespace simple_physics_solver
           for (size_t d = 0; d < DIM; ++d) {
             exyz[i * DIM + d] += dist[d] / r3 * other_charges[j];
           }
-//           cout << "[" << config->mpi_rank << "] updated force for p[" << i << "] = ";
-//           internal::print_vec(exyz + i * DIM);
-//           cout << endl;
         }
       }
 #ifdef WITH_MPI
       // send-recv
-//       cout << "[" << config->mpi_rank << "] exchaning data" << endl;
       MPI_Status stat_pos, stat_charge, stat_mass;
       // NOTE: this will probably only work for spacial parallelization up to 10,000 ranks
       MPI_Sendrecv_replace(other_positions, num_particles * DIM, MPI_DOUBLE,
                            next_rank, 10000 + current_paired,
                            prev_rank, 10000 + next_recv,
                            config->space_comm, &stat_pos);
-//       cout << "[" << config->mpi_rank << "] got positions: ";
-//       for (size_t p = 0; p < num_particles; ++p) {
-//         internal::print_vec(other_positions + p * DIM);
-//         cout << "\t";
-//       }
-//       cout << endl;
       MPI_Sendrecv_replace(other_charges, num_particles, MPI_DOUBLE,
                            next_rank, 20000 + current_paired,
                            prev_rank, 20000 + next_recv,
@@ -164,7 +146,6 @@ namespace simple_physics_solver
       next_send = (next_send == config->mpi_size - 1) ? 0 : next_send + 1;
 #endif
     }
-//     cout << "[" << config->mpi_rank << "] done" << endl;
 
     delete[] other_positions;
     delete[] other_charges;
@@ -252,7 +233,9 @@ namespace simple_physics_solver
     delete[] temp;
 
     double e = e_kin + e_pot;
+#ifdef WITH_MPI
     int err = MPI_Allreduce(MPI_IN_PLACE, &e, 1, MPI_DOUBLE, MPI_SUM, config->space_comm);
+#endif
     return e;
   }
 
