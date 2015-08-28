@@ -5,13 +5,6 @@
 #include <type_traits>
 using namespace std;
 
-#include <leathers/push>
-#include <leathers/all>
-#include <Eigen/Dense>
-#include <leathers/pop>
-template<typename precision>
-using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
 #include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
 #include "pfasst/encap/traits.hpp"

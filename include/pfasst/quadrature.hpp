@@ -12,13 +12,10 @@ using namespace std;
 
 #include <leathers/push>
 #include <leathers/all>
-#include <Eigen/Dense>
-template<typename precision>
-using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
 #include <boost/math/constants/constants.hpp>
 #include <leathers/pop>
 
+#include "pfasst/globals.hpp"
 #include "pfasst/config.hpp"
 #include "pfasst/util.hpp"
 #include "pfasst/quadrature/polynomial.hpp"

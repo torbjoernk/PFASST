@@ -5,6 +5,18 @@
 #ifndef _GLOBALS__HPP_
 #define _GLOBALS__HPP_
 
+
+#include <leathers/push>
+#include <leathers/all>
+#include <Eigen/Dense>
+#include <leathers/pop>
+template<typename precision>
+using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
+template<typename precision>
+using Index = typename Matrix<precision>::Index;
+
+
 /**
  * Denoting unused function parameters for omitting compiler warnings.
  *

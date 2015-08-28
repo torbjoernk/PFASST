@@ -9,16 +9,6 @@
 #include <vector>
 using namespace std;
 
-#include <leathers/push>
-#include <leathers/all>
-#include <Eigen/Dense>
-#include <leathers/pop>
-template<typename precision>
-using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
-
-template<typename precision>
-using Index = typename Matrix<precision>::Index;
-
 #include "pfasst/globals.hpp"
 #include "pfasst/quadrature/polynomial.hpp"
 
