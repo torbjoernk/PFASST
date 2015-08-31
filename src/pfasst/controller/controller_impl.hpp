@@ -57,35 +57,35 @@ namespace pfasst
   Controller<TransferT, CommT>::compute_num_steps()
   {
     if (this->get_status()->get_num_steps() != 0) {
-      CLOG(WARNING, this->get_logger_id()) << "Total number of steps was already computed. Skipping.";
+      ML_CLOG(WARNING, this->get_logger_id(), "Total number of steps was already computed. Skipping.");
       return;
     }
     
     if (this->get_status()->get_t_end() <= 0) {
-      CLOG(ERROR, this->get_logger_id()) << "Time end point (" << this->get_status()->get_t_end()
-                                         << ") must be non-zero positive.";
+      ML_CLOG(ERROR, this->get_logger_id(), "Time end point (" << this->get_status()->get_t_end()
+                                         << ") must be non-zero positive.");
       throw logic_error("time end point must be non-zero positive");
     }
 
     if (this->get_status()->get_dt() <= 0.0) {
-      CLOG(ERROR, this->get_logger_id()) << "Time delta (" << this->get_status()->get_dt()
-                                         << ") must be non-zero positive.";
+      ML_CLOG(ERROR, this->get_logger_id(), "Time delta (" << this->get_status()->get_dt()
+                                         << ") must be non-zero positive.");
       throw logic_error("time delta must be non-zero positive");
     }
     
     if (this->get_status()->get_time() >= this->get_status()->get_t_end()) {
-      CLOG(ERROR, this->get_logger_id()) << "Time end point (" << this->get_status()->get_t_end()
+      ML_CLOG(ERROR, this->get_logger_id(), "Time end point (" << this->get_status()->get_t_end()
                                          << ") must be greater than the current time point ("
-                                         << this->get_status()->get_time() << ").";
+                                         << this->get_status()->get_time() << ").");
       throw logic_error("time end point must be greater start time point");
     }
 
     const auto num_steps = (this->get_status()->get_t_end() - this->get_status()->get_time()) / this->get_status()->get_dt();
-    CLOG_IF(!almost_equal(num_steps * this->get_status()->get_dt(), lrint(num_steps) * this->get_status()->get_dt()),
-            WARNING, this->get_logger_id())
+    ML_CLOG_IF(!almost_equal(num_steps * this->get_status()->get_dt(), lrint(num_steps) * this->get_status()->get_dt()),
+            WARNING, this->get_logger_id(),
       << LOG_FIXED << "End time point not an integral multiple of time delta: "
       << "(" << this->get_status()->get_t_end() << " - " << this->get_status()->get_time() << ") / " << this->get_status()->get_dt()
-      << " = " << num_steps << " != " << lrint(num_steps);
+      << " = " << num_steps << " != " << lrint(num_steps));
 
     this->status()->num_steps() = lrint(num_steps);
   }
@@ -159,10 +159,10 @@ namespace pfasst
   void
   Controller<TransferT, CommT>::setup()
   {
-    CLOG_IF(this->is_ready(), WARNING, this->get_logger_id())
-      << "Controller has already been setup.";
+    ML_CLOG_IF(this->is_ready(), WARNING, this->get_logger_id(),
+      << "Controller has already been setup.");
 
-    CVLOG(1, this->get_logger_id()) << "setting up controller";
+    ML_CVLOG(1, this->get_logger_id(), "setting up controller");
 
     if (this->get_status()->get_t_end() <= 0.0) {
       CLOG(ERROR, this->get_logger_id()) << "End time point must be larger than zero."
@@ -173,15 +173,15 @@ namespace pfasst
     this->compute_num_steps();
     const auto num_steps = this->get_status()->get_num_steps();
     if (!almost_equal(this->get_status()->get_time() + num_steps * this->get_status()->get_dt(), this->get_status()->get_t_end())) {
-      CLOG(ERROR, this->get_logger_id()) << "End time point not an integral multiple of time delta. " << LOG_FIXED
+      ML_CLOG(ERROR, this->get_logger_id(), "End time point not an integral multiple of time delta. " << LOG_FIXED
         << " (" << num_steps << " * " << this->get_status()->get_dt()
-        << " = " << num_steps * this->get_status()->get_dt() << " != " << this->get_status()->get_t_end() << ")";
+        << " = " << num_steps * this->get_status()->get_dt() << " != " << this->get_status()->get_t_end() << ")");
       throw logic_error("time end point is not an integral multiple of time delta");
     }
 
-    CLOG_IF(this->get_status()->get_max_iterations() == 0, WARNING, this->get_logger_id())
+    ML_CLOG_IF(this->get_status()->get_max_iterations() == 0, WARNING, this->get_logger_id(),
       << "You sould define a maximum number of iterations to avoid endless runs."
-      << " (" << this->get_status()->get_max_iterations() << ")";
+      << " (" << this->get_status()->get_max_iterations() << ")");
 
     this->ready() = true;
   }
@@ -191,7 +191,7 @@ namespace pfasst
   Controller<TransferT, CommT>::run()
   {
     if (!this->is_ready()) {
-      CLOG(ERROR, this->get_logger_id()) << "Controller is not ready to run. setup() not called yet.";
+      ML_CLOG(ERROR, this->get_logger_id(), "Controller is not ready to run. setup() not called yet.");
       throw logic_error("controller not ready to run");
     }
   }
@@ -199,10 +199,10 @@ namespace pfasst
   template<class TransferT, class CommT>
   void
   Controller<TransferT, CommT>::post_run() {
-    CLOG(INFO, this->get_logger_id()) << "Run Finished.";
+    ML_CLOG(INFO, this->get_logger_id(), "Run Finished.");
     auto status_summary = this->get_status()->summary();
     for (const auto& line : status_summary) {
-      CLOG(INFO, this->get_logger_id()) << line;
+      ML_CLOG(INFO, this->get_logger_id(), line);
     }
   }
 
@@ -215,23 +215,23 @@ namespace pfasst
 
 
     if (new_time > this->get_status()->get_t_end() && !almost_equal(new_time, this->get_status()->get_t_end())) {
-      CLOG(WARNING, this->get_logger_id()) << "Not advancing " << num_steps
+      ML_CLOG(WARNING, this->get_logger_id(), "Not advancing " << num_steps
                                            << ((num_steps > 1) ? " time steps " : " time step ")
                                            << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time
                                            << " as it will exceed T_end=" << this->get_status()->get_t_end() << " by "
-                                           << (new_time - this->get_status()->get_t_end());
+                                           << (new_time - this->get_status()->get_t_end()));
 
       return false;
 
     } else if(almost_equal(new_time, this->get_status()->get_t_end())) {
-      CLOG(INFO, this->get_logger_id()) << "End time point reached: " << this->get_status()->get_t_end();
+      ML_CLOG(INFO, this->get_logger_id(), "End time point reached: " << this->get_status()->get_t_end());
 
       return false;
 
     } else {
-      CVLOG(1, this->get_logger_id()) << "Advancing " << num_steps
+      ML_CVLOG(1, this->get_logger_id(), "Advancing " << num_steps
                                       << ((num_steps > 1) ? " time steps " : " time step ")
-                                      << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time;
+                                      << "with dt=" << this->get_status()->get_dt() << " to t=" << new_time);
 
       this->status()->time() += delta_time;
       this->status()->step() += num_steps;
@@ -246,15 +246,15 @@ namespace pfasst
   Controller<TransferT, CommT>::advance_iteration()
   {
     if (this->get_status()->get_iteration() + 1 > this->get_status()->get_max_iterations()) {
-      CLOG(WARNING, this->get_logger_id()) << "Not advancing to next iteration ("
+      ML_CLOG(WARNING, this->get_logger_id(), "Not advancing to next iteration ("
                                            << (this->get_status()->get_iteration() + 1)
                                            << ") as it will exceed maximum number of allowed iterations ("
-                                           << this->get_status()->get_max_iterations() << ")";
+                                           << this->get_status()->get_max_iterations() << ")");
 
       return false;
 
     } else {
-      CVLOG(1, this->get_logger_id()) << "Advancing to next iteration -> " << (this->get_status()->get_iteration() + 1);
+      ML_CVLOG(1, this->get_logger_id(), "Advancing to next iteration -> " << (this->get_status()->get_iteration() + 1));
 
       this->status()->iteration()++;
 

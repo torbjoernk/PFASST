@@ -55,9 +55,9 @@ namespace pfasst
         this->_coarse_level = sweeper;
         this->get_coarse()->set_logger_id("LVL_COARSE");
       } else {
-        CLOG(ERROR, this->get_logger_id()) << "Type of given Sweeper ("
+        ML_CLOG(ERROR, this->get_logger_id(), "Type of given Sweeper ("
           << typeid(SweeperT).name() << ") is not applicable as Coarse Sweeper ("
-          << typeid(typename transfer_type::traits::coarse_sweeper_type).name() << ").";
+          << typeid(typename transfer_type::traits::coarse_sweeper_type).name() << ").");
         throw logic_error("given sweeper can not be used as coarse sweeper");
       }
     } else {
@@ -65,9 +65,9 @@ namespace pfasst
         this->_fine_level = sweeper;
         this->get_fine()->set_logger_id("LVL_FINE");
       } else {
-        CLOG(ERROR, this->get_logger_id()) << "Type of given Sweeper ("
+        ML_CLOG(ERROR, this->get_logger_id(), "Type of given Sweeper ("
           << typeid(SweeperT).name() << ") is not applicable as Fine Sweeper ("
-          << typeid(typename transfer_type::traits::fine_sweeper_type).name() << ").";
+          << typeid(typename transfer_type::traits::fine_sweeper_type).name() << ").");
         throw logic_error("given sweeper can not be used as fine sweeper");
       }
     }
@@ -121,15 +121,15 @@ namespace pfasst
     Controller<TransferT, CommT>::setup();
 
     if (this->get_num_levels() != 2) {
-      CLOG(ERROR, this->get_logger_id()) << "Two levels (Sweeper) must have been added for Two-Level-MLSDC.";
+      ML_CLOG(ERROR, this->get_logger_id(), "Two levels (Sweeper) must have been added for Two-Level-MLSDC.");
       throw logic_error("Two-Level-MLSDC requires two levels");
     }
 
-    CVLOG(1, this->get_logger_id()) << "setting up coarse level";
+    ML_CVLOG(1, this->get_logger_id(), "setting up coarse level");
     this->get_coarse()->status() = this->get_status();
     this->get_coarse()->setup();
 
-    CVLOG(1, this->get_logger_id()) << "setting up fine level";
+    ML_CVLOG(1, this->get_logger_id(), "setting up fine level");
     this->get_fine()->status() = this->get_status();
     this->get_fine()->setup();
   }
@@ -141,17 +141,17 @@ namespace pfasst
     Controller<TransferT, CommT>::run();
 
     do {
-      CLOG(INFO, this->get_logger_id()) << "";
-      CLOG(INFO, this->get_logger_id()) << "Time Step " << (this->get_status()->get_step() + 1)
-                                        << " of " << this->get_status()->get_num_steps();
+      ML_CLOG(INFO, this->get_logger_id(), "");
+      ML_CLOG(INFO, this->get_logger_id(), "Time Step " << (this->get_status()->get_step() + 1)
+                                        << " of " << this->get_status()->get_num_steps());
 
       this->status()->state() = State::PREDICTING;
 
       // iterate on each time step
       do {
         if (this->get_status()->get_state() == State::PREDICTING) {
-          CLOG(INFO, this->get_logger_id()) << "";
-          CLOG(INFO, this->get_logger_id()) << "MLSDC Prediction step";
+          ML_CLOG(INFO, this->get_logger_id(), "");
+          ML_CLOG(INFO, this->get_logger_id(), "MLSDC Prediction step");
 
           assert(this->get_status()->get_iteration() == 0);
 
@@ -167,8 +167,8 @@ namespace pfasst
           this->sweep_fine();
 
         } else {
-          CLOG(INFO, this->get_logger_id()) << "";
-          CLOG(INFO, this->get_logger_id()) << "Iteration " << this->get_status()->get_iteration();
+          ML_CLOG(INFO, this->get_logger_id(), "");
+          ML_CLOG(INFO, this->get_logger_id(), "Iteration " << this->get_status()->get_iteration());
 
           this->cycle_down();
           this->sweep_coarse();
@@ -199,15 +199,15 @@ namespace pfasst
   {
     this->get_coarse()->converged();
     if (this->get_fine()->converged()) {
-      CLOG(INFO, this->get_logger_id()) << "FINE sweeper has converged.";
+      ML_CLOG(INFO, this->get_logger_id(), "FINE sweeper has converged.");
       return false;
     } else if (Controller<TransferT, CommT>::advance_iteration()) {
-      CLOG(INFO, this->get_logger_id()) << "FINE sweeper has not yet converged and additional iterations to do.";
+      ML_CLOG(INFO, this->get_logger_id(), "FINE sweeper has not yet converged and additional iterations to do.");
       this->get_fine()->save();
       this->get_coarse()->save();
       return true;
     } else {
-      CLOG(INFO, this->get_logger_id()) << "FINE sweeper has not yet converged and no more iterations to do.";
+      ML_CLOG(INFO, this->get_logger_id(), "FINE sweeper has not yet converged and no more iterations to do.");
       return false;
     }
   }
@@ -217,7 +217,7 @@ namespace pfasst
   void
   TwoLevelMLSDC<TransferT, CommT>::predict_coarse()
   {
-    CLOG(INFO, this->get_logger_id()) << "Predicting on COARSE level";
+    ML_CLOG(INFO, this->get_logger_id(), "Predicting on COARSE level");
 
     this->status()->state() = State::PRE_ITER_COARSE;
     this->get_coarse()->pre_predict();
@@ -235,7 +235,7 @@ namespace pfasst
   void
   TwoLevelMLSDC<TransferT, CommT>::predict_fine()
   {
-    CLOG(INFO, this->get_logger_id()) << "Predicting on FINE level";
+    ML_CLOG(INFO, this->get_logger_id(), "Predicting on FINE level");
 
     this->status()->state() = State::PRE_ITER_FINE;
     this->get_fine()->pre_predict();
@@ -253,7 +253,7 @@ namespace pfasst
   void
   TwoLevelMLSDC<TransferT, CommT>::sweep_coarse()
   {
-    CLOG(INFO, this->get_logger_id()) << "Sweeping on COARSE level";
+    ML_CLOG(INFO, this->get_logger_id(), "Sweeping on COARSE level");
 
     this->status()->state() = State::PRE_ITER_COARSE;
     this->get_coarse()->pre_sweep();
@@ -271,7 +271,7 @@ namespace pfasst
   void
   TwoLevelMLSDC<TransferT, CommT>::sweep_fine()
   {
-    CLOG(INFO, this->get_logger_id()) << "Sweeping on FINE level";
+    ML_CLOG(INFO, this->get_logger_id(), "Sweeping on FINE level");
 
     this->status()->state() = State::PRE_ITER_FINE;
     this->get_fine()->pre_sweep();
@@ -289,7 +289,7 @@ namespace pfasst
   void
   TwoLevelMLSDC<TransferT, CommT>::cycle_down()
   {
-    CLOG(INFO, this->get_logger_id()) << "Restrict onto coarse level";
+    ML_CLOG(INFO, this->get_logger_id(), "Restrict onto coarse level");
 
     this->get_transfer()->restrict(this->get_fine(), this->get_coarse(), true);
     this->get_transfer()->fas(this->get_status()->get_dt(), this->get_fine(), this->get_coarse());
@@ -300,7 +300,7 @@ namespace pfasst
   void
   TwoLevelMLSDC<TransferT, CommT>::cycle_up()
   {
-    CLOG(INFO, this->get_logger_id()) << "Interpolate onto fine level";
+    ML_CLOG(INFO, this->get_logger_id(), "Interpolate onto fine level");
 
     this->get_transfer()->interpolate(this->get_coarse(), this->get_fine(), true);
   }
