@@ -424,7 +424,7 @@ namespace pfasst
                                               const shared_ptr<typename SweeperTrait::encap_type> rhs)
   {
     UNUSED(f); UNUSED(u); UNUSED(t); UNUSED(dt); UNUSED(dt); UNUSED(rhs);
-    throw runtime_error("spacial solver");
+    throw runtime_error("spatial solver");
   }
 
   template<class SweeperTrait, typename Enabled>

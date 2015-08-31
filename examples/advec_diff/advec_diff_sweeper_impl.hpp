@@ -28,14 +28,14 @@ namespace pfasst
       void
       AdvecDiff<SweeperTrait, Enabled>::init_opts()
       {
-        config::options::add_option<size_t>("Advection-Diffusion", "num_dofs", "number spacial degrees of freedom on fine level");
+        config::options::add_option<size_t>("Advection-Diffusion", "num_dofs", "number spatial degrees of freedom on fine level");
         config::options::add_option<size_t>("Advection-Diffusion", "coarse_factor", "coarsening factor");
-        config::options::add_option<spacial_type>("Advection-Diffusion", "nu", "diffusivity");
-        config::options::add_option<spacial_type>("Advection-Diffusion", "vel", "velocity of advection");
+        config::options::add_option<spatial_type>("Advection-Diffusion", "nu", "diffusivity");
+        config::options::add_option<spatial_type>("Advection-Diffusion", "vel", "velocity of advection");
       }
 
       template<class SweeperTrait, typename Enabled>
-      AdvecDiff<SweeperTrait, Enabled>::AdvecDiff(const size_t& ndofs, const typename SweeperTrait::spacial_type& nu, const typename SweeperTrait::spacial_type& v)
+      AdvecDiff<SweeperTrait, Enabled>::AdvecDiff(const size_t& ndofs, const typename SweeperTrait::spatial_type& nu, const typename SweeperTrait::spatial_type& v)
         :   IMEX<SweeperTrait, Enabled>()
           , _t0(1.0)
           , _nu(nu)
@@ -46,10 +46,10 @@ namespace pfasst
         this->encap_factory()->set_size(ndofs);
 
         for (size_t i = 0; i < ndofs; ++i) {
-          spacial_type kx = two_pi<spacial_type>()
-                            * ((i <= ndofs / 2) ? spacial_type(i)
-                                                : spacial_type(i) - spacial_type(ndofs));
-          this->_ddx[i] = complex<spacial_type>(0.0, 1.0) * kx;
+          spatial_type kx = two_pi<spatial_type>()
+                            * ((i <= ndofs / 2) ? spatial_type(i)
+                                                : spatial_type(i) - spatial_type(ndofs));
+          this->_ddx[i] = complex<spatial_type>(0.0, 1.0) * kx;
           this->_lap[i] = pfasst::almost_zero(kx * kx) ? 0.0 : -kx * kx;
         }
       }
@@ -60,8 +60,8 @@ namespace pfasst
       {
         IMEX<SweeperTrait, Enabled>::set_options();
 
-        this->_nu = config::get_value<typename traits::spacial_type>("nu", DEFAULT_DIFFUSIVITY);
-        this->_v = config::get_value<typename traits::spacial_type>("vel", DEFAULT_VELOCITY);
+        this->_nu = config::get_value<typename traits::spatial_type>("nu", DEFAULT_DIFFUSIVITY);
+        this->_v = config::get_value<typename traits::spatial_type>("vel", DEFAULT_VELOCITY);
       }
 
       template<class SweeperTrait, typename Enabled>
@@ -70,7 +70,7 @@ namespace pfasst
       {
         auto result = this->get_encap_factory()->create();
 
-        const spacial_type dx = 1.0 / sqrt(4.0 * pi<spacial_type>() * this->_nu * (t + this->_t0));
+        const spatial_type dx = 1.0 / sqrt(4.0 * pi<spatial_type>() * this->_nu * (t + this->_t0));
         
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
           result->data()[i] = 0.0;
@@ -78,7 +78,7 @@ namespace pfasst
 
         for (int ii = -2; ii < 3; ++ii) {
           for (size_t i = 0; i < this->get_num_dofs(); ++i) {
-            spacial_type x = spacial_type(i) / this->get_num_dofs() - 0.5 + ii - t * this->_v;
+            spatial_type x = spatial_type(i) / this->get_num_dofs() - 0.5 + ii - t * this->_v;
             result->data()[i] += dx * exp(-x * x / (4 * this->_nu * (t + this->_t0)));
           }
         }
@@ -208,7 +208,7 @@ namespace pfasst
         CVLOG(4, this->get_logger_id()) << LOG_FIXED << "evaluating EXPLICIT part at t=" << t;
         CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tu:   " << to_string(u);
 
-        spacial_type c = - this->_v / spacial_type(this->get_num_dofs());
+        spatial_type c = - this->_v / spatial_type(this->get_num_dofs());
 
         auto* z = this->_fft.forward(u);
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
@@ -232,7 +232,7 @@ namespace pfasst
         CVLOG(4, this->get_logger_id()) << LOG_FIXED << "evaluating IMPLICIT part at t=" << t;
         CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tu:   " << to_string(u);
 
-        spacial_type c = this->_nu / spacial_type(this->get_num_dofs());
+        spatial_type c = this->_nu / spatial_type(this->get_num_dofs());
 
         auto* z = this->_fft.forward(u);
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
@@ -256,16 +256,16 @@ namespace pfasst
                                                     const typename SweeperTrait::time_type& dt,
                                                     const shared_ptr<typename SweeperTrait::encap_type> rhs)
       {
-        CVLOG(4, this->get_logger_id()) << LOG_FIXED << "IMPLICIT spacial SOLVE at t=" << t << " with dt=" << dt;
+        CVLOG(4, this->get_logger_id()) << LOG_FIXED << "IMPLICIT spatial SOLVE at t=" << t << " with dt=" << dt;
         CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tf:   " << to_string(f);
         CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\tu:   " << to_string(u);
         CVLOG(5, this->get_logger_id()) << LOG_FLOAT << "\trhs: " << to_string(rhs);
 
-        spacial_type c = this->_nu * dt;
+        spatial_type c = this->_nu * dt;
 
         auto* z = this->_fft.forward(rhs);
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
-          z[i] /= (1.0 - c * this->_lap[i]) * spacial_type(this->get_num_dofs());
+          z[i] /= (1.0 - c * this->_lap[i]) * spatial_type(this->get_num_dofs());
         }
         this->_fft.backward(u);
 

@@ -31,15 +31,15 @@ namespace pfasst
       fine->data() = coarse->get_data();
 
     } else {
-      complex<fine_spacial_type> *coarse_z = this->fft.forward(coarse);
-      complex<fine_spacial_type> *fine_z = this->fft.get_workspace(fine_ndofs)->z;
+      complex<fine_spatial_type> *coarse_z = this->fft.forward(coarse);
+      complex<fine_spatial_type> *fine_z = this->fft.get_workspace(fine_ndofs)->z;
 
       for (size_t i = 0; i < fine_ndofs; i++) {
         fine_z[i] = 0.0;
       }
 
       // FFTW is not normalized
-      coarse_spacial_type c = 1.0 / coarse_ndofs;
+      coarse_spatial_type c = 1.0 / coarse_ndofs;
 
       // positive frequencies
       for (size_t i = 0; i < coarse_ndofs / 2; i++) {

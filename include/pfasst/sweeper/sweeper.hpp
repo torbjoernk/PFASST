@@ -46,12 +46,12 @@ namespace pfasst
       //! size = #nodes + 1
       vector<shared_ptr<typename traits::encap_type>>        _tau;
       vector<shared_ptr<typename traits::encap_type>>        _residuals;
-      vector<typename traits::spacial_type>                  _abs_res_norms;
-      vector<typename traits::spacial_type>                  _rel_res_norms;
+      vector<typename traits::spatial_type>                  _abs_res_norms;
+      vector<typename traits::spatial_type>                  _rel_res_norms;
 
       shared_ptr<Status<typename traits::time_type>>         _status;
-      typename traits::spacial_type                          _abs_residual_tol;
-      typename traits::spacial_type                          _rel_residual_tol;
+      typename traits::spatial_type                          _abs_residual_tol;
+      typename traits::spatial_type                          _rel_residual_tol;
 
       string                                                 _logger_id;
 
@@ -94,8 +94,8 @@ namespace pfasst
       virtual const char* get_logger_id() const;
 
       virtual void set_options();
-      virtual void set_abs_residual_tol(const typename SweeperTrait::spacial_type& abs_res_tol);
-      virtual void set_rel_residual_tol(const typename SweeperTrait::spacial_type& rel_res_tol);
+      virtual void set_abs_residual_tol(const typename SweeperTrait::spatial_type& abs_res_tol);
+      virtual void set_rel_residual_tol(const typename SweeperTrait::spatial_type& rel_res_tol);
 
       virtual void setup();
 

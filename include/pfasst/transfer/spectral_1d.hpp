@@ -26,15 +26,15 @@ namespace pfasst
       typedef typename traits::coarse_encap_traits coarse_encap_traits;
       typedef typename traits::coarse_encap_type   coarse_encap_type;
       typedef typename traits::coarse_time_type    coarse_time_type;
-      typedef typename traits::coarse_spacial_type coarse_spacial_type;
+      typedef typename traits::coarse_spatial_type coarse_spatial_type;
 
       typedef typename traits::fine_encap_traits   fine_encap_traits;
       typedef typename traits::fine_encap_type     fine_encap_type;
       typedef typename traits::fine_time_type      fine_time_type;
-      typedef typename traits::fine_spacial_type   fine_spacial_type;
+      typedef typename traits::fine_spatial_type   fine_spatial_type;
 
     protected:
-      pfasst::contrib::FFT<fine_spacial_type> fft;
+      pfasst::contrib::FFT<fine_spatial_type> fft;
 
     public:
       Spectral1DTransfer() = default;

@@ -17,7 +17,7 @@ namespace pfasst
       typedef          SweeperTrait                 sweeper_traits;
       typedef typename sweeper_traits::encap_type   encap_type;
       typedef typename sweeper_traits::time_type    time_type;
-      typedef typename sweeper_traits::spacial_type spacial_type;
+      typedef typename sweeper_traits::spatial_type spatial_type;
 
     protected:
       Matrix<time_type> _q_delta_expl;

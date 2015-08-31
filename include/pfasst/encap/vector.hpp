@@ -24,7 +24,7 @@ namespace pfasst
     class Encapsulation<EncapsulationTrait,
                         typename enable_if<
                                    is_same<
-                                     vector<typename EncapsulationTrait::spacial_type>,
+                                     vector<typename EncapsulationTrait::spatial_type>,
                                      typename EncapsulationTrait::data_type
                                    >::value>::type>
       :   public enable_shared_from_this<Encapsulation<EncapsulationTrait>>
@@ -33,7 +33,7 @@ namespace pfasst
       public:
         typedef          EncapsulationTrait           traits;
         typedef typename traits::time_type            time_type;
-        typedef typename traits::spacial_type         spacial_type;
+        typedef typename traits::spatial_type         spatial_type;
         typedef typename traits::data_type            data_type;
         typedef          EncapsulationFactory<traits> factory_type;
 
@@ -52,7 +52,7 @@ namespace pfasst
         virtual void scaled_add(const typename EncapsulationTrait::time_type& a,
                                const shared_ptr<Encapsulation<EncapsulationTrait>> y);
 
-        virtual typename EncapsulationTrait::spacial_type norm0() const;
+        virtual typename EncapsulationTrait::spatial_type norm0() const;
 
         template<class CommT>
         void send(shared_ptr<CommT> comm, const int dest_rank, const int tag, const bool blocking);
@@ -69,9 +69,9 @@ namespace pfasst
      */
     template<
       typename time_precision,
-      typename spacial_precision
+      typename spatial_precision
     >
-    using VectorEncapsulation = Encapsulation<vector_encap_traits<time_precision, spacial_precision>>;
+    using VectorEncapsulation = Encapsulation<vector_encap_traits<time_precision, spatial_precision>>;
 
 
     template<
@@ -80,7 +80,7 @@ namespace pfasst
     class EncapsulationFactory<EncapsulationTrait,
                                typename enable_if<
                                           is_same<
-                                            vector<typename EncapsulationTrait::spacial_type>,
+                                            vector<typename EncapsulationTrait::spatial_type>,
                                             typename EncapsulationTrait::data_type
                                           >::value>::type>
       : public enable_shared_from_this<EncapsulationFactory<EncapsulationTrait>>
