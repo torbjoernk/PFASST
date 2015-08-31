@@ -32,16 +32,16 @@ namespace pfasst
           typedef          SweeperTrait         traits;
           typedef typename traits::encap_type   encap_type;
           typedef typename traits::time_type    time_type;
-          typedef typename traits::spacial_type spacial_type;
+          typedef typename traits::spatial_type spatial_type;
 
           static void init_opts();
 
         private:
           time_type    _t0;
-          spacial_type _nu;
+          spatial_type _nu;
 
-          pfasst::contrib::FFT<spacial_type> _fft;
-          vector<complex<spacial_type>>      _lap;
+          pfasst::contrib::FFT<spatial_type> _fft;
+          vector<complex<spatial_type>>      _lap;
 
         protected:
           virtual shared_ptr<typename SweeperTrait::encap_type> evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
@@ -59,7 +59,7 @@ namespace pfasst
           virtual vector<shared_ptr<typename SweeperTrait::encap_type>> compute_relative_error(const vector<shared_ptr<typename SweeperTrait::encap_type>>& error, const typename SweeperTrait::time_type& t);
 
         public:
-          explicit Heat1D(const size_t& ndofs, const typename SweeperTrait::spacial_type& nu = 0.02);
+          explicit Heat1D(const size_t& ndofs, const typename SweeperTrait::spatial_type& nu = 0.02);
           Heat1D(const Heat1D<SweeperTrait, Enabled>& other) = default;
           Heat1D(Heat1D<SweeperTrait, Enabled>&& other) = default;
           virtual ~Heat1D() = default;

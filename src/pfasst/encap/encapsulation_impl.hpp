@@ -73,7 +73,7 @@ namespace pfasst
     }
 
     template<class EncapsulationTrait>
-    typename EncapsulationTrait::spacial_type
+    typename EncapsulationTrait::spatial_type
     norm0(const shared_ptr<Encapsulation<EncapsulationTrait>> x)
     {
       return x->norm0();

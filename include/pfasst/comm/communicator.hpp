@@ -30,6 +30,7 @@ namespace pfasst
         virtual bool is_first() const;
         virtual bool is_last() const;
 
+        virtual void cleanup();
         virtual void abort(const int& err_code);
 
         virtual void send(const double* const data, const int count, const int dest_rank, const int tag);

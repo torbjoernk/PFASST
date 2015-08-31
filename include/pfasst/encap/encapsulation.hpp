@@ -114,7 +114,7 @@ namespace pfasst
     template<
       class EncapsulationTrait
     >
-    typename EncapsulationTrait::spacial_type
+    typename EncapsulationTrait::spatial_type
     norm0(const shared_ptr<Encapsulation<EncapsulationTrait>> x);
 
 
@@ -138,7 +138,7 @@ namespace pfasst
       public:
         typedef          EncapsulationTrait            traits;
         typedef typename traits::time_type             time_type;
-        typedef typename traits::spacial_type          spacial_type;
+        typedef typename traits::spatial_type          spatial_type;
         typedef typename traits::data_type             data_type;
         typedef          EncapsulationFactory<traits>  factory_type;
 
@@ -146,8 +146,8 @@ namespace pfasst
       //! time_type must be an arithmetic type
       static_assert(is_arithmetic<time_type>::value,
                     "time precision must be an arithmetic type");
-      static_assert(is_arithmetic<spacial_type>::value,
-                    "spacial precision must be an arithmetic type");
+      static_assert(is_arithmetic<spatial_type>::value,
+                    "spatial precision must be an arithmetic type");
       static_assert(is_constructible<data_type>::value,
                     "Data Type must be constructible");
       static_assert(is_default_constructible<data_type>::value,
@@ -216,7 +216,7 @@ namespace pfasst
          *
          * @note The implementation is strongly dependent on the encapsulated data type.
          */
-        virtual typename EncapsulationTrait::spacial_type norm0() const;
+        virtual typename EncapsulationTrait::spatial_type norm0() const;
 
         /**
          * Streams string representation of Encapsulation.

@@ -15,7 +15,7 @@ namespace pfasst
     typedef          EncapsulationTraits                       encap_traits;
     typedef          encap::Encapsulation<EncapsulationTraits> encap_type;
     typedef typename encap_traits::time_type                   time_type;
-    typedef typename encap_traits::spacial_type                spacial_type;
+    typedef typename encap_traits::spatial_type                spatial_type;
   };
 }  // ::pfasst
 

@@ -180,22 +180,22 @@ namespace pfasst
   Sweeper<SweeperTrait, Enabled>::set_options()
   {
     ML_CVLOG(3, this->get_logger_id(), "setting options from runtime parameters (if available)");
-    this->_abs_residual_tol = config::get_value<typename traits::spacial_type>("abs_res_tol", this->_abs_residual_tol);
-    this->_rel_residual_tol = config::get_value<typename traits::spacial_type>("rel_res_tol", this->_rel_residual_tol);
+    this->_abs_residual_tol = config::get_value<typename traits::spatial_type>("abs_res_tol", this->_abs_residual_tol);
+    this->_rel_residual_tol = config::get_value<typename traits::spatial_type>("rel_res_tol", this->_rel_residual_tol);
     ML_CVLOG(3, this->get_logger_id(), "  absolut residual tolerance:  " << this->_abs_residual_tol);
     ML_CVLOG(3, this->get_logger_id(), "  relative residual tolerance: " << this->_rel_residual_tol);
   }
 
   template<class SweeperTrait, typename Enabled>
   void
-  Sweeper<SweeperTrait, Enabled>::set_abs_residual_tol(const typename SweeperTrait::spacial_type& abs_res_tol)
+  Sweeper<SweeperTrait, Enabled>::set_abs_residual_tol(const typename SweeperTrait::spatial_type& abs_res_tol)
   {
     this->_abs_residual_tol = abs_res_tol;
   }
 
   template<class SweeperTrait, typename Enabled>
   void
-  Sweeper<SweeperTrait, Enabled>::set_rel_residual_tol(const typename SweeperTrait::spacial_type& rel_res_tol)
+  Sweeper<SweeperTrait, Enabled>::set_rel_residual_tol(const typename SweeperTrait::spatial_type& rel_res_tol)
   {
     this->_rel_residual_tol = rel_res_tol;
   }

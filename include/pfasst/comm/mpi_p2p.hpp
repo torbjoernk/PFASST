@@ -47,7 +47,7 @@ namespace pfasst
         explicit MpiP2P(MPI_Comm comm = MPI_COMM_WORLD);
         MpiP2P(const MpiP2P& other) = default;
         MpiP2P(MpiP2P&& other) = default;
-        virtual ~MpiP2P() = default;  // TODO: might need to implement destructor to clean up pending MPI stati
+        virtual ~MpiP2P();
         MpiP2P& operator=(const MpiP2P& other) = default;
         MpiP2P& operator=(MpiP2P&& other) = default;
 
@@ -59,7 +59,8 @@ namespace pfasst
         virtual bool is_first() const override;
         virtual bool is_last() const override;
 
-        virtual void abort(const int& err_code);
+        virtual void cleanup() override;
+        virtual void abort(const int& err_code) override;
 
         virtual void send(const double* const data, const int count, const int dest_rank, const int tag) override;
         virtual void send_status(const StatusDetail<double>* const data, const int count, const int dest_rank, const int tag) override;

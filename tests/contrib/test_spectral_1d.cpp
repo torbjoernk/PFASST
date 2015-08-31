@@ -1,7 +1,7 @@
 #include "fixtures/test_helpers.hpp"
 
-#include <pfasst/transfer/spectral_1d.hpp>
-using pfasst::Spectral1DTransfer;
+#include <pfasst/contrib/spectral_1d.hpp>
+using pfasst::contrib::Spectral1DTransfer;
 
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>

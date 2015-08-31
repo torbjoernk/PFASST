@@ -9,7 +9,6 @@ include_directories(
 set(TESTS
     test_transfer
     test_polynomial_transfer
-    test_spectral_1d
 )
 
 set(TESTS_MPI

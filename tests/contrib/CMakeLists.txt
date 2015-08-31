@@ -8,6 +8,7 @@ include_directories(
 
 set(TESTS
     test_fft
+    test_spectral_1d
 )
 
 set(TESTS_MPI
