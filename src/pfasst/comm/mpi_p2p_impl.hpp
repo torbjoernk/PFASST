@@ -79,6 +79,18 @@ namespace pfasst
       }
     }
 
+    MpiP2P::~MpiP2P()
+    {
+      for (auto&& req : this->_requests) {
+        MPI_Status stat = MPI_Status_factory();
+        int err = MPI_Wait(&(req.second), &stat);
+        check_mpi_error(err);
+        assert(req.second == MPI_REQUEST_NULL);
+        this->_requests.erase(req.first);
+      }
+      assert(this->_requests.size() == 0);
+    }
+
     size_t MpiP2P::get_size() const
     {
       assert(this->_size > 0);
