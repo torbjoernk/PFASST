@@ -85,8 +85,8 @@ namespace pfasst
       this->status()->step() = this->_time_block * this->get_communicator()->get_size() + this->get_communicator()->get_rank();
 
       ML_CLOG(INFO, this->get_logger_id(), "");
-      ML_CLOG(INFO, this->get_logger_id(), "Time Step " << (this->get_status()->get_step() + 1))
-      << " of " << this->get_status()->get_num_steps();
+      ML_CLOG(INFO, this->get_logger_id(), "Time Step " << (this->get_status()->get_step() + 1)
+      << " of " << this->get_status()->get_num_steps());
 
       this->status()->state() = State::PREDICTING;
 
@@ -132,8 +132,8 @@ namespace pfasst
         }
 
         if (this->_prev_status->get_state() == State::FAILED) {
-          ML_CLOG(WARNING, this->get_logger_id(), "previous process failed";
-          ML_CLOG(ERROR, this->get_logger_id(), "We are aborting here. (read: TODO)";
+          ML_CLOG(WARNING, this->get_logger_id(), "previous process failed");
+          ML_CLOG(ERROR, this->get_logger_id(), "We are aborting here. (read: TODO)");
           this->get_communicator()->abort(-1);
         } else if (this->_prev_status->get_state() == State::CONVERGED) {
           // TODO: do we really need to do a full sweep here ?!?
@@ -208,7 +208,7 @@ namespace pfasst
         << "previous process has converged but FINE sweeper not yet.");
 
       if (Controller<TransferT, CommT>::advance_iteration()) {
-        ML_CLOG(INFO, this->get_logger_id()), "FINE sweeper has not yet converged and additional iterations to do.");
+        ML_CLOG(INFO, this->get_logger_id(), "FINE sweeper has not yet converged and additional iterations to do.");
         this->get_fine()->save();
         this->get_coarse()->save();
         this->status()->state() = State::ITERATING;

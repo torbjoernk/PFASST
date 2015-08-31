@@ -53,7 +53,7 @@ namespace pfasst
     {
       if (err_code != MPI_SUCCESS) {
         string err_msg = error_from_code(err_code);
-        CLOG(ERROR, "COMM_P2P") << "MPI encountered an error: " << err_msg;
+        ML_CLOG(ERROR, "COMM_P2P", "MPI encountered an error: " << err_msg);
         throw runtime_error("MPI encountered an error: " + err_msg);
       }
     }
@@ -131,7 +131,7 @@ namespace pfasst
 
     void MpiP2P::send(const double* const data, const int count, const int dest_rank, const int tag)
     {
-      CLOG(DEBUG, "COMM_P2P") << "sending " << count << " double values with tag=" << tag << " to " << dest_rank;
+      ML_CLOG(DEBUG, "COMM_P2P", "sending " << count << " double values with tag=" << tag << " to " << dest_rank);
 #ifdef NON_CONST_MPI
       int err = MPI_Send(data, count, MPI_DOUBLE, dest_rank, tag, const_cast<MPI_Comm>(this->_comm));
 #else
@@ -144,7 +144,7 @@ namespace pfasst
     {
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
 
-      CLOG(DEBUG, "COMM_P2P") << "sending " << count << " Status with tag=" << tag << " to " << dest_rank;
+      ML_CLOG(DEBUG, "COMM_P2P"i, "sending " << count << " Status with tag=" << tag << " to " << dest_rank);
 #ifdef NON_CONST_MPI
       int err = MPI_Send(data, count, status_data_type, dest_rank, tag, const_cast<MPI_Comm>(this->_comm));
 #else
@@ -156,18 +156,18 @@ namespace pfasst
 
     void MpiP2P::isend(const double* const data, const int count, const int dest_rank, const int tag)
     {
-      CLOG(DEBUG, "COMM_P2P") << "non-blocking send of " << count << " double values with tag=" << tag << " to " << dest_rank;
+      ML_CLOG(DEBUG, "COMM_P2P", "non-blocking send of " << count << " double values with tag=" << tag << " to " << dest_rank);
 
       auto request_index = make_pair(dest_rank, tag);
 
       if (this->_requests.find(request_index) != this->_requests.end()) {
-        CLOG(WARNING, "COMM_P2P") << "request handle does already exists for tag=" << tag << " and destination " << dest_rank
-        << " which is still active";
+        ML_CLOG(WARNING, "COMM_P2P", "request handle does already exists for tag=" << tag << " and destination " << dest_rank
+          << " which is still active");
         auto stat = MPI_Status_factory();
-        CLOG(DEBUG, "COMM_P2P") << "waiting ...";
+        ML_CLOG(DEBUG, "COMM_P2P", "waiting ...");
         int err = MPI_Wait(&(this->_requests[request_index]), &stat);
         check_mpi_error(err);
-        CLOG(DEBUG, "COMM_P2P") << "waited: " << stat;
+        ML_CLOG(DEBUG, "COMM_P2P", "waited: " << stat);
       } else {
         MPI_Request this_request = MPI_REQUEST_NULL;
         this->_requests.insert(make_pair(request_index, this_request));
@@ -185,18 +185,18 @@ namespace pfasst
     {
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
 
-      CLOG(DEBUG, "COMM_P2P") << "non-blocking send of " << count << " Status with tag=" << tag << " to " << dest_rank;
+      ML_CLOG(DEBUG, "COMM_P2P", "non-blocking send of " << count << " Status with tag=" << tag << " to " << dest_rank);
 
       auto request_index = make_pair(dest_rank, tag);
 
       if (this->_requests.find(request_index) != this->_requests.end()) {
-        CLOG(WARNING, "COMM_P2P") << "request handle does already exists for tag=" << tag << " and destination " << dest_rank
-        << " which is still active";
+        ML_CLOG(WARNING, "COMM_P2P", "request handle does already exists for tag=" << tag << " and destination " << dest_rank
+        << " which is still active");
         auto stat = MPI_Status_factory();
-        CLOG(DEBUG, "COMM_P2P") << "waiting ...";
+        ML_CLOG(DEBUG, "COMM_P2P", "waiting ...");
         int err = MPI_Wait(&(this->_requests[request_index]), &stat);
         check_mpi_error(err);
-        CLOG(DEBUG, "COMM_P2P") << "waited: " << stat;
+        ML_CLOG(DEBUG, "COMM_P2P", "waited: " << stat);
       } else {
         MPI_Request this_request = MPI_REQUEST_NULL;
         this->_requests.insert(make_pair(request_index, this_request));
@@ -214,14 +214,14 @@ namespace pfasst
     void MpiP2P::recv(double* data, const int count, const int dest_rank, const int tag)
     {
       this->_stati.push_back(MPI_Status_factory());
-      CLOG(DEBUG, "COMM_P2P") << "receiving " << count << " double values with tag=" << tag << " from " << dest_rank;
+      ML_CLOG(DEBUG, "COMM_P2P", "receiving " << count << " double values with tag=" << tag << " from " << dest_rank);
 #ifdef NON_CONST_MPI
       int err = MPI_Recv(data, count, MPI_DOUBLE, dest_rank, tag, const_cast<MPI_Comm>(this->_comm), &(this->_stati.back()));
 #else
       int err = MPI_Recv(data, count, MPI_DOUBLE, dest_rank, tag, this->_comm, &(this->_stati.back()));
 #endif
       check_mpi_error(err);
-      CVLOG(1, "COMM_P2P") << "--> status: " << this->_stati.back();
+      ML_CVLOG(1, "COMM_P2P", "--> status: " << this->_stati.back());
     }
 
     void MpiP2P::recv_status(StatusDetail<double>* data, const int count, const int dest_rank, const int tag)
@@ -229,31 +229,31 @@ namespace pfasst
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
 
       this->_stati.push_back(MPI_Status_factory());
-      CLOG(DEBUG, "COMM_P2P") << "receiving " << count << " Status with tag=" << tag << " from " << dest_rank;
+      ML_CLOG(DEBUG, "COMM_P2P", "receiving " << count << " Status with tag=" << tag << " from " << dest_rank);
 #ifdef NON_CONST_MPI
       int err = MPI_Recv(data, count, pfasst::status_data_type, dest_rank, tag, const_cast<MPI_Comm>(this->_comm), &(this->_stati.back()));
 #else
       int err = MPI_Recv(data, count, pfasst::status_data_type, dest_rank, tag, this->_comm, &(this->_stati.back()));
 #endif
       check_mpi_error(err);
-      CVLOG(1, "COMM_P2P") << "--> status: " << this->_stati.back();
+      ML_CVLOG(1, "COMM_P2P", "--> status: " << this->_stati.back());
     }
 
 
     void MpiP2P::irecv(double* data, const int count, const int src_rank, const int tag)
     {
-      CLOG(DEBUG, "COMM_P2P") << "non-blocking receive of " << count << " double values with tag=" << tag << " from " << src_rank;
+      ML_CLOG(DEBUG, "COMM_P2P", "non-blocking receive of " << count << " double values with tag=" << tag << " from " << src_rank);
 
       auto request_index = make_pair(src_rank, tag);
 
       if (this->_requests.find(request_index) != this->_requests.end()) {
-        CLOG(WARNING, "COMM_P2P") << "request handle does already exists for tag=" << tag << " and source " << src_rank
-                                  << " which is still active";
+        ML_CLOG(WARNING, "COMM_P2P", "request handle does already exists for tag=" << tag << " and source " << src_rank
+                                  << " which is still active");
         auto stat = MPI_Status_factory();
-        CLOG(DEBUG, "COMM_P2P") << "waiting ...";
+        ML_CLOG(DEBUG, "COMM_P2P", "waiting ...");
         int err = MPI_Wait(&(this->_requests[request_index]), &stat);
         check_mpi_error(err);
-        CLOG(DEBUG, "COMM_P2P") << "waited: " << stat;
+        ML_CLOG(DEBUG, "COMM_P2P", "waited: " << stat);
       } else {
         MPI_Request this_request = MPI_REQUEST_NULL;
         this->_requests.insert(make_pair(request_index, this_request));
@@ -271,18 +271,18 @@ namespace pfasst
     {
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
 
-      CLOG(DEBUG, "COMM_P2P") << "non-blocking receive of " << count << " Status with tag=" << tag << " from " << src_rank;
+      ML_CLOG(DEBUG, "COMM_P2P", "non-blocking receive of " << count << " Status with tag=" << tag << " from " << src_rank);
 
       auto request_index = make_pair(src_rank, tag);
 
       if (this->_requests.find(request_index) != this->_requests.end()) {
-        CLOG(WARNING, "COMM_P2P") << "request handle does already exists for tag=" << tag << " and source " << src_rank
-        << " which is still active";
+        ML_CLOG(WARNING, "COMM_P2P", "request handle does already exists for tag=" << tag << " and source " << src_rank
+          << " which is still active");
         auto stat = MPI_Status_factory();
-        CLOG(DEBUG, "COMM_P2P") << "waiting ...";
+        ML_CLOG(DEBUG, "COMM_P2P", "waiting ...");
         int err = MPI_Wait(&(this->_requests[request_index]), &stat);
         check_mpi_error(err);
-        CLOG(DEBUG, "COMM_P2P") << "waited: " << stat;
+        ML_CLOG(DEBUG, "COMM_P2P", "waited: " << stat);
       } else {
         MPI_Request this_request = MPI_REQUEST_NULL;
         this->_requests.insert(make_pair(request_index, this_request));
@@ -299,7 +299,7 @@ namespace pfasst
 
     void MpiP2P::bcast(double* data, const int count, const int root_rank)
     {
-      CLOG(DEBUG, "COMM_P2P") << "braodcasting " << count << " double values from root " << root_rank;
+      ML_CLOG(DEBUG, "COMM_P2P", "broadcasting " << count << " double values from root " << root_rank);
 #ifdef NON_CONST_MPI
       int err = MPI_Bcast(data, count, MPI_DOUBLE, root_rank, const_cast<MPI_Comm>(this->_comm));
 #else

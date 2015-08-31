@@ -22,11 +22,11 @@ namespace pfasst
       this->compute_nodes();
       this->compute_weights();
 
-      CVLOG(4, "QUAD") << LOG_FIXED << "Gauss-Radau (right) on [0.0, 1.0] with " << num_nodes
-                       << " nodes at " << this->get_nodes();
-      CVLOG(5, "QUAD") << "Q:";
+      ML_CVLOG(4, "QUAD", LOG_FIXED << "Gauss-Radau (right) on [0.0, 1.0] with " << num_nodes
+                       << " nodes at " << this->get_nodes());
+      ML_CVLOG(5, "QUAD", "Q:");
       for (size_t row = 0; row < (size_t)this->get_q_mat().rows(); ++row) {
-        CVLOG(5, "QUAD") << "  " << this->get_q_mat().block(row, 0, 1, this->get_q_mat().cols());
+        ML_CVLOG(5, "QUAD", "  " << this->get_q_mat().block(row, 0, 1, this->get_q_mat().cols()));
       }
     }
 

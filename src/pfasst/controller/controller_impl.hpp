@@ -165,8 +165,8 @@ namespace pfasst
     ML_CVLOG(1, this->get_logger_id(), "setting up controller");
 
     if (this->get_status()->get_t_end() <= 0.0) {
-      CLOG(ERROR, this->get_logger_id()) << "End time point must be larger than zero."
-        << " (" << this->get_status()->get_t_end() << ")";
+      ML_CLOG(ERROR, this->get_logger_id(), "End time point must be larger than zero."
+        << " (" << this->get_status()->get_t_end() << ")");
       throw logic_error("end time point must be larger zero");
     }
 

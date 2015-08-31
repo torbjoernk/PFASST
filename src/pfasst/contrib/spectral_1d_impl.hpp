@@ -23,7 +23,7 @@ namespace pfasst
     Spectral1DTransfer<TransferTraits, Enabled>::interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
                                                                   shared_ptr<typename TransferTraits::fine_encap_type> fine)
     {
-      CVLOG(1, "TRANS") << "interpolate data";
+      ML_CVLOG(1, "TRANS", "interpolate data");
 
       const size_t coarse_ndofs = coarse->get_data().size();
       const size_t fine_ndofs = fine->get_data().size();
@@ -32,7 +32,7 @@ namespace pfasst
 
       if (fine_ndofs == coarse_ndofs) {
         // do a shortcut
-        CLOG(DEBUG, "TRANS") << "number dofs of fine and coarse are the same; doing a trivial copy and NO FFT";
+        ML_CLOG(DEBUG, "TRANS", "number dofs of fine and coarse are the same; doing a trivial copy and NO FFT");
         fine->data() = coarse->get_data();
 
       } else {
@@ -68,7 +68,7 @@ namespace pfasst
     Spectral1DTransfer<TransferTraits, Enabled>::restrict_data(const shared_ptr<typename TransferTraits::fine_encap_type> fine,
                                                                shared_ptr<typename TransferTraits::coarse_encap_type> coarse)
     {
-      CVLOG(1, "TRANS") << "restrict data";
+      ML_CVLOG(1, "TRANS", "restrict data");
 
       const size_t coarse_ndofs = coarse->get_data().size();
       const size_t fine_ndofs = fine->get_data().size();
@@ -77,7 +77,7 @@ namespace pfasst
 
       if (fine_ndofs == coarse_ndofs) {
         // do a shortcut
-        CLOG(DEBUG, "TRANS") << "number dofs of fine and coarse are the same; doing a trivial copy and NO FFT";
+        ML_CLOG(DEBUG, "TRANS", "number dofs of fine and coarse are the same; doing a trivial copy and NO FFT");
         coarse->data() = fine->get_data();
 
       } else {
