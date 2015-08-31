@@ -35,7 +35,7 @@ namespace pfasst
                    typename EncapsulationTrait::data_type
                  >::value
                >::type>::Encapsulation(const typename EncapsulationTrait::data_type& data)
-      : Encapsulation<EncapsulationTrait>()
+      : Encapsulation<EncapsulationTrait>(data.size())
     {
       this->data() = data;
     }
