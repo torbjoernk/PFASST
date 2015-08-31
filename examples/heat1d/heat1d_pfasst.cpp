@@ -8,14 +8,14 @@ using namespace std;
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/comm/mpi_p2p.hpp>
 #include <pfasst/controller/two_level_pfasst.hpp>
-#include <pfasst/transfer/spectral_1d.hpp>
+#include <pfasst/contrib/spectral_1d.hpp>
 
 #include "heat1d_sweeper.hpp"
 
 using pfasst::encap::VectorEncapsulation;
 using pfasst::quadrature::quadrature_factory;
 using pfasst::quadrature::QuadratureType;
-using pfasst::Spectral1DTransfer;
+using pfasst::contrib::Spectral1DTransfer;
 using pfasst::TwoLevelPfasst;
 typedef pfasst::comm::MpiP2P CommType;
 

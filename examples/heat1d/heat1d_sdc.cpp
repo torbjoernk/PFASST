@@ -5,14 +5,14 @@ using namespace std;
 #include <pfasst/quadrature.hpp>
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/controller/sdc.hpp>
-#include <pfasst/transfer/spectral_1d.hpp>
+#include <pfasst/contrib/spectral_1d.hpp>
 
 #include "heat1d_sweeper.hpp"
 
 using pfasst::encap::VectorEncapsulation;
 using pfasst::quadrature::quadrature_factory;
 using pfasst::quadrature::QuadratureType;
-using pfasst::Spectral1DTransfer;
+using pfasst::contrib::Spectral1DTransfer;
 using pfasst::SDC;
 
 using pfasst::examples::heat1d::Heat1D;
