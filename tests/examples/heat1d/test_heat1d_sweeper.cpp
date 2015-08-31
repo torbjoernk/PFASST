@@ -3,22 +3,22 @@
 #include <vector>
 using namespace std;
 
+#include <pfasst/quadrature.hpp>
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
-typedef pfasst::vector_encap_traits<double, double> VectorEncapTrait;
-typedef pfasst::encap::Encapsulation<VectorEncapTrait> VectorEncapsulation;
+using pfasst::quadrature::QuadratureType;
+typedef pfasst::vector_encap_traits<double, double>                           EncapTraits;
 
 #include "examples/heat1d/heat1d_sweeper.hpp"
-template<class... Ts>
-using Sweeper = pfasst::examples::heat1d::Heat1D<Ts...>;
+typedef pfasst::examples::heat1d::Heat1D<pfasst::sweeper_traits<EncapTraits>> SweeperType;
 
 
 class ProblemSetup
   : public ::testing::Test
 {
   protected:
-    typedef          Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> sweeper_type;
-    typedef typename sweeper_type::encap_type                          encap_type;
+    typedef          SweeperType              sweeper_type;
+    typedef typename sweeper_type::encap_type encap_type;
 
     shared_ptr<sweeper_type> sweeper;
 
@@ -61,7 +61,6 @@ TEST_F(ProblemSetup, computes_exact_solution_at_t01)
 
   EXPECT_THAT(exact->get_data(), Pointwise(DoubleNear(), exact_t001));
 }
-
 
 
 TEST_MAIN()
