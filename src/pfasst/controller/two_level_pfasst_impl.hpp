@@ -389,7 +389,7 @@ namespace pfasst
   {
     this->get_fine()->get_end_state()->bcast(this->get_communicator(), this->get_communicator()->get_size() - 1);
     
-    // TODO: cleanup dangling request handlers of communicator here
+    this->get_communicator()->cleanup();
   }
 
   template<class TransferT, class CommT>

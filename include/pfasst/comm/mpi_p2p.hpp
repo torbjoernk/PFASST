@@ -59,7 +59,8 @@ namespace pfasst
         virtual bool is_first() const override;
         virtual bool is_last() const override;
 
-        virtual void abort(const int& err_code);
+        virtual void cleanup() override;
+        virtual void abort(const int& err_code) override;
 
         virtual void send(const double* const data, const int count, const int dest_rank, const int tag) override;
         virtual void send_status(const StatusDetail<double>* const data, const int count, const int dest_rank, const int tag) override;
