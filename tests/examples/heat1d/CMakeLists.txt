@@ -9,6 +9,7 @@ include_directories(
 
 set(TESTS
     test_heat1d_sweeper
+    test_heat1d_convergence
 )
 
 set(TESTS_MPI
