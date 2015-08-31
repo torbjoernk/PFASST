@@ -21,6 +21,27 @@ using namespace std;
 #include "pfasst/controller/status.hpp"
 
 
+#ifndef NON_CONST_MPI
+  template<typename T>
+  T* mpi_const_cast(const T* input) {
+      return const_cast<T*>(input);
+  }
+  template<typename T>
+  T& mpi_const_cast(const T& input) {
+      return const_cast<T&>(input);
+  }
+#else
+  template<typename T>
+  const T* mpi_const_cast(const T* input) {
+      return input;
+  }
+  template<typename T>
+  const T& mpi_const_cast(const T& input) {
+      return input;
+  }
+#endif
+
+
 namespace pfasst
 {
   namespace comm
