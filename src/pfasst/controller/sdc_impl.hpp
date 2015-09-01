@@ -57,7 +57,7 @@ namespace pfasst
   SDC<TransferT>::add_transfer(shared_ptr<TransferT> transfer)
   {
     UNUSED(transfer);
-    CLOG(WARNING, this->get_logger_id()) << "SDC Controller does not require a transfer operator.";
+    ML_CLOG(WARNING, this->get_logger_id(), "SDC Controller does not require a transfer operator.");
   }
 
   template<class TransferT>
@@ -90,7 +90,7 @@ namespace pfasst
     Controller<TransferT>::setup();
 
     if (this->get_num_levels() != 1) {
-      CLOG(ERROR, this->get_logger_id()) << "One level (Sweeper) must have been added for SDC.";
+      ML_CLOG(ERROR, this->get_logger_id(), "One level (Sweeper) must have been added for SDC.");
       throw logic_error("SDC requires one level");
     }
 
@@ -104,34 +104,34 @@ namespace pfasst
   {
     Controller<TransferT>::run();
 
-    CLOG(INFO, this->get_logger_id()) << "";
-    CLOG(INFO, this->get_logger_id()) << "Sequential SDC";
-    CLOG(INFO, this->get_logger_id()) << "  t0:        " << LOG_FIXED << this->get_status()->get_time();
-    CLOG(INFO, this->get_logger_id()) << "  dt:        " << LOG_FIXED << this->get_status()->get_dt();
-    CLOG(INFO, this->get_logger_id()) << "  T:         " << LOG_FIXED << this->get_status()->get_t_end();
-    CLOG(INFO, this->get_logger_id()) << "  num steps: " << LOG_FIXED << this->get_status()->get_num_steps();
-    CLOG(INFO, this->get_logger_id()) << "  max iter:  " << LOG_FIXED << this->get_status()->get_max_iterations();
-    CLOG(INFO, this->get_logger_id()) << "  Initial Value: " << to_string(this->get_sweeper()->get_initial_state());
+    ML_CLOG(INFO, this->get_logger_id(), "");
+    ML_CLOG(INFO, this->get_logger_id(), "Sequential SDC");
+    ML_CLOG(INFO, this->get_logger_id(), "  t0:        " << LOG_FIXED << this->get_status()->get_time());
+    ML_CLOG(INFO, this->get_logger_id(), "  dt:        " << LOG_FIXED << this->get_status()->get_dt());
+    ML_CLOG(INFO, this->get_logger_id(), "  T:         " << LOG_FIXED << this->get_status()->get_t_end());
+    ML_CLOG(INFO, this->get_logger_id(), "  num steps: " << LOG_FIXED << this->get_status()->get_num_steps());
+    ML_CLOG(INFO, this->get_logger_id(), "  max iter:  " << LOG_FIXED << this->get_status()->get_max_iterations());
+    ML_CLOG(INFO, this->get_logger_id(), "  Initial Value: " << to_string(this->get_sweeper()->get_initial_state()));
 
     // iterate over time steps
     do {
-      CLOG(INFO, this->get_logger_id()) << "";
-      CLOG(INFO, this->get_logger_id()) << "Time Step " << (this->get_status()->get_step() + 1)
-                                        << " of " << this->get_status()->get_num_steps();
+      ML_CLOG(INFO, this->get_logger_id(), "");
+      ML_CLOG(INFO, this->get_logger_id(), "Time Step " << (this->get_status()->get_step() + 1)
+                                        << " of " << this->get_status()->get_num_steps());
 
       // iterate on current time step
       do {
         const bool do_prediction = this->get_status()->get_iteration() == 0;
 
         if (do_prediction) {
-          CLOG(INFO, this->get_logger_id()) << "";
-          CLOG(INFO, this->get_logger_id()) << "SDC Prediction step";
+          ML_CLOG(INFO, this->get_logger_id(), "");
+          ML_CLOG(INFO, this->get_logger_id(), "SDC Prediction step");
           this->get_sweeper()->pre_predict();
           this->get_sweeper()->predict();
           this->get_sweeper()->post_predict();
         } else {
-          CLOG(INFO, this->get_logger_id()) << "";
-          CLOG(INFO, this->get_logger_id()) << "Iteration " << this->get_status()->get_iteration();
+          ML_CLOG(INFO, this->get_logger_id(), "");
+          ML_CLOG(INFO, this->get_logger_id(), "Iteration " << this->get_status()->get_iteration());
           this->get_sweeper()->pre_sweep();
           this->get_sweeper()->sweep();
           this->get_sweeper()->post_sweep();
@@ -159,14 +159,14 @@ namespace pfasst
   SDC<TransferT>::advance_iteration()
   {
     if (this->get_sweeper()->converged()) {
-      CLOG(INFO, this->get_logger_id()) << "Sweeper has converged.";
+      ML_CLOG(INFO, this->get_logger_id(), "Sweeper has converged.");
       return false;
     } else if (Controller<TransferT>::advance_iteration()) {
-      CVLOG(1, this->get_logger_id()) << "Sweeper has not yet converged and additional iterations to do.";
+      ML_CVLOG(1, this->get_logger_id(), "Sweeper has not yet converged and additional iterations to do.");
       this->get_sweeper()->save();
       return true;
     } else {
-      CLOG(WARNING, this->get_logger_id()) << "Sweeper has not yet converged and no more iterations to do.";
+      ML_CLOG(WARNING, this->get_logger_id(), "Sweeper has not yet converged and no more iterations to do.");
       return false;
     }
   }

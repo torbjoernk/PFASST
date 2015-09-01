@@ -90,12 +90,14 @@ const string OUT::reset = "\033[0m";
 
 #ifdef PFASST_NO_LOGGING
   #define ELPP_DISABLE_LOGS
+  #define ML_NOLOG
 #endif
 
 #include <leathers/push>
 #include <leathers/all>
 #include <pfasst/easylogging++.h>
 #include <leathers/pop>
+#include <pfasst/metalog.hpp>
 
 
 #ifndef PFASST_LOGGER_INITIALIZED
