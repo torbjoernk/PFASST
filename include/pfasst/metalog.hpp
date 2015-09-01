@@ -65,7 +65,7 @@ namespace metalog {
   #define ML_CLOG(level, logger_id, x) \
       (metalog::log((CLOG(level, logger_id)), metalog::Data<metalog::None>() << x))
   #define ML_CLOG_IF(condition, level, logger_id, x) \
-      CLOG_IF(condition, level, logger_id, x)
+      CLOG_IF(condition, level, logger_id) << x
   #define ML_CVLOG(verbose_level, logger_id, x) \
       CVLOG(verbose_level, logger_id) << x
   #define ML_CVLOG_IF(condition, verbose_level, logger_id, x) \

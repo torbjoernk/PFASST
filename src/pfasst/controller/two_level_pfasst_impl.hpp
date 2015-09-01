@@ -205,7 +205,7 @@ namespace pfasst
 
     } else {
       ML_CLOG_IF(previous_done && !fine_converged, INFO, this->get_logger_id(),
-        << "previous process has converged but FINE sweeper not yet.");
+        "previous process has converged but FINE sweeper not yet.");
 
       if (Controller<TransferT, CommT>::advance_iteration()) {
         ML_CLOG(INFO, this->get_logger_id(), "FINE sweeper has not yet converged and additional iterations to do.");

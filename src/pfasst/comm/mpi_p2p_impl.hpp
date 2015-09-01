@@ -144,7 +144,7 @@ namespace pfasst
     {
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
 
-      ML_CLOG(DEBUG, "COMM_P2P"i, "sending " << count << " Status with tag=" << tag << " to " << dest_rank);
+      ML_CLOG(DEBUG, "COMM_P2P", "sending " << count << " Status with tag=" << tag << " to " << dest_rank);
 #ifdef NON_CONST_MPI
       int err = MPI_Send(data, count, status_data_type, dest_rank, tag, const_cast<MPI_Comm>(this->_comm));
 #else

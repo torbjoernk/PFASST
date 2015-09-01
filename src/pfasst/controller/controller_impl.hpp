@@ -83,7 +83,7 @@ namespace pfasst
     const auto num_steps = (this->get_status()->get_t_end() - this->get_status()->get_time()) / this->get_status()->get_dt();
     ML_CLOG_IF(!almost_equal(num_steps * this->get_status()->get_dt(), lrint(num_steps) * this->get_status()->get_dt()),
             WARNING, this->get_logger_id(),
-      << LOG_FIXED << "End time point not an integral multiple of time delta: "
+      LOG_FIXED << "End time point not an integral multiple of time delta: "
       << "(" << this->get_status()->get_t_end() << " - " << this->get_status()->get_time() << ") / " << this->get_status()->get_dt()
       << " = " << num_steps << " != " << lrint(num_steps));
 
@@ -160,7 +160,7 @@ namespace pfasst
   Controller<TransferT, CommT>::setup()
   {
     ML_CLOG_IF(this->is_ready(), WARNING, this->get_logger_id(),
-      << "Controller has already been setup.");
+      "Controller has already been setup.");
 
     ML_CVLOG(1, this->get_logger_id(), "setting up controller");
 
@@ -180,7 +180,7 @@ namespace pfasst
     }
 
     ML_CLOG_IF(this->get_status()->get_max_iterations() == 0, WARNING, this->get_logger_id(),
-      << "You sould define a maximum number of iterations to avoid endless runs."
+      "You sould define a maximum number of iterations to avoid endless runs."
       << " (" << this->get_status()->get_max_iterations() << ")");
 
     this->ready() = true;
