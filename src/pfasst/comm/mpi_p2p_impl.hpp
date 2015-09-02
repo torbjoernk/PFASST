@@ -132,7 +132,7 @@ namespace pfasst
     void MpiP2P::send(const double* const data, const int count, const int dest_rank, const int tag)
     {
       ML_CLOG(DEBUG, "COMM_P2P", "sending " << count << " double values with tag=" << tag << " to " << dest_rank);
-      int err = MPI_Send(data, count, MPI_DOUBLE, dest_rank, tag, mpi_const_cast<MPI_Comm>(this->_comm));
+      int err = MPI_Send(mpi_const_cast<void>(data), count, MPI_DOUBLE, dest_rank, tag, this->_comm);
       check_mpi_error(err);
     }
 
@@ -141,7 +141,7 @@ namespace pfasst
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
 
       ML_CLOG(DEBUG, "COMM_P2P", "sending " << count << " Status with tag=" << tag << " to " << dest_rank);
-      int err = MPI_Send(data, count, status_data_type, dest_rank, tag, mpi_const_cast<MPI_Comm>(this->_comm));
+      int err = MPI_Send(mpi_const_cast<void>(data), count, status_data_type, dest_rank, tag, this->_comm);
       check_mpi_error(err);
     }
 
@@ -165,7 +165,7 @@ namespace pfasst
         this->_requests.insert(make_pair(request_index, this_request));
       }
 
-      int err = MPI_Isend(data, count, MPI_DOUBLE, dest_rank, tag, mpi_const_cast<MPI_Comm>(this->_comm), &(this->_requests[request_index]));
+      int err = MPI_Isend(mpi_const_cast<void>(data), count, MPI_DOUBLE, dest_rank, tag, this->_comm, &(this->_requests[request_index]));
       check_mpi_error(err);
     }
 
@@ -190,7 +190,7 @@ namespace pfasst
         this->_requests.insert(make_pair(request_index, this_request));
       }
 
-      int err = MPI_Isend(data, count, status_data_type, dest_rank, tag, mpi_const_cast<MPI_Comm>(this->_comm), &(this->_requests[request_index]));
+      int err = MPI_Isend(mpi_const_cast<void>(data), count, status_data_type, dest_rank, tag, this->_comm, &(this->_requests[request_index]));
       check_mpi_error(err);
     }
 
@@ -199,7 +199,7 @@ namespace pfasst
     {
       this->_stati.push_back(MPI_Status_factory());
       ML_CLOG(DEBUG, "COMM_P2P", "receiving " << count << " double values with tag=" << tag << " from " << dest_rank);
-      int err = MPI_Recv(data, count, MPI_DOUBLE, dest_rank, tag, mpi_const_cast<MPI_Comm>(this->_comm), &(this->_stati.back()));
+      int err = MPI_Recv(data, count, MPI_DOUBLE, dest_rank, tag, this->_comm, &(this->_stati.back()));
       check_mpi_error(err);
       ML_CVLOG(1, "COMM_P2P", "--> status: " << this->_stati.back());
     }
@@ -210,7 +210,7 @@ namespace pfasst
 
       this->_stati.push_back(MPI_Status_factory());
       ML_CLOG(DEBUG, "COMM_P2P", "receiving " << count << " Status with tag=" << tag << " from " << dest_rank);
-      int err = MPI_Recv(data, count, pfasst::status_data_type, dest_rank, tag, mpi_const_cast<MPI_Comm>(this->_comm), &(this->_stati.back()));
+      int err = MPI_Recv(data, count, pfasst::status_data_type, dest_rank, tag, this->_comm, &(this->_stati.back()));
       check_mpi_error(err);
       ML_CVLOG(1, "COMM_P2P", "--> status: " << this->_stati.back());
     }
