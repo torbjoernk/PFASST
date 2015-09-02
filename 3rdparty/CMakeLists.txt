@@ -29,7 +29,7 @@ endif()
 set(Boost_MIN_VERSION 1.55.0)
 set(Boost_COMPONETS program_options)
 
-find_package(Boost ${Boost_MINOR_VERSION} COMPONENTS ${Boost_COMPONETS} REQUIRED)
+find_package(Boost ${Boost_MIN_VERSION} COMPONENTS ${Boost_COMPONETS} REQUIRED)
 set_package_properties(Boost
     PROPERTIES
       DESCRIPTION "C++ libraries"
