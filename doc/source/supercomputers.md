@@ -18,15 +18,18 @@ There are a few steps one has to complete before using _PFASST++_ on _JUQUEEN_.
   3. run 
 
          CXX=`which mpig++` CC=`which mpigcc` ./bootstrap.sh \
+           --with-toolset=gcc \
            --with-libraries=program_options --prefix=<INSTALL_PLACE>
 
      where `INSTALL_PLACE` is something like `$HOME/progs/juqueen`
 
-  4. create file called `user-config.jam` with the following content:
+  4. make sure there is no `vacpp` occuring in `project-config.jam`
+
+  5. create file called `user-config.jam` with the following content:
 
          using gcc : 4.8.1 : mpig++ ;
 
-  5. now compile
+  6. now compile
 
          CXX=`which mpig++` CC=`which mpigcc` ./b2 --prefix=<INSTALL_PLACE> \
            --reconfigure link=static stage
