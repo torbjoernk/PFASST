@@ -96,7 +96,7 @@ namespace pfasst
       ML_CVLOG(2, this->get_logger_id(), LOG_FLOAT << "  u["<<m<<"] = " << to_string(this->get_states()[m]));
 
       // compute right hand side for implicit solve (i.e. the explicit part of the propagation)
-      shared_ptr<encap_type> rhs = this->get_encap_factory()->create();
+      shared_ptr<encap_type> rhs = this->get_encap_factory().create();
       rhs->data() = this->get_states()[m]->get_data();
       ML_CVLOG(2, this->get_logger_id(), "  rhs = u["<<m<<"]                    = " << to_string(rhs));
       rhs->scaled_add(dt * this->_q_delta_expl(m + 1, m), this->_expl_rhs[m]);
@@ -220,7 +220,7 @@ namespace pfasst
       ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "  u["<<m<<"] = " << to_string(this->get_states()[m]));
 
       // compute right hand side for implicit solve (i.e. the explicit part of the propagation)
-      shared_ptr<encap_type> rhs = this->get_encap_factory()->create();
+      shared_ptr<encap_type> rhs = this->get_encap_factory().create();
       // rhs = u_0
       rhs->data() = this->get_states().front()->get_data();
       ML_CVLOG(6, this->get_logger_id(), "  rhs = u[0]                    = " << to_string(rhs));

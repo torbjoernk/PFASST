@@ -20,18 +20,18 @@ namespace pfasst
   {
     ML_CVLOG(1, "TRANS", "interpolate initial value only");
 
-    auto coarse_factory = coarse->get_encap_factory();
-    auto fine_factory = fine->get_encap_factory();
+    auto& coarse_factory = coarse->get_encap_factory();
+    auto& fine_factory = fine->get_encap_factory();
 
     // c_delta = restrict(u_0^F) - u_0^C
-    auto coarse_delta = coarse_factory->create();
+    auto coarse_delta = coarse_factory.create();
     // c_delta = restrict(u_0)
     this->restrict_data(fine->get_initial_state(), coarse_delta);
     // c_delta -= c_0
     coarse_delta->scaled_add(-1.0, coarse->get_initial_state());
 
     // f_delta = interpolate(c_delta)
-    auto fine_delta = fine_factory->create();
+    auto fine_delta = fine_factory.create();
     // f_delta = interpolate(c_delta)
     this->interpolate_data(coarse_delta, fine_delta);
 
@@ -67,15 +67,15 @@ namespace pfasst
     // +1 here for additional value in states
     const size_t num_coarse_nodes = coarse->get_quadrature()->get_num_nodes() + 1;
 
-    auto coarse_factory = coarse->get_encap_factory();
-    auto fine_factory = fine->get_encap_factory();
+    auto& coarse_factory = coarse->get_encap_factory();
+    auto& fine_factory = fine->get_encap_factory();
 
     // compute coarse level correction
     vector<shared_ptr<fine_encap_type>> fine_deltas(num_coarse_nodes);
     generate(fine_deltas.begin(), fine_deltas.end(),
-             [fine_factory]() { return fine_factory->create(); });
+             [&fine_factory]() { return fine_factory.create(); });
 
-    auto coarse_delta = coarse_factory->create();
+    auto coarse_delta = coarse_factory.create();
     // u_m^F = u_m^F - interpolate(u_m^C - prev_u_m^C)
     for (size_t m = 1; m < num_coarse_nodes; ++m) {
       coarse_delta->data() = coarse->get_states()[m]->get_data();
@@ -190,11 +190,11 @@ namespace pfasst
     }
     assert(coarse_nodes.size() == fine_nodes.size());
 
-    auto coarse_factory = coarse->get_encap_factory();
-    auto fine_factory = fine->get_encap_factory();
+    auto& coarse_factory = coarse->get_encap_factory();
+    auto& fine_factory = fine->get_encap_factory();
 
     vector<shared_ptr<coarse_encap_type>> fas(num_coarse_nodes + 1);
-    generate(fas.begin(), fas.end(), [coarse_factory]() { return coarse_factory->create(); });
+    generate(fas.begin(), fas.end(), [&coarse_factory]() { return coarse_factory.create(); });
 
     const auto coarse_integral = coarse->integrate(dt);
     const auto fine_integral = fine->integrate(dt);

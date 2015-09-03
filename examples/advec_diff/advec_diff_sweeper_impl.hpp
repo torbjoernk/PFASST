@@ -68,7 +68,7 @@ namespace pfasst
       shared_ptr<typename SweeperTrait::encap_type>
       AdvecDiff<SweeperTrait, Enabled>::exact(const typename SweeperTrait::time_type& t)
       {
-        auto result = this->get_encap_factory()->create();
+        auto result = this->get_encap_factory().create();
 
         const spatial_type dx = 1.0 / sqrt(4.0 * pi<spatial_type>() * this->_nu * (t + this->_t0));
         
@@ -143,7 +143,7 @@ namespace pfasst
       size_t
       AdvecDiff<SweeperTrait, Enabled>::get_num_dofs() const
       {
-        return this->get_encap_factory()->size();
+        return this->get_encap_factory().size();
       }
 
 
@@ -215,7 +215,7 @@ namespace pfasst
           z[i] *= c * this->_ddx[i];
         }
 
-        auto result = this->get_encap_factory()->create();
+        auto result = this->get_encap_factory().create();
         this->_fft.backward(result);
 
         this->_num_expl_f_evals++;
@@ -239,7 +239,7 @@ namespace pfasst
           z[i] *= c * this->_lap[i];
         }
 
-        auto result = this->get_encap_factory()->create();
+        auto result = this->get_encap_factory().create();
         this->_fft.backward(result);
 
         this->_num_impl_f_evals++;
