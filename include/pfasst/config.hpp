@@ -24,7 +24,8 @@ namespace po = boost::program_options;
     #error "Do you really want to use this ancient MPI implementation ?!"
   #elif MPI_VERSION == 2
     #pragma message "Can you upgrade to a MPI implementation of version 3.x ?"
-    #define NON_CONST_MPI
+    // TODO: this should not be the general case but works on juqueen. we should check that.
+    // #define NON_CONST_MPI
   #else
     // this should be fine
   #endif
