@@ -89,8 +89,8 @@ namespace pfasst
         virtual void isend(const double* const data, const int count, const int dest_rank, const int tag) override;
         virtual void isend_status(const StatusDetail<double>* const data, const int count, const int dest_rank, const int tag) override;
 
-        virtual void recv(double* data, const int count, const int dest_rank, const int tag) override;
-        virtual void recv_status(StatusDetail<double>* data, const int count, const int dest_rank, const int tag) override;
+        virtual void recv(double* data, const int count, const int src_rank, const int tag) override;
+        virtual void recv_status(StatusDetail<double>* data, const int count, const int src_rank, const int tag) override;
 
         virtual void irecv(double* data, const int count, const int src_rank, const int tag) override;
         virtual void irecv_status(StatusDetail<double>* data, const int count, const int src_rank, const int tag) override;

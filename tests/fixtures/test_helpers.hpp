@@ -35,8 +35,8 @@ MATCHER(MutuallyEqual, "")
 #ifdef WITH_MPI
 #define TEST_MAIN() \
   int main(int argc, char** argv) { \
-    pfasst::log::start_log(argc, argv); \
     MPI_Init(&argc, &argv); \
+    pfasst::log::start_log(argc, argv); \
     InitGoogleTest(&argc, argv); \
     const int out = RUN_ALL_TESTS(); \
     MPI_Finalize(); \

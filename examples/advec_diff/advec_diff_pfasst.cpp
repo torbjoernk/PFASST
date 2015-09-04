@@ -1,7 +1,10 @@
 #include <memory>
 using namespace std;
 
+#include <leathers/push>
+#include <leathers/all>
 #include <mpi.h>
+#include <leathers/pop>
 
 #include <pfasst.hpp>
 #include <pfasst/quadrature.hpp>
