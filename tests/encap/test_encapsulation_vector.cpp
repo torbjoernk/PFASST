@@ -19,7 +19,7 @@ typedef pfasst::vector_encap_traits<double, double>    VectorEncapTrait;
 typedef pfasst::encap::Encapsulation<VectorEncapTrait> VectorEncapsulation;
 
 #include "comm/mocks.hpp"
-typedef CommMock                                       CommType;
+typedef CommMock                                       CommunicatorType;
 
 
 typedef ::testing::Types<VectorEncapsulation> EncapTypes;
@@ -175,7 +175,7 @@ TEST(MatrixApplication, all_ones)
 
 TEST(Communication, sending)
 {
-  shared_ptr<CommType> comm = make_shared<CommType>();
+  shared_ptr<CommunicatorType> comm = make_shared<CommunicatorType>();
   shared_ptr<VectorEncapsulation> vec = \
     make_shared<VectorEncapsulation>(vector<double>{1.0, 2.0, 3.0});
   vec->send(comm, 1, 0, true);
@@ -185,7 +185,7 @@ TEST(Communication, sending)
 
 TEST(Communication, receiving)
 {
-  shared_ptr<CommType> comm = make_shared<CommType>();
+  shared_ptr<CommunicatorType> comm = make_shared<CommunicatorType>();
   shared_ptr<VectorEncapsulation> vec = \
     make_shared<VectorEncapsulation>(vector<double>{1.0, 2.0, 3.0});
   vec->recv(comm, 1, 0, true);
@@ -195,7 +195,7 @@ TEST(Communication, receiving)
 
 TEST(Communication, broadcasting)
 {
-  shared_ptr<CommType> comm = make_shared<CommType>();
+  shared_ptr<CommunicatorType> comm = make_shared<CommunicatorType>();
   shared_ptr<VectorEncapsulation> vec = \
     make_shared<VectorEncapsulation>(vector<double>{1.0, 2.0, 3.0});
   vec->bcast(comm, 0);

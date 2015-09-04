@@ -17,7 +17,7 @@ using pfasst::quadrature::quadrature_factory;
 using pfasst::quadrature::QuadratureType;
 using pfasst::contrib::Spectral1DTransfer;
 using pfasst::TwoLevelPfasst;
-typedef pfasst::comm::MpiP2P CommType;
+typedef pfasst::comm::MpiP2P CommunicatorType;
 
 using pfasst::examples::heat1d::Heat1D;
 
@@ -36,8 +36,8 @@ namespace pfasst
       void run_pfasst(const size_t& ndofs, const size_t& nnodes, const QuadratureType& quad_type,
                       const double& t_0, const double& dt, const double& t_end, const size_t& niter)
       {
-        TwoLevelPfasst<TransferType, CommType> pfasst;
-        pfasst.communicator() = make_shared<CommType>(MPI_COMM_WORLD);
+        TwoLevelPfasst<TransferType, CommunicatorType> pfasst;
+        pfasst.communicator() = make_shared<CommunicatorType>(MPI_COMM_WORLD);
 
         auto coarse = make_shared<SweeperType>(ndofs);
         coarse->quadrature() = quadrature_factory<double>(nnodes, quad_type);
