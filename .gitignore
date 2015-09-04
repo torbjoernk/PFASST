@@ -4,6 +4,8 @@
 /coverage
 *.info
 /include/pfasst/site_config.hpp
+cxx_wrapper.sh
+cc_wrapper.sh
 
 .python-version
 __pycache__
