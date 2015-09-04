@@ -191,7 +191,6 @@ namespace pfasst
     assert(coarse_nodes.size() == fine_nodes.size());
 
     auto& coarse_factory = coarse->get_encap_factory();
-    auto& fine_factory = fine->get_encap_factory();
 
     vector<shared_ptr<coarse_encap_type>> fas(num_coarse_nodes + 1);
     generate(fas.begin(), fas.end(), [&coarse_factory]() { return coarse_factory.create(); });
