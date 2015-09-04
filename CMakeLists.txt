@@ -24,14 +24,13 @@ cmake_dependent_option(
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
 
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 ON )
-cmake_dependent_option(
-        pfasst_WITH_SCOREP       "enable scalable instrumentation with Score-P"           OFF
-            "pfasst_WITH_MPI" ON)
 
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
 cmake_dependent_option(
        enable_LTO               "enable LinkTimeOptimization"                             OFF
             "CMAKE_BUILD_TYPE" Release)
+
+option(pfasst_WITH_EXTRA_WRAPPER "Build script to allow to set an additional wrapper via $PREP" OFF)
 
 option(pfasst_WITH_LOGGING      "Enable logging output on console"                        ON)
 
@@ -53,20 +52,19 @@ if(${pfasst_WITH_MPI})
     message(STATUS "Using MPI C++ Compiler Wrapper: ${MPI_CXX_COMPILER}")
     message(STATUS "USing MPI C Compiler Wrapper: ${MPI_C_COMPILER}")
     add_definitions(-DWITH_MPI)
+endif()
 
-    if(pfasst_WITH_SCOREP)
-        find_package(ScoreP REQUIRED)
-        configure_file(
-            "${pfasst_SOURCE_DIR}/cmake/scorep-cxx.sh.in"
-            "${CMAKE_BINARY_DIR}/scorep-cxx.sh"
-        )
-        configure_file(
-            "${pfasst_SOURCE_DIR}/cmake/scorep-cc.sh.in"
-            "${CMAKE_BINARY_DIR}/scorep-cc.sh"
-        )
-        set(CMAKE_CXX_COMPILER "${CMAKE_BINARY_DIR}/scorep-cxx.sh")
-        set(CMAKE_C_COMPILER "${CMAKE_BINARY_DIR}/scorep-cc.sh")
-    endif()
+if(pfasst_WITH_EXTRA_WRAPPER)
+    configure_file(
+        "${pfasst_SOURCE_DIR}/cmake/cxx_wrapper.sh.in"
+        "${CMAKE_BINARY_DIR}/cxx_wrapper.sh"
+    )
+    configure_file(
+        "${pfasst_SOURCE_DIR}/cmake/cc_wrapper.sh.in"
+        "${CMAKE_BINARY_DIR}/cc_wrapper.sh"
+    )
+    set(CMAKE_CXX_COMPILER "${CMAKE_BINARY_DIR}/cxx_wrapper.sh")
+    set(CMAKE_C_COMPILER "${CMAKE_BINARY_DIR}/cc_wrapper.sh")
 endif()
 
 # Check for C++11 support
