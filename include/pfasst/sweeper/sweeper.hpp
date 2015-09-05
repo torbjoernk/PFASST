@@ -77,7 +77,7 @@ namespace pfasst
       virtual const shared_ptr<Status<typename SweeperTrait::time_type>>  get_status() const;
 
       virtual       shared_ptr<typename SweeperTrait::encap_type::factory_type>& encap_factory();
-      virtual const shared_ptr<typename SweeperTrait::encap_type::factory_type>  get_encap_factory() const;
+      virtual const typename SweeperTrait::encap_type::factory_type&  get_encap_factory() const;
 
       virtual       shared_ptr<typename SweeperTrait::encap_type>&         initial_state();
       virtual       vector<shared_ptr<typename SweeperTrait::encap_type>>& states();

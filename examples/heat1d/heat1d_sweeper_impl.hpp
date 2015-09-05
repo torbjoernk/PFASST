@@ -63,7 +63,7 @@ namespace pfasst
       shared_ptr<typename SweeperTrait::encap_type>
       Heat1D<SweeperTrait, Enabled>::exact(const typename SweeperTrait::time_type& t)
       {
-        auto result = this->get_encap_factory()->create();
+        auto result = this->get_encap_factory().create();
 
         // taken from pySDC
         //   xvalues = np.array([(i) * self.dx for i in range(self.nvars)])
@@ -133,7 +133,7 @@ namespace pfasst
       size_t
       Heat1D<SweeperTrait, Enabled>::get_num_dofs() const
       {
-        return this->get_encap_factory()->size();
+        return this->get_encap_factory().size();
       }
 
 
@@ -198,7 +198,7 @@ namespace pfasst
         ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "evaluating EXPLICIT part at t=" << t);
         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
 
-        auto result = this->get_encap_factory()->create();
+        auto result = this->get_encap_factory().create();
 
         // taken form pySDC
         //   # xvalues = np.array([(i+1)*self.dx for i in range(self.nvars)])
@@ -232,7 +232,7 @@ namespace pfasst
           z[i] *= c * this->_lap[i];
         }
 
-        auto result = this->get_encap_factory()->create();
+        auto result = this->get_encap_factory().create();
         this->_fft.backward(result);
 
         this->_num_impl_f_evals++;

@@ -96,10 +96,10 @@ class Setup
       this->sweeper1 = make_shared<SweeperType>();
       this->sweeper2 = make_shared<SweeperType>();
 
-      this->sweeper1_initial = this->sweeper1->get_encap_factory()->create();
-      this->sweeper1_end = this->sweeper1->get_encap_factory()->create();
-      this->sweeper2_initial = this->sweeper2->get_encap_factory()->create();
-      this->sweeper2_end = this->sweeper2->get_encap_factory()->create();
+      this->sweeper1_initial = this->sweeper1->get_encap_factory().create();
+      this->sweeper1_end = this->sweeper1->get_encap_factory().create();
+      this->sweeper2_initial = this->sweeper2->get_encap_factory().create();
+      this->sweeper2_end = this->sweeper2->get_encap_factory().create();
 
       ON_CALL(*(this->sweeper1.get()), get_initial_state())
         .WillByDefault(Return(this->sweeper1_initial));

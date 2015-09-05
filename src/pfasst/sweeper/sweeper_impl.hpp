@@ -63,10 +63,10 @@ namespace pfasst
   }
 
   template<class SweeperTrait, typename Enabled>
-  const shared_ptr<typename SweeperTrait::encap_type::factory_type>
+  const typename SweeperTrait::encap_type::factory_type&
   Sweeper<SweeperTrait, Enabled>::get_encap_factory() const
   {
-    return this->_factory;
+    return *(this->_factory);
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -218,28 +218,26 @@ namespace pfasst
     ML_CLOG(INFO, this->get_logger_id(), "using as quadrature: " << this->get_quadrature()->print_summary()
                                       << " and an expected error of " << LOG_FLOAT << this->get_quadrature()->expected_error());
 
-    assert(this->get_encap_factory() != nullptr);
+    // TODO: remove
+    /* assert(this->get_encap_factory() != nullptr); */
 
     const auto nodes = this->get_quadrature()->get_nodes();
     const auto num_nodes = this->get_quadrature()->get_num_nodes();
 
     this->states().resize(num_nodes + 1);
-    generate(this->states().begin(), this->states().end(),
-             bind(&traits::encap_type::factory_type::create, this->get_encap_factory()));
+    auto& factory = this->get_encap_factory();
+    generate(this->states().begin(), this->states().end(), [&factory](){ return factory.create(); });
 
     this->previous_states().resize(num_nodes + 1);
-    generate(this->previous_states().begin(), this->previous_states().end(),
-             bind(&traits::encap_type::factory_type::create, this->get_encap_factory()));
+    generate(this->previous_states().begin(), this->previous_states().end(), [&factory](){ return factory.create(); });
 
-    this->end_state() = this->get_encap_factory()->create();
+    this->end_state() = this->get_encap_factory().create();
 
     this->tau().resize(num_nodes + 1);
-    generate(this->tau().begin(), this->tau().end(),
-             bind(&traits::encap_type::factory_type::create, this->get_encap_factory()));
+    generate(this->tau().begin(), this->tau().end(), [&factory](){ return factory.create(); });
 
     this->residuals().resize(num_nodes + 1);
-    generate(this->residuals().begin(), this->residuals().end(),
-             bind(&traits::encap_type::factory_type::create, this->get_encap_factory()));
+    generate(this->residuals().begin(), this->residuals().end(), [&factory](){ return factory.create(); });
   }
 
   template<class SweeperTrait, typename Enabled>
