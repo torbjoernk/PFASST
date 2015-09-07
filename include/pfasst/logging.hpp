@@ -97,7 +97,20 @@ const string OUT::reset = "\033[0m";
 #include <leathers/all>
 #include <pfasst/easylogging++.h>
 #include <leathers/pop>
-#include <pfasst/metalog.hpp>
+
+#ifndef ML_NOLOG
+  #define ML_LOG(level, x) LOG(level) << x
+  #define ML_CLOG(level, logger_id, x) CLOG(level, logger_id) << x
+  #define ML_CLOG_IF(condition, level, logger_id, x) CLOG_IF(condition, level, logger_id) <<  x
+  #define ML_CVLOG(verbose_level, logger_id, x) CVLOG(verbose_level, logger_id) << x
+  #define ML_CVLOG_IF(condition, verbose_level, logger_id, x) CVLOG_IF(condition, verbose_level, logger_id) << x
+#else
+  #define ML_LOG(level, x)
+  #define ML_CLOG(level, logger_id, x)
+  #define ML_CLOG_IF(condition, level, logger_id, x)
+  #define ML_CVLOG(verbose_level, logger_id, x)
+  #define ML_CVLOG_IF(condition, verbose_level, logger_id, x)
+#endif
 
 
 #ifndef PFASST_LOGGER_INITIALIZED
