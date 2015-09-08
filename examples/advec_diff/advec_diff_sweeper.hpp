@@ -6,7 +6,7 @@
 using namespace std;
 
 #include <pfasst/sweeper/imex.hpp>
-#include <pfasst/contrib/fft.hpp>
+#include <pfasst/contrib/fft_1d.hpp>
 
 // I'd really like to have these as static const variable templates but this is only possible since C++14 ... :-(
 #define DEFAULT_DIFFUSIVITY 0.02
@@ -45,9 +45,9 @@ namespace pfasst
           spatial_type _nu;
           spatial_type _v;
 
-          pfasst::contrib::FFT<spatial_type> _fft;
-          vector<complex<spatial_type>>      _ddx;
-          vector<complex<spatial_type>>      _lap;
+          pfasst::contrib::FFT1D<spatial_type> _fft;
+          vector<complex<spatial_type>>        _ddx;
+          vector<complex<spatial_type>>        _lap;
 
         protected:
           virtual shared_ptr<typename SweeperTrait::encap_type> evaluate_rhs_expl(const typename SweeperTrait::time_type& t,

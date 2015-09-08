@@ -8,7 +8,7 @@
 using namespace std;
 
 #include "pfasst/quadrature.hpp"
-#include "pfasst/contrib/fft.hpp"
+#include "pfasst/contrib/fft_1d.hpp"
 
 
 namespace pfasst
@@ -36,7 +36,7 @@ namespace pfasst
         typedef typename traits::fine_spatial_type fine_spatial_type;
 
       protected:
-        pfasst::contrib::FFT<fine_spatial_type> fft;
+        pfasst::contrib::FFT1D<fine_spatial_type> fft;
 
       public:
         Spectral1DTransfer() = default;

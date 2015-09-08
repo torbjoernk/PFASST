@@ -71,7 +71,7 @@ namespace pfasst
         auto result = this->get_encap_factory().create();
 
         const spatial_type dx = 1.0 / sqrt(4.0 * pi<spatial_type>() * this->_nu * (t + this->_t0));
-        
+
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
           result->data()[i] = 0.0;
         }

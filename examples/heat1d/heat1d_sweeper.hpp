@@ -6,7 +6,7 @@
 using namespace std;
 
 #include <pfasst/sweeper/imex.hpp>
-#include <pfasst/contrib/fft.hpp>
+#include <pfasst/contrib/fft_1d.hpp>
 
 
 namespace pfasst
@@ -40,8 +40,8 @@ namespace pfasst
           time_type    _t0;
           spatial_type _nu;
 
-          pfasst::contrib::FFT<spatial_type> _fft;
-          vector<complex<spatial_type>>      _lap;
+          pfasst::contrib::FFT1D<spatial_type> _fft;
+          vector<complex<spatial_type>>        _lap;
 
         protected:
           virtual shared_ptr<typename SweeperTrait::encap_type> evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
