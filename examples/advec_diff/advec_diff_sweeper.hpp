@@ -81,7 +81,7 @@ namespace pfasst
 
           virtual bool converged() override;
 
-          virtual size_t get_num_dofs() const;
+          size_t get_num_dofs() const;
       };
     }  // ::pfasst::examples::advec_diff
   }  // ::pfasst::examples

@@ -74,7 +74,7 @@ namespace pfasst
 
           virtual bool converged() override;
 
-          virtual size_t get_num_dofs() const;
+          size_t get_num_dofs() const;
       };
     }  // ::pfasst::examples::heat1d
   }  // ::pfasst::examples
