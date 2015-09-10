@@ -147,12 +147,12 @@ namespace pfasst
     nodes.insert(nodes.begin(), time_type(0.0));
     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
 
-    ML_CVLOG(4, this->get_logger_id(), "initial values for sweeping");
+    ML_CVLOG(2, this->get_logger_id(), "initial values for sweeping");
     for (size_t m = 0; m <= num_nodes; ++m) {
-      ML_CVLOG(5, this->get_logger_id(), "  t["<<m<<"]=" << LOG_FIXED << dt << " * " << nodes[m]);
-      ML_CVLOG(6, this->get_logger_id(), LOG_FLOAT << "       u: " << to_string(this->get_states()[m]));
-      ML_CVLOG(6, this->get_logger_id(), LOG_FLOAT << "    f_ex: " << to_string(this->_expl_rhs[m]));
-      ML_CVLOG(6, this->get_logger_id(), LOG_FLOAT << "    f_im: " << to_string(this->_impl_rhs[m]));
+      ML_CVLOG(2, this->get_logger_id(), "  t["<<m<<"]=" << LOG_FIXED << this->get_status()->get_time() << " + " << dt << " * " << nodes[m]);
+      ML_CVLOG(2, this->get_logger_id(), LOG_FLOAT << "       u: " << to_string(this->get_states()[m]));
+      ML_CVLOG(2, this->get_logger_id(), LOG_FLOAT << "    f_ex: " << to_string(this->_expl_rhs[m]));
+      ML_CVLOG(2, this->get_logger_id(), LOG_FLOAT << "    f_im: " << to_string(this->_impl_rhs[m]));
     }
 
     ML_CVLOG(4, this->get_logger_id(), "computing integrals");
@@ -215,8 +215,8 @@ namespace pfasst
     time_type tm = t;
     // note: m=0 is initial value and not a quadrature node
     for (size_t m = 0; m < num_nodes; ++m) {
-      ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "propagating from t["<<m<<"]=" << dt << " * " << nodes[m]
-                          << " to t["<<(m+1)<<"]=" << dt << " * " << nodes[m+1]);
+      ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "propagating from t["<<m<<"]=" << (t + (dt * nodes[m]))
+                                                   << " to t["<<(m+1)<<"]=" << (t + (dt * nodes[m+1])));
       ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "  u["<<m<<"] = " << to_string(this->get_states()[m]));
 
       // compute right hand side for implicit solve (i.e. the explicit part of the propagation)
@@ -251,7 +251,7 @@ namespace pfasst
       tm += dt * this->_q_delta_impl(m+1, m+1);
       this->_expl_rhs[m + 1] = this->evaluate_rhs_expl(tm, this->get_states()[m + 1]);
 
-      ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "  ==> values at t["<<(m+1)<<"]=" << (dt * nodes[m+1]));
+      ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "  ==> values at t["<<(m+1)<<"]=" << (t + (dt * nodes[m+1])));
       ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "         u["<<m+1<<"]: " << to_string(this->get_states()[m + 1]));
       ML_CVLOG(6, this->get_logger_id(), LOG_FLOAT << "      f_ex["<<m+1<<"]: " << to_string(this->_expl_rhs[m + 1]));
       ML_CVLOG(6, this->get_logger_id(), LOG_FLOAT << "      f_im["<<m+1<<"]: " << to_string(this->_impl_rhs[m + 1]));

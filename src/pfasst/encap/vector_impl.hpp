@@ -147,6 +147,7 @@ namespace pfasst
                >::type>::send(shared_ptr<CommT> comm, const int dest_rank,
                               const int tag, const bool blocking)
     {
+      ML_CVLOG(2, "ENCAP", "sending data: " << this->get_data());
       if (blocking) {
         comm->send(this->get_data().data(), this->get_data().size(), dest_rank, tag);
       } else {
@@ -172,6 +173,7 @@ namespace pfasst
       } else {
         comm->irecv(this->data().data(), this->get_data().size(), src_rank, tag);
       }
+      ML_CVLOG(2, "ENCAP", "received data: " << this->get_data());
     }
 
     template<class EncapsulationTrait>

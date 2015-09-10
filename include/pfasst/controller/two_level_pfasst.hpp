@@ -27,7 +27,9 @@ namespace pfasst
     protected:
       shared_ptr<Status<time_type>> _prev_status;
       size_t _time_block = 0;
-      
+
+      virtual void get_prev_status();
+
       virtual void predict_coarse() override;
       virtual void predict_fine() override;
       virtual void sweep_coarse() override;

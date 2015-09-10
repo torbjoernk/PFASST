@@ -69,18 +69,10 @@ namespace pfasst
 #endif
 
   template<typename precision>
-  Status<precision>::Status()
+  void
+  Status<precision>::clear()
   {
-//    VLOG(1) << "Size and Alignment of Status::Detail: " << sizeof(this->_detail) << " / " << alignof(this->_detail);
-//    VLOG(1) << "  state:    " << sizeof(this->_detail.state) << " / " << alignof(this->_detail.state) << " / " << offsetof(Detail, state);
-//    VLOG(1) << "  step:     " << sizeof(this->_detail.step) << " / " << alignof(this->_detail.step) << " / " << offsetof(Detail, step);
-//    VLOG(1) << "  iter:     " << sizeof(this->_detail.iteration) << " / " << alignof(this->_detail.iteration) << " / " << offsetof(Detail, iteration);
-//    VLOG(1) << "  max_iter: " << sizeof(this->_detail.max_iterations) << " / " << alignof(this->_detail.max_iterations) << " / " << offsetof(Detail, max_iterations);
-//    VLOG(1) << "  time:     " << sizeof(this->_detail.time) << " / " << alignof(this->_detail.time) << " / " << offsetof(Detail, time);
-//    VLOG(1) << "  dt:       " << sizeof(this->_detail.dt) << " / " << alignof(this->_detail.dt) << " / " << offsetof(Detail, dt);
-//    VLOG(1) << "  t_end:    " << sizeof(this->_detail.t_end) << " / " << alignof(this->_detail.t_end) << " / " << offsetof(Detail, t_end);
-//    VLOG(1) << "  abs_res:  " << sizeof(this->_detail.abs_res_norm) << " / " << alignof(this->_detail.abs_res_norm) << " / " << offsetof(Detail, abs_res_norm);
-//    VLOG(1) << "  rel_res:  " << sizeof(this->_detail.rel_res_norm) << " / " << alignof(this->_detail.rel_res_norm) << " / " << offsetof(Detail, rel_res_norm);
+    this->_detail = StatusDetail<precision>();
   }
 
   template<typename precision>

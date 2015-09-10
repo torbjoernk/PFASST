@@ -88,12 +88,14 @@ namespace pfasst
       StatusDetail<precision> _detail;
 
     public:
-      Status();
+      Status() = default;
       Status(const Status<precision>& other) = default;
       Status(Status<precision>&& other) = default;
-      ~Status() = default;
+      virtual ~Status() = default;
       Status<precision>& operator=(const Status<precision>& other) = default;
       Status<precision>& operator=(Status<precision>&& other) = default;
+
+      virtual void clear();
 
       virtual size_t& step();
       virtual size_t  get_step() const;

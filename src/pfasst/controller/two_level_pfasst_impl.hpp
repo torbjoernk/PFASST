@@ -71,7 +71,7 @@ namespace pfasst
                                          << this->get_communicator()->get_size() << ").");
       throw logic_error("number time steps must be multiple of number processors");
     }
-    
+
     const size_t num_blocks = this->get_status()->get_num_steps() / this->get_communicator()->get_size();
 
     if (num_blocks == 0) {
@@ -81,12 +81,20 @@ namespace pfasst
       throw logic_error("invalid duration: too many time processes for given time steps");
     }
 
+    // iterate over time blocks (i.e. time-parallel blocks)
     do {
-      this->status()->step() = this->_time_block * this->get_communicator()->get_size() + this->get_communicator()->get_rank();
+      this->status()->step() = this->_time_block * this->get_communicator()->get_size() \
+                               + this->get_communicator()->get_rank();
+      if (this->_time_block == 0) {
+        this->status()->time() += this->get_status()->get_dt() * this->status()->get_step();
+      }
 
       ML_CLOG(INFO, this->get_logger_id(), "");
       ML_CLOG(INFO, this->get_logger_id(), "Time Step " << (this->get_status()->get_step() + 1)
-      << " of " << this->get_status()->get_num_steps());
+                                                        << " of " << this->get_status()->get_num_steps()
+                                                        << " (i.e. t0=" << this->get_status()->get_time() << ")");
+
+      this->_prev_status->clear();
 
       this->status()->state() = State::PREDICTING;
 
@@ -95,14 +103,14 @@ namespace pfasst
       this->status()->iteration()++;
 
       this->status()->state() = State::ITERATING;
-      
+
       this->get_fine()->converged();
 
       if (!this->get_communicator()->is_last()) {
         ML_CVLOG(1, this->get_logger_id(), "sending status: " << to_string(this->get_status()));
         this->get_status()->send(this->get_communicator(),
                                  this->get_communicator()->get_rank() + 1,
-                                 this->compute_tag(1, true), true);
+                                 this->compute_tag(1, true), false);
       }
 
       if (this->get_status()->get_state() <= State::FAILED) {
@@ -115,34 +123,26 @@ namespace pfasst
         ML_CLOG(INFO, this->get_logger_id(), "");
         ML_CLOG(INFO, this->get_logger_id(), "Iteration " << this->get_status()->get_iteration());
 
-        this->status()->state() = State::ITERATING;
+        this->get_prev_status();
 
-        if (!this->get_communicator()->is_first()) {
-          ML_CLOG(DEBUG, this->get_logger_id(), "this status: " << to_string(this->status()));
-          ML_CLOG(DEBUG, this->get_logger_id(), "prev status: " << to_string(this->_prev_status));
-          if (this->_prev_status->get_state() > State::FAILED) {
-            ML_CVLOG(1, this->get_logger_id(), "looking for state of previous process");
-            this->_prev_status->recv(this->get_communicator(),
-                                     this->get_communicator()->get_rank() - 1,
-                                     this->compute_tag(1, true), true);
-            ML_CLOG(DEBUG, this->get_logger_id(), "Status received: " << to_string(this->_prev_status));
-          } else {
-            ML_CVLOG(1, this->get_logger_id(), "previous process has already converged but this one needs another iteration");
-          }
-        }
+        this->status()->state() = State::ITERATING;
 
         if (this->_prev_status->get_state() == State::FAILED) {
           ML_CLOG(WARNING, this->get_logger_id(), "previous process failed");
-          ML_CLOG(ERROR, this->get_logger_id(), "We are aborting here. (read: TODO)");
+          ML_CLOG(ERROR, this->get_logger_id(), "We are aborting here.");
           this->get_communicator()->abort(-1);
+
         } else if (this->_prev_status->get_state() == State::CONVERGED) {
-          // TODO: do we really need to do a full sweep here ?!?
-          ML_CLOG(WARNING, this->get_logger_id(), "previous has converged; propagating that");
+          ML_CLOG(WARNING, this->get_logger_id(), "previous process has converged; this process not");
+
+        } else {
+          ML_CVLOG(1, this->get_logger_id(), "previous process not finished");
         }
 
         this->cycle_down();
 
         if (!this->get_communicator()->is_first() && this->_prev_status->get_state() > State::FAILED) {
+          ML_CVLOG(2, this->get_logger_id(), "looking for coarse data");
           this->get_coarse()->initial_state()->recv(this->get_communicator(),
                                                     this->get_communicator()->get_rank() - 1,
                                                     this->compute_tag(0, false), true);
@@ -150,6 +150,7 @@ namespace pfasst
         this->sweep_coarse();
 
         if (!this->get_communicator()->is_last()) {
+          ML_CVLOG(2, this->get_logger_id(), "sending coarse data");
           this->get_coarse()->get_end_state()->send(this->get_communicator(),
                                                     this->get_communicator()->get_rank() + 1,
                                                     this->compute_tag(0, false), true);
@@ -158,8 +159,9 @@ namespace pfasst
         this->cycle_up();
 
         this->sweep_fine();
-        
+
         if (!this->get_communicator()->is_last()) {
+          ML_CVLOG(2, this->get_logger_id(), "sending fine data");
           this->get_fine()->get_end_state()->send(this->get_communicator(),
                                                   this->get_communicator()->get_rank() + 1,
                                                   this->compute_tag(1, false), false);
@@ -167,7 +169,7 @@ namespace pfasst
 
         // convergence check
       } while(this->advance_iteration());
-      
+
       ML_CLOG(INFO, this->get_logger_id(), "Time Step done.");
 
       this->broadcast();
@@ -192,6 +194,8 @@ namespace pfasst
   bool
   TwoLevelPfasst<TransferT, CommT>::advance_iteration()
   {
+    this->get_prev_status();
+
     const bool fine_converged = this->get_fine()->converged();
     const bool previous_done = (this->get_communicator()->is_first())
                                ? true : this->_prev_status->get_state() <= State::FAILED;
@@ -224,10 +228,30 @@ namespace pfasst
       ML_CVLOG(1, this->get_logger_id(), "sending status: " << to_string(this->get_status()));
       this->get_status()->send(this->get_communicator(),
                                this->get_communicator()->get_rank() + 1,
-                               this->compute_tag(1, true), true);
+                               this->compute_tag(1, true), false);
     }
 
     return (this->get_status()->get_state() > State::FAILED);
+  }
+
+  template<class TransferT, class CommT>
+  void
+  TwoLevelPfasst<TransferT, CommT>::get_prev_status()
+  {
+    if (!this->get_communicator()->is_first()) {
+      ML_CLOG(DEBUG, this->get_logger_id(), "prev status: " << to_string(this->_prev_status));
+
+      if (this->_prev_status->get_state() > State::FAILED) {
+        ML_CVLOG(1, this->get_logger_id(), "looking for updated state of previous process");
+        this->_prev_status->recv(this->get_communicator(),
+                                 this->get_communicator()->get_rank() - 1,
+                                 this->compute_tag(1, true), true);
+        ML_CLOG(DEBUG, this->get_logger_id(), "Status received: " << to_string(this->_prev_status));
+
+      } else {
+        ML_CVLOG(1, this->get_logger_id(), "previous process has already reported to have converged or failed");
+      }
+    }
   }
 
   template<class TransferT, class CommT>
@@ -326,7 +350,7 @@ namespace pfasst
       ML_CVLOG(1, this->get_logger_id(), "looking for new initial value of fine level");
       this->get_fine()->initial_state()->recv(this->get_communicator(),
                                               this->get_communicator()->get_rank() - 1,
-                                              this->compute_tag(1, false), false);
+                                              this->compute_tag(1, false), true);
     }
 
     this->get_transfer()->interpolate_initial(this->get_coarse(), this->get_fine());
@@ -341,7 +365,6 @@ namespace pfasst
     ML_CLOG(INFO, this->get_logger_id(), "");
     ML_CLOG(INFO, this->get_logger_id(), "PFASST Prediction step");
 
-    // TODO: spread initial values to subsequent processes
     // restrict fine initial condition ...
     this->get_transfer()->restrict_initial(this->get_fine(), this->get_coarse());
     // ... and spread it to all nodes on the coarse level
@@ -357,8 +380,8 @@ namespace pfasst
         this->predict_coarse();
       } else {
         // and default sweeps for subsequent processes
-        
-        if (!this->get_communicator()->is_first()) {
+
+        if (!this->get_communicator()->is_first() && this->_prev_status->get_state() > State::FAILED) {
           ML_CVLOG(1, this->get_logger_id(), "receiving coarse initial value");
 
           this->get_coarse()->initial_state()->recv(this->communicator(), this->get_communicator()->get_rank() - 1,
@@ -368,18 +391,20 @@ namespace pfasst
         this->sweep_coarse();
       }
 
-    if (!this->get_communicator()->is_last()) {
-      ML_CVLOG(1, this->get_logger_id(), "sending coarse end");
-      this->get_coarse()->get_end_state()->send(this->communicator(), this->get_communicator()->get_rank() + 1,
-                                                this->compute_tag(0, false), true);
-    }
-
-      this->get_coarse()->save();
+      if (!this->get_communicator()->is_last()) {
+        ML_CVLOG(1, this->get_logger_id(), "sending coarse end");
+        this->get_coarse()->get_end_state()->send(this->communicator(), this->get_communicator()->get_rank() + 1,
+                                                  this->compute_tag(0, false), true);
+      }
     }
 
     // return to fine level
+    ML_CVLOG(1, this->get_logger_id(), "cycle up onto fine level");
     this->get_transfer()->interpolate(this->get_coarse(), this->get_fine(), true);
     this->sweep_fine();
+
+    // finalize prediction step
+    this->get_coarse()->save();
     this->get_fine()->save();
   }
 
@@ -388,7 +413,7 @@ namespace pfasst
   TwoLevelPfasst<TransferT, CommT>::broadcast()
   {
     this->get_fine()->get_end_state()->bcast(this->get_communicator(), this->get_communicator()->get_size() - 1);
-    
+
     this->get_communicator()->cleanup();
   }
 
@@ -398,11 +423,11 @@ namespace pfasst
   {
     int tag = (level + 1) * 1000000;
     if (!for_status) {
-      tag += this->get_status()->get_iteration() * 100;
+      tag += (this->get_status()->get_iteration() + 1) * 100;
     }
     ML_CVLOG(2, this->get_logger_id(), "tag for level " << level
                                     << " in iteration " << this->get_status()->get_iteration()
-                                    << " for " << ((for_status) ? "status" : "data") << "communication"
+                                    << " for " << ((for_status) ? "status" : "data") << " communication"
                                     << " --> " << tag);
     return tag;
   }

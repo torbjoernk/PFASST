@@ -110,7 +110,7 @@ namespace pfasst
     {
       return (this->get_rank() == this->get_size() - 1);
     }
-    
+
     void MpiP2P::cleanup()
     {
       for (auto&& req : this->_requests) {
