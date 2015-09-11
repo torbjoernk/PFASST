@@ -98,17 +98,14 @@ void interpolate_data(FFT& fft, const shared_ptr<Vector>& coarse, shared_ptr<Vec
 
     for (size_t yi = 0; yi < coarse_dim_dofs; ++yi) {
       // y is second dim (i.e. columns)
-      cout << "yi: " << yi << endl;
       for (size_t xi = 0; xi < coarse_dim_dofs; ++xi) {
         // x is first dim (i.e. rows)
-        cout << "  xi: " << xi << endl;
         const size_t coarse_index = yi * coarse_dim_dofs + xi;
         assert(coarse_index < coarse_ndofs);
 
         if (yi < coarse_dim_dofs / 2 && xi < coarse_dim_dofs / 2) {
           // positive frequencies (in top-left corner)
           const size_t fine_index = yi * fine_dim_dofs + xi;
-          cout << "   top-left: fi=" << fine_index << endl;
           assert(fine_index < fine_ndofs);
           fine_z[fine_index] = c * coarse_z[coarse_index];
 
@@ -116,7 +113,6 @@ void interpolate_data(FFT& fft, const shared_ptr<Vector>& coarse, shared_ptr<Vec
           // x-negative, y-positive frequencies (in top-right corner)
           const size_t fine_tail_col = fine_dim_dofs - (fine_dim_dofs / 4) + xi - coarse_dim_dofs / 2;
           const size_t fine_index = yi * fine_dim_dofs + fine_tail_col;
-          cout << "   top-right: fi=" << fine_index << endl;
           assert(fine_index < fine_ndofs);
           fine_z[fine_index] = c * coarse_z[coarse_index];
 
@@ -124,7 +120,6 @@ void interpolate_data(FFT& fft, const shared_ptr<Vector>& coarse, shared_ptr<Vec
           // x-positive, y-negative frequencies (in bottom-left corner)
           const size_t fine_tail_row = fine_dim_dofs - (fine_dim_dofs / 4) + yi - coarse_dim_dofs / 2;
           const size_t fine_index = fine_tail_row * fine_dim_dofs + xi;
-          cout << "   bottom-left: fi=" << fine_index << endl;
           assert(fine_index < fine_ndofs);
           fine_z[fine_index] = c * coarse_z[coarse_index];
 
@@ -133,7 +128,6 @@ void interpolate_data(FFT& fft, const shared_ptr<Vector>& coarse, shared_ptr<Vec
           const size_t fine_tail_row = fine_dim_dofs - (fine_dim_dofs / 4) + yi - coarse_dim_dofs / 2;
           const size_t fine_tail_col = fine_dim_dofs - (fine_dim_dofs / 4) + xi - coarse_dim_dofs / 2;
           const size_t fine_index = fine_tail_row * fine_dim_dofs + fine_tail_col;
-          cout << "   bottom-right: fi=" << fine_index << endl;
           assert(fine_index < fine_ndofs);
           fine_z[fine_index] = c * coarse_z[coarse_index];
 
@@ -147,6 +141,35 @@ void interpolate_data(FFT& fft, const shared_ptr<Vector>& coarse, shared_ptr<Vec
     print_arr_2d(fine_z, make_pair(fine_dim_dofs, fine_dim_dofs));
 
     fft.backward(fine);
+  }
+}
+
+void restrict_data(FFT& fft, const shared_ptr<Vector>& fine, shared_ptr<Vector> coarse)
+{
+  const size_t coarse_ndofs = coarse->get_data().size();
+  const size_t fine_ndofs = fine->get_data().size();
+  assert(coarse_ndofs > 0);
+  assert(fine_ndofs >= coarse_ndofs);
+
+  if (fine_ndofs == coarse_ndofs) {
+    // do a shortcut
+    coarse->data() = fine->get_data();
+
+  } else {
+    const size_t coarse_dim_dofs = sqrt(coarse_ndofs);
+    const size_t fine_dim_dofs   = sqrt(fine_ndofs);
+    const size_t factor = fine_dim_dofs / coarse_dim_dofs;
+    cout << "coarsining by factor=" << factor << endl;
+
+    for (size_t yi = 0; yi < coarse_dim_dofs; ++yi) {
+      for (size_t xi = 0; xi < coarse_dim_dofs; ++xi) {
+        const size_t coarse_index = yi * coarse_dim_dofs + xi;
+        assert(coarse_index < coarse_ndofs);
+        const size_t fine_index = factor * (yi * fine_dim_dofs + xi);
+        assert(fine_index < fine_ndofs);
+        coarse->data()[coarse_index] = fine->get_data()[fine_index];
+      }
+    }
   }
 }
 
@@ -212,4 +235,11 @@ int main(int argc, char** argv) {
   const auto norm = compute_diff(fine, fine_fun);
 
   assert(norm < 1e-15);
+
+  auto coarse = make_shared<Vector>(dim_size * dim_size);
+  restrict_data(fft, fine_fun, coarse);
+  cout << "restricted fine:" << endl;
+  print_vec_2d(coarse, make_pair(dim_size, dim_size));
+  const auto norm_c = compute_diff(coarse, vec);
+  assert(norm_c < 1e-15);
 }
