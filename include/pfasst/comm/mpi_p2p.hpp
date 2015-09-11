@@ -80,7 +80,7 @@ namespace pfasst
         virtual bool is_first() const override;
         virtual bool is_last() const override;
 
-        virtual void cleanup() override;
+        virtual void cleanup(const bool discard = false) override;
         virtual void abort(const int& err_code) override;
 
         virtual void send(const double* const data, const int count, const int dest_rank, const int tag) override;

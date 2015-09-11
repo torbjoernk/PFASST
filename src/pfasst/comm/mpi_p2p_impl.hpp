@@ -81,7 +81,7 @@ namespace pfasst
 
     MpiP2P::~MpiP2P()
     {
-      this->cleanup();
+      this->cleanup(true);
     }
 
     size_t MpiP2P::get_size() const
@@ -111,16 +111,46 @@ namespace pfasst
       return (this->get_rank() == this->get_size() - 1);
     }
 
-    void MpiP2P::cleanup()
+    void MpiP2P::cleanup(const bool discard)
     {
+      ML_CLOG(DEBUG, "COMM_P2P", "cleaning up " << this->_requests.size() << " dangling request handlers");
       for (auto&& req : this->_requests) {
         MPI_Status stat = MPI_Status_factory();
-        int err = MPI_Wait(&(req.second), &stat);
+        int flag = bool(false);
+        int err = MPI_ERR_LASTCODE;
+
+        err = MPI_Request_get_status(req.second, &flag, &stat);
         check_mpi_error(err);
+        if (bool(flag)) {
+          ML_CLOG(DEBUG, "COMM_P2P", "completed request status: " << stat);
+        } else {
+          ML_CLOG(DEBUG, "COMM_P2P", "non-completed request status: " << stat);
+
+          if (discard) {
+            ML_CLOG(DEBUG, "COMM_P2P", "throwing away that request");
+            err = MPI_Cancel(&(req.second));
+            check_mpi_error(err);
+
+            flag = int(false);
+            while (!flag) {
+              err = MPI_Test(&(req.second), &flag, &stat);
+              check_mpi_error(err);
+            }
+            ML_CLOG(DEBUG, "COMM_P2P", "status after testing: " << stat);
+          } else {
+            ML_CLOG(DEBUG, "COMM_P2P", "waiting for gentle completion of that request");
+          }
+        }
+
+        err = MPI_Wait(&(req.second), &stat);
+        check_mpi_error(err);
+        ML_CLOG(DEBUG, "COMM_P2P", "request status after waiting: " << stat);
+
         assert(req.second == MPI_REQUEST_NULL);
         this->_requests.erase(req.first);
       }
       assert(this->_requests.size() == 0);
+      ML_CLOG(DEBUG, "COMM_P2P", "done");
     }
 
     void MpiP2P::abort(const int& err_code)

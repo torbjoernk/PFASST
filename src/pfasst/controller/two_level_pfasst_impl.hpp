@@ -171,8 +171,6 @@ namespace pfasst
       } while(this->advance_iteration());
 
       ML_CLOG(INFO, this->get_logger_id(), "Time Step done.");
-
-      this->broadcast();
     } while(this->advance_time(this->get_communicator()->get_size()));
   }
 
@@ -183,6 +181,8 @@ namespace pfasst
     ML_CLOG(INFO, this->get_logger_id(), "");
 
     if (TwoLevelMLSDC<TransferT, CommT>::advance_time(num_steps)) {
+      this->broadcast();
+
       this->_time_block++;
       return true;
     } else {
@@ -245,7 +245,7 @@ namespace pfasst
         ML_CVLOG(1, this->get_logger_id(), "looking for updated state of previous process");
         this->_prev_status->recv(this->get_communicator(),
                                  this->get_communicator()->get_rank() - 1,
-                                 this->compute_tag(1, true), true);
+                                 this->compute_tag(1, true), false);
         ML_CLOG(DEBUG, this->get_logger_id(), "Status received: " << to_string(this->_prev_status));
 
       } else {
@@ -350,7 +350,7 @@ namespace pfasst
       ML_CVLOG(1, this->get_logger_id(), "looking for new initial value of fine level");
       this->get_fine()->initial_state()->recv(this->get_communicator(),
                                               this->get_communicator()->get_rank() - 1,
-                                              this->compute_tag(1, false), true);
+                                              this->compute_tag(1, false), false);
     }
 
     this->get_transfer()->interpolate_initial(this->get_coarse(), this->get_fine());
@@ -423,10 +423,10 @@ namespace pfasst
   {
     int tag = (level + 1) * 1000000;
     if (!for_status) {
-      tag += (this->get_status()->get_iteration() + 1) * 100;
+      tag += 100;
     }
     ML_CVLOG(2, this->get_logger_id(), "tag for level " << level
-                                    << " in iteration " << this->get_status()->get_iteration()
+//                                     << " in iteration " << this->get_status()->get_iteration()
                                     << " for " << ((for_status) ? "status" : "data") << " communication"
                                     << " --> " << tag);
     return tag;

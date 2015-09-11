@@ -37,8 +37,10 @@ namespace pfasst
       return false;
     }
 
-    void Communicator::cleanup()
-    {}
+    void Communicator::cleanup(const bool discard)
+    {
+      UNUSED(discard);
+    }
 
     void Communicator::abort(const int& err_code)
     {
