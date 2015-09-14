@@ -36,15 +36,16 @@ namespace pfasst
   {
     namespace advec_diff
     {
-      void run_pfasst(const size_t& ndofs, const size_t& nnodes, const QuadratureType& quad_type,
-                      const double& t_0, const double& dt, const double& t_end, const size_t& niter)
+      void run_pfasst(const size_t& ndofs, const size_t& coarse_factor, const size_t& nnodes,
+                      const QuadratureType& quad_type, const double& t_0, const double& dt,
+                      const double& t_end, const size_t& niter)
       {
         TwoLevelPfasst<TransferType, CommunicatorType> pfasst;
         pfasst.communicator() = make_shared<CommunicatorType>(MPI_COMM_WORLD);
 
-        auto coarse = make_shared<SweeperType>(ndofs);
+        auto coarse = make_shared<SweeperType>(ndofs / coarse_factor);
         coarse->quadrature() = quadrature_factory<double>(nnodes, quad_type);
-        auto fine = make_shared<SweeperType>(ndofs * 2);
+        auto fine = make_shared<SweeperType>(ndofs);
         fine->quadrature() = quadrature_factory<double>(nnodes, quad_type);
 
         auto transfer = make_shared<TransferType>();
@@ -82,7 +83,8 @@ int main(int argc, char** argv)
   pfasst::init(argc, argv, SweeperType::init_opts);
   pfasst::Status<double>::create_mpi_datatype();
 
-  const size_t ndofs = get_value<size_t>("num_dofs", 4);
+  const size_t ndofs = get_value<size_t>("num_dofs", 8);
+  const size_t coarse_factor = get_value<size_t>("coarse_factor", 2);
   const size_t nnodes = get_value<size_t>("num_nodes", 3);
   const QuadratureType quad_type = QuadratureType::GaussRadau;
   const double t_0 = 0.0;
@@ -104,7 +106,7 @@ int main(int argc, char** argv)
   }
   const size_t niter = get_value<size_t>("num_iters", 5);
 
-  pfasst::examples::advec_diff::run_pfasst(ndofs, nnodes, quad_type, t_0, dt, t_end, niter);
+  pfasst::examples::advec_diff::run_pfasst(ndofs, coarse_factor, nnodes, quad_type, t_0, dt, t_end, niter);
 
   pfasst::Status<double>::free_mpi_datatype();
 
