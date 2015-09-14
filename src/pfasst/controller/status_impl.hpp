@@ -216,6 +216,14 @@ namespace pfasst
 
   template<typename precision>
   template<typename CommT>
+  bool
+  Status<precision>::probe(shared_ptr<CommT> comm, const int src_rank, const int tag)
+  {
+    return comm->probe(src_rank, tag);
+  }
+
+  template<typename precision>
+  template<typename CommT>
   void
   Status<precision>::send(shared_ptr<CommT> comm, const int dest_rank, const int tag,
                           const bool blocking)

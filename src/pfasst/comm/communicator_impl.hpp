@@ -49,6 +49,13 @@ namespace pfasst
     }
 
 
+    bool Communicator::probe(const int src_rank, const int tag)
+    {
+      UNUSED(src_rank); UNUSED(tag);
+      throw runtime_error("not implemented: probing for incoming message");
+    }
+
+
     void Communicator::send(const double* const data, const int count, const int dest_rank, const int tag)
     {
       UNUSED(data); UNUSED(count); UNUSED(dest_rank); UNUSED(tag);

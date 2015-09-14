@@ -159,6 +159,18 @@ namespace pfasst
     }
 
 
+    bool MpiP2P::probe(const int src_rank, const int tag)
+    {
+      ML_CLOG(DEBUG, "COMM_P2P", "probing for incomming message from " << src_rank << " with tag=" << tag);
+      MPI_Status stat = MPI_Status_factory();
+      int flag = (int)false;
+      int err = MPI_Iprobe(src_rank, tag, this->_comm, &flag, &stat);
+      check_mpi_error(err);
+      ML_CLOG(DEBUG, "COMM_P2P", "probed: " << stat);
+      return (bool)flag;
+    }
+
+
     void MpiP2P::send(const double* const data, const int count, const int dest_rank, const int tag)
     {
       ML_CLOG(DEBUG, "COMM_P2P", "sending " << count << " double values with tag=" << tag << " to " << dest_rank);

@@ -243,10 +243,17 @@ namespace pfasst
 
       if (this->_prev_status->get_state() > State::FAILED) {
         ML_CVLOG(1, this->get_logger_id(), "looking for updated state of previous process");
-        this->_prev_status->recv(this->get_communicator(),
-                                 this->get_communicator()->get_rank() - 1,
-                                 this->compute_tag(1, true), false);
-        ML_CLOG(DEBUG, this->get_logger_id(), "Status received: " << to_string(this->_prev_status));
+        bool msg_avail = this->_prev_status->probe(this->get_communicator(),
+                                                   this->get_communicator()->get_rank() - 1,
+                                                   this->compute_tag(1, true));
+        if (msg_avail) {
+          this->_prev_status->recv(this->get_communicator(),
+                                   this->get_communicator()->get_rank() - 1,
+                                   this->compute_tag(1, true), true);
+          ML_CLOG(DEBUG, this->get_logger_id(), "Status received: " << to_string(this->_prev_status));
+        } else {
+          ML_CLOG(DEBUG, this->get_logger_id(), "no new status available");
+        }
 
       } else {
         ML_CVLOG(1, this->get_logger_id(), "previous process has already reported to have converged or failed");
