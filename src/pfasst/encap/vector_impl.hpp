@@ -136,6 +136,21 @@ namespace pfasst
 
     template<class EncapsulationTrait>
     template<class CommT>
+    bool
+    Encapsulation<
+      EncapsulationTrait, 
+      typename enable_if<
+                 is_same<
+                   vector<typename EncapsulationTrait::spatial_type>,
+                   typename EncapsulationTrait::data_type
+                 >::value
+               >::type>::probe(shared_ptr<CommT> comm, const int src_rank, const int tag)
+    {
+      return comm->probe(src_rank, tag);
+    }
+
+    template<class EncapsulationTrait>
+    template<class CommT>
     void
     Encapsulation<
       EncapsulationTrait, 

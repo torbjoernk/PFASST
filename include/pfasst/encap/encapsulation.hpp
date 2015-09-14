@@ -249,6 +249,17 @@ namespace pfasst
         //! @name Communication
         //! @{
         /**
+         * probing for incomming encapsulated data over communicator.
+         *
+         * @param[in] comm     Communicator used for sending
+         * @param[in] src_rank source processor of the data
+         * @param[in] tag      accociation of the data
+         * @returns `true` if data is available for receiving, `false` otherwise
+         */
+        template<class CommT>
+        bool probe(shared_ptr<CommT> comm, const int src_rank, const int tag);
+
+        /**
          * Sending encapsulated data over communicator.
          *
          * @param[in] comm      Communicator used for sending

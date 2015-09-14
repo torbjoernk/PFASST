@@ -352,12 +352,20 @@ namespace pfasst
 
     this->get_transfer()->interpolate(this->get_coarse(), this->get_fine(), true);
 
-    if (!this->get_communicator()->is_first() && this->_prev_status->get_state() > State::FAILED) {
+    if (!this->get_communicator()->is_first()) {
       assert(this->get_fine()->get_initial_state() != nullptr);
       ML_CVLOG(1, this->get_logger_id(), "looking for new initial value of fine level");
-      this->get_fine()->initial_state()->recv(this->get_communicator(),
-                                              this->get_communicator()->get_rank() - 1,
-                                              this->compute_tag(1, false), false);
+      const bool fine_avail = this->get_fine()->initial_state()->probe(this->get_communicator(),
+                                                                       this->get_communicator()->get_rank() - 1,
+                                                                       this->compute_tag(1, false));
+      if (fine_avail) {
+        this->get_fine()->initial_state()->recv(this->get_communicator(),
+                                                this->get_communicator()->get_rank() - 1,
+                                                this->compute_tag(1, false), true);
+        ML_CVLOG(1, this->get_logger_id(), "new initial data on fine level received");
+      } else {
+        ML_CVLOG(1, this->get_logger_id(), "no new data available");
+      }
     }
 
     this->get_transfer()->interpolate_initial(this->get_coarse(), this->get_fine());
