@@ -96,4 +96,6 @@ int main(int argc, char** argv)
   const size_t niter = get_value<size_t>("num_iters", 5);
 
   pfasst::examples::advec_diff::run_mlsdc(ndofs, coarse_factor, nnodes, quad_type, t_0, dt, t_end, niter);
+
+  return 0;
 }
