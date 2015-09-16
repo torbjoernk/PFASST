@@ -60,7 +60,7 @@ namespace pfasst
       ML_CLOG(WARNING, this->get_logger_id(), "Total number of steps was already computed. Skipping.");
       return;
     }
-    
+
     if (this->get_status()->get_t_end() <= 0) {
       ML_CLOG(ERROR, this->get_logger_id(), "Time end point (" << this->get_status()->get_t_end()
                                          << ") must be non-zero positive.");
@@ -72,7 +72,7 @@ namespace pfasst
                                          << ") must be non-zero positive.");
       throw logic_error("time delta must be non-zero positive");
     }
-    
+
     if (this->get_status()->get_time() >= this->get_status()->get_t_end()) {
       ML_CLOG(ERROR, this->get_logger_id(), "Time end point (" << this->get_status()->get_t_end()
                                          << ") must be greater than the current time point ("

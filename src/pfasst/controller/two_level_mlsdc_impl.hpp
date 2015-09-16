@@ -145,11 +145,11 @@ namespace pfasst
       ML_CLOG(INFO, this->get_logger_id(), "Time Step " << (this->get_status()->get_step() + 1)
                                         << " of " << this->get_status()->get_num_steps());
 
-      this->status()->state() = State::PREDICTING;
+      this->status()->set_primary_state(PrimaryState::PREDICTING);
 
       // iterate on each time step
       do {
-        if (this->get_status()->get_state() == State::PREDICTING) {
+        if (this->get_status()->get_primary_state() == PrimaryState::PREDICTING) {
           ML_CLOG(INFO, this->get_logger_id(), "");
           ML_CLOG(INFO, this->get_logger_id(), "MLSDC Prediction step");
 
@@ -176,6 +176,8 @@ namespace pfasst
           this->cycle_up();
           this->sweep_fine();
         }
+
+        this->status()->set_primary_state(PrimaryState::INTER_ITER);
       } while(this->advance_iteration());
     } while(this->advance_time());
   }
@@ -197,17 +199,25 @@ namespace pfasst
   bool
   TwoLevelMLSDC<TransferT, CommT>::advance_iteration()
   {
+    this->status()->set_secondary_state(SecondaryState::CONV_CHECK);
+
     this->get_coarse()->converged();
+
     if (this->get_fine()->converged()) {
       ML_CLOG(INFO, this->get_logger_id(), "FINE sweeper has converged.");
+      this->status()->set_primary_state(PrimaryState::CONVERGED);
       return false;
+
     } else if (Controller<TransferT, CommT>::advance_iteration()) {
       ML_CLOG(INFO, this->get_logger_id(), "FINE sweeper has not yet converged and additional iterations to do.");
       this->get_fine()->save();
       this->get_coarse()->save();
+      this->status()->set_primary_state(PrimaryState::ITERATING);
       return true;
+
     } else {
       ML_CLOG(INFO, this->get_logger_id(), "FINE sweeper has not yet converged and no more iterations to do.");
+      this->status()->set_primary_state(PrimaryState::FAILED);
       return false;
     }
   }
@@ -219,16 +229,14 @@ namespace pfasst
   {
     ML_CLOG(INFO, this->get_logger_id(), "Predicting on COARSE level");
 
-    this->status()->state() = State::PRE_ITER_COARSE;
+    this->status()->set_secondary_state(SecondaryState::PRE_ITER_COARSE);
     this->get_coarse()->pre_predict();
 
-    this->status()->state() = State::ITER_COARSE;
+    this->status()->set_secondary_state(SecondaryState::ITER_COARSE);
     this->get_coarse()->predict();
 
-    this->status()->state() = State::POST_ITER_COARSE;
+    this->status()->set_secondary_state(SecondaryState::POST_ITER_COARSE);
     this->get_coarse()->post_predict();
-
-    this->status()->state() = State::PREDICTING;
   }
 
   template<class TransferT, class CommT>
@@ -237,16 +245,14 @@ namespace pfasst
   {
     ML_CLOG(INFO, this->get_logger_id(), "Predicting on FINE level");
 
-    this->status()->state() = State::PRE_ITER_FINE;
+    this->status()->set_secondary_state(SecondaryState::PRE_ITER_FINE);
     this->get_fine()->pre_predict();
 
-    this->status()->state() = State::ITER_FINE;
+    this->status()->set_secondary_state(SecondaryState::ITER_FINE);
     this->get_fine()->predict();
 
-    this->status()->state() = State::POST_ITER_FINE;
+    this->status()->set_secondary_state(SecondaryState::POST_ITER_FINE);
     this->get_fine()->post_predict();
-
-    this->status()->state() = State::PREDICTING;
   }
 
   template<class TransferT, class CommT>
@@ -255,16 +261,14 @@ namespace pfasst
   {
     ML_CLOG(INFO, this->get_logger_id(), "Sweeping on COARSE level");
 
-    this->status()->state() = State::PRE_ITER_COARSE;
+    this->status()->set_secondary_state(SecondaryState::PRE_ITER_COARSE);
     this->get_coarse()->pre_sweep();
 
-    this->status()->state() = State::ITER_COARSE;
+    this->status()->set_secondary_state(SecondaryState::ITER_COARSE);
     this->get_coarse()->sweep();
 
-    this->status()->state() = State::POST_ITER_COARSE;
+    this->status()->set_secondary_state(SecondaryState::POST_ITER_COARSE);
     this->get_coarse()->post_sweep();
-
-    this->status()->state() = State::ITERATING;
   }
 
   template<class TransferT, class CommT>
@@ -273,16 +277,14 @@ namespace pfasst
   {
     ML_CLOG(INFO, this->get_logger_id(), "Sweeping on FINE level");
 
-    this->status()->state() = State::PRE_ITER_FINE;
+    this->status()->set_secondary_state(SecondaryState::PRE_ITER_FINE);
     this->get_fine()->pre_sweep();
 
-    this->status()->state() = State::ITER_FINE;
+    this->status()->set_secondary_state(SecondaryState::ITER_FINE);
     this->get_fine()->sweep();
 
-    this->status()->state() = State::POST_ITER_FINE;
+    this->status()->set_secondary_state(SecondaryState::POST_ITER_FINE);
     this->get_fine()->post_sweep();
-
-    this->status()->state() = State::ITERATING;
   }
 
   template<class TransferT, class CommT>
@@ -290,6 +292,7 @@ namespace pfasst
   TwoLevelMLSDC<TransferT, CommT>::cycle_down()
   {
     ML_CLOG(INFO, this->get_logger_id(), "Restrict onto coarse level");
+    this->status()->set_secondary_state(SecondaryState::CYCLE_DOWN);
 
     this->get_transfer()->restrict(this->get_fine(), this->get_coarse(), true);
     this->get_transfer()->fas(this->get_status()->get_dt(), this->get_fine(), this->get_coarse());
@@ -301,6 +304,7 @@ namespace pfasst
   TwoLevelMLSDC<TransferT, CommT>::cycle_up()
   {
     ML_CLOG(INFO, this->get_logger_id(), "Interpolate onto fine level");
+    this->status()->set_secondary_state(SecondaryState::CYCLE_UP);
 
     this->get_transfer()->interpolate(this->get_coarse(), this->get_fine(), true);
   }
