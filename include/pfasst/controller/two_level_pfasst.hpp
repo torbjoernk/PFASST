@@ -4,12 +4,25 @@
 #include <memory>
 using namespace std;
 
+#include <leathers/push>
+#include <leathers/all>
+#include <better-enums/enum.h>
+#include <leathers/pop>
+
 #include "pfasst/controller/two_level_mlsdc.hpp"
 #include "pfasst/comm/mpi_p2p.hpp"
 
 
 namespace pfasst
 {
+  namespace detail
+  {
+    ENUM(TagLevel, size_t, FINE, COARSE, ANY)
+    ENUM(TagModifier, size_t, PREV_STEP, PREV_ITER, PREV_ITER_PREV_STEP, UNMOD)
+    ENUM(TagType, size_t, STATUS, DATA)
+  }  // ::pfasst::detail
+
+
   template<
     class TransferT,
     class CommT = comm::MpiP2P
@@ -17,6 +30,10 @@ namespace pfasst
   class TwoLevelPfasst
     : public TwoLevelMLSDC<TransferT, CommT>
   {
+    using TagLevel = pfasst::detail::TagLevel;
+    using TagModifier = pfasst::detail::TagModifier;
+    using TagType = pfasst::detail::TagType;
+
     public:
       typedef          TransferT                             transfer_type;
       typedef          CommT                                 comm_type;
@@ -26,21 +43,26 @@ namespace pfasst
 
     protected:
       shared_ptr<Status<time_type>> _prev_status;
+      shared_ptr<Status<time_type>> _prev_status_temp;
       size_t _time_block = 0;
 
-      virtual void get_prev_status();
+      virtual void send_status();
+      virtual void get_check_prev_status();
 
-      virtual void predict_coarse() override;
-      virtual void predict_fine() override;
-      virtual void sweep_coarse() override;
-      virtual void sweep_fine() override;
+      virtual void recv_coarse();
+      virtual void send_coarse();
+      virtual void recv_fine(const bool& dummy = false);
+      virtual void send_fine();
 
       virtual void predictor();
       virtual void cycle_down() override;
       virtual void cycle_up() override;
 
       virtual void broadcast();
-      virtual int compute_tag(const size_t& level, const bool for_status) const;
+
+      int compute_tag(const TagType type,
+                      const TagLevel level = TagLevel::ANY,
+                      const TagModifier mod = TagModifier::UNMOD) const;
 
     public:
       TwoLevelPfasst();
