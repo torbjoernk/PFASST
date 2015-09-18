@@ -1,11 +1,11 @@
-#include "pfasst/contrib/fft.hpp"
+#include "pfasst/contrib/fft_1d.hpp"
 
 namespace pfasst
 {
   namespace contrib
   {
     template<class precision>
-    FFT<precision>::~FFT()
+    FFT1D<precision>::~FFT1D()
     {
       for (auto& x : workspaces) {
         shared_ptr<workspace> wk = std::get<1>(x);
@@ -17,8 +17,8 @@ namespace pfasst
     }
 
     template<class precision>
-    shared_ptr<typename FFT<precision>::workspace>
-    FFT<precision>::get_workspace(size_t ndofs)
+    shared_ptr<typename FFT1D<precision>::workspace>
+    FFT1D<precision>::get_workspace(size_t ndofs)
     {
       if (workspaces.find(ndofs) == workspaces.end()) {
         auto wk = make_shared<workspace>();
@@ -35,7 +35,7 @@ namespace pfasst
     template<class precision>
     template<class time_precision>
     complex<precision>*
-    FFT<precision>::forward(const shared_ptr<encap::VectorEncapsulation<time_precision, precision>> x)
+    FFT1D<precision>::forward(const shared_ptr<encap::VectorEncapsulation<time_precision, precision>> x)
     {
       const size_t ndofs = x->get_data().size();
       auto wk = get_workspace(ndofs);
@@ -48,7 +48,7 @@ namespace pfasst
 
     template<class precision>
     void
-    FFT<precision>::backward(shared_ptr<encap::VectorEncapsulation<time_precision, precision>> x)
+    FFT1D<precision>::backward(shared_ptr<encap::VectorEncapsulation<time_precision, precision>> x)
     {
       const size_t ndofs = x->get_data().size();
       auto wk = get_workspace(ndofs);

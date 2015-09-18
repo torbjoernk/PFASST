@@ -14,22 +14,22 @@ using namespace std;
 using namespace boost::math::constants;
 
 
-#include <pfasst/contrib/fft.hpp>
-using pfasst::contrib::FFT;
+#include <pfasst/contrib/fft_1d.hpp>
+using pfasst::contrib::FFT1D;
 
 #include <pfasst/encap/vector.hpp>
 typedef pfasst::encap::VectorEncapsulation<double, double> VectorType;
 #include <pfasst/logging.hpp>
 
 
-typedef ::testing::Types<FFT<double>> FFTTypes;
-INSTANTIATE_TYPED_TEST_CASE_P(FFT, Concepts, FFTTypes);
+typedef ::testing::Types<FFT1D<double>> FFT1DTypes;
+INSTANTIATE_TYPED_TEST_CASE_P(FFT1D, Concepts, FFT1DTypes);
 
 class Interface
   : public ::testing::Test
 {
   protected:
-    typedef FFT<double> fft_type;
+    typedef FFT1D<double> fft_type;
 
     fft_type fft;
 };
@@ -44,7 +44,7 @@ class DiscreteFastFourierTransform
   : public ::testing::TestWithParam<shared_ptr<VectorType>>
 {
   protected:
-    typedef FFT<double> fft_type;
+    typedef FFT1D<double> fft_type;
 
     fft_type fft;
     shared_ptr<VectorType> values;

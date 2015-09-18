@@ -8,6 +8,7 @@
 #include <vector>
 using namespace std;
 
+#include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
 
 

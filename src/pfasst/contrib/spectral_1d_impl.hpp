@@ -16,9 +16,9 @@ namespace pfasst
   namespace contrib
   {
     template<
-            class TransferTraits,
-            typename Enabled
-            >
+      class TransferTraits,
+      typename Enabled
+    >
     void
     Spectral1DTransfer<TransferTraits, Enabled>::interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
                                                                   shared_ptr<typename TransferTraits::fine_encap_type> fine)
@@ -61,9 +61,9 @@ namespace pfasst
     }
 
     template<
-            class TransferTraits,
-            typename Enabled
-            >
+      class TransferTraits,
+      typename Enabled
+    >
     void
     Spectral1DTransfer<TransferTraits, Enabled>::restrict_data(const shared_ptr<typename TransferTraits::fine_encap_type> fine,
                                                                shared_ptr<typename TransferTraits::coarse_encap_type> coarse)

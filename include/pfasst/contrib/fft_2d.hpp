@@ -1,5 +1,5 @@
-#ifndef _PFASST__CONTRIB__FFTW_HPP_
-#define _PFASST__CONTRIB__FFTW_HPP_
+#ifndef _PFASST__CONTRIB__FFT_2D_HPP_
+#define _PFASST__CONTRIB__FFT_2D_HPP_
 
 #include <complex>
 using std::real;
@@ -24,7 +24,7 @@ namespace pfasst
     template<
       class precision
     >
-    class FFT
+    class FFT2D
     {
       protected:
         struct workspace {
@@ -37,7 +37,7 @@ namespace pfasst
         map<size_t, shared_ptr<workspace>> workspaces;
 
       public:
-        virtual ~FFT();
+        virtual ~FFT2D();
 
         shared_ptr<workspace> get_workspace(size_t ndofs);
 
@@ -50,6 +50,6 @@ namespace pfasst
   }  // ::pfasst::contrib
 }  // ::pfasst
 
-#include "pfasst/contrib/fft_impl.hpp"
+#include "pfasst/contrib/fft_2d_impl.hpp"
 
-#endif  // _PFASST__CONTRIB__FFTW_HPP_
+#endif  // _PFASST__CONTRIB__FFT_2D_HPP_
