@@ -55,6 +55,8 @@ namespace pfasst
         virtual typename EncapsulationTrait::spatial_type norm0() const;
 
         template<class CommT>
+        bool probe(shared_ptr<CommT> comm, const int src_rank, const int tag);
+        template<class CommT>
         void send(shared_ptr<CommT> comm, const int dest_rank, const int tag, const bool blocking);
         template<class CommT>
         void recv(shared_ptr<CommT> comm, const int src_rank, const int tag, const bool blocking);

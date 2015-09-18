@@ -14,21 +14,23 @@ namespace pfasst
   void
   Status<precision>::create_mpi_datatype()
   {
-    const int COUNT = 10;
+    const int COUNT = 11;
     int blocks[COUNT] = {
-      sizeof(State),     // state
-      sizeof(size_t),    // step
-      sizeof(size_t),    // num_steps
-      sizeof(size_t),    // iteration
-      sizeof(size_t),    // max_iterations
-      sizeof(precision), // time
-      sizeof(precision), // dt
-      sizeof(precision), // t_end
-      sizeof(precision), // abs_res_norm
-      sizeof(precision)  // rel_res_norm
+      sizeof(PrimaryState),   // primary_state
+      sizeof(SecondaryState), // secondary_state
+      sizeof(size_t),         // step
+      sizeof(size_t),         // num_steps
+      sizeof(size_t),         // iteration
+      sizeof(size_t),         // max_iterations
+      sizeof(precision),      // time
+      sizeof(precision),      // dt
+      sizeof(precision),      // t_end
+      sizeof(precision),      // abs_res_norm
+      sizeof(precision)       // rel_res_norm
     };
     MPI_Aint displ[COUNT] = {
-      offsetof(StatusDetail<precision>, state),
+      offsetof(StatusDetail<precision>, primary_state),
+      offsetof(StatusDetail<precision>, secondary_state),
       offsetof(StatusDetail<precision>, step),
       offsetof(StatusDetail<precision>, num_steps),
       offsetof(StatusDetail<precision>, iteration),
@@ -49,10 +51,11 @@ namespace pfasst
       MPI_BYTE,
       MPI_BYTE,
       MPI_BYTE,
+      MPI_BYTE,
       MPI_BYTE
     };
 
-    VLOG(1) << "creating MPI Data Type for Status";
+    ML_CVLOG(1, "DEFAULT", "creating MPI Data Type for Status");
     int err = MPI_Type_create_struct(COUNT, blocks, displ, types, &(status_data_type));
     assert(err == MPI_SUCCESS);
     err = MPI_Type_commit(&(status_data_type));
@@ -173,17 +176,40 @@ namespace pfasst
   }
 
   template<typename precision>
-  State
-  Status<precision>::get_state() const
+  PrimaryState
+  Status<precision>::get_primary_state() const
   {
-    return this->_detail.state;
+    return this->_detail.primary_state;
   }
 
   template<typename precision>
-  State&
-  Status<precision>::state()
+  void
+  Status<precision>::set_primary_state(const PrimaryState& state)
   {
-    return this->_detail.state;
+    this->_detail.primary_state = state;
+    this->_detail.secondary_state = SecondaryState::UNKNOWN_SECONDARY;
+  }
+
+  template<typename precision>
+  SecondaryState
+  Status<precision>::get_secondary_state() const
+  {
+    return this->_detail.secondary_state;
+  }
+
+  template<typename precision>
+  void
+  Status<precision>::set_secondary_state(const SecondaryState& state)
+  {
+    if (validate_state_combination(this->get_primary_state(), state)) {
+      this->_detail.secondary_state = state;
+    } else {
+      ML_CLOG(FATAL, "DEFAULT", "Invalid combination of primary ("
+                                << (+this->get_primary_state())._to_string()
+                                << ") and secondary state ("
+                                << (+state)._to_string() << ")");
+      throw runtime_error("invalid combination of primary and secondary state");
+    }
   }
 
   template<typename precision>
@@ -212,6 +238,14 @@ namespace pfasst
   Status<precision>::rel_res_norm()
   {
     return this->_detail.rel_res_norm;
+  }
+
+  template<typename precision>
+  template<typename CommT>
+  bool
+  Status<precision>::probe(shared_ptr<CommT> comm, const int src_rank, const int tag)
+  {
+    return comm->probe(src_rank, tag);
   }
 
   template<typename precision>
@@ -263,17 +297,6 @@ namespace pfasst
   void
   Status<precision>::log(el::base::type::ostream_t& os) const
   {
-    os << LOG_FIXED << "Status("
-       << "t=" << this->get_time()
-       << ", dt=" << this->get_dt()
-       << ", t_end=" << this->get_t_end()
-       << ", step=" << this->get_step()
-       << ", num_steps=" << this->get_num_steps()
-       << ", iter=" << this->get_iteration()
-       << ", iter_max=" << this->get_max_iterations()
-       << ", state=" << this->get_state()
-       << ", abs_res=" << LOG_FLOAT << this->get_abs_res_norm()
-       << ", rel_res=" << LOG_FLOAT << this->get_rel_res_norm()
-       << ")";
+    os << LOG_FIXED << "Status(" << this->_detail << ")";
   }
 }  // ::pfasst

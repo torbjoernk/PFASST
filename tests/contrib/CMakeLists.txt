@@ -7,7 +7,7 @@ include_directories(
 )
 
 set(TESTS
-    test_fft
+    test_fft_1d
     test_spectral_1d
 )
 

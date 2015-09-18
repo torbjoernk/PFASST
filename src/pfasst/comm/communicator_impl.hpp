@@ -37,13 +37,22 @@ namespace pfasst
       return false;
     }
 
-    void Communicator::cleanup()
-    {}
+    void Communicator::cleanup(const bool discard)
+    {
+      UNUSED(discard);
+    }
 
     void Communicator::abort(const int& err_code)
     {
       UNUSED(err_code);
       std::abort();
+    }
+
+
+    bool Communicator::probe(const int src_rank, const int tag)
+    {
+      UNUSED(src_rank); UNUSED(tag);
+      throw runtime_error("not implemented: probing for incoming message");
     }
 
 

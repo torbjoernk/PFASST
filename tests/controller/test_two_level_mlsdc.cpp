@@ -267,6 +267,7 @@ TEST_F(Logic, advance_iteration_with_exceeding_max_iteration_threshold)
 {
   controller->status()->iteration() = 1;
   controller->status()->max_iterations() = 1;
+  controller->status()->set_primary_state(pfasst::PrimaryState::INTER_ITER);
   ASSERT_THAT(controller->get_status()->get_iteration(), Eq(1));
   ASSERT_THAT(controller->get_status()->get_max_iterations(), Eq(1));
 
@@ -278,6 +279,7 @@ TEST_F(Logic, advance_iteration)
 {
   controller->status()->iteration() = 1;
   controller->status()->max_iterations() = 5;
+  controller->status()->set_primary_state(pfasst::PrimaryState::INTER_ITER);
   ASSERT_THAT(controller->get_status()->get_iteration(), Eq(1));
   ASSERT_THAT(controller->get_status()->get_max_iterations(), Eq(5));
 

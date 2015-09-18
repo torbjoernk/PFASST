@@ -5,29 +5,29 @@ using namespace std;
 #include <pfasst/quadrature.hpp>
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/controller/two_level_mlsdc.hpp>
-#include <pfasst/contrib/spectral_1d.hpp>
+#include <pfasst/contrib/spectral_2d.hpp>
 
-#include "advec_diff_sweeper.hpp"
+#include "heat2d_sweeper.hpp"
 
 using pfasst::encap::VectorEncapsulation;
 using pfasst::quadrature::quadrature_factory;
 using pfasst::quadrature::QuadratureType;
-using pfasst::contrib::Spectral1DTransfer;
+using pfasst::contrib::Spectral2DTransfer;
 using pfasst::TwoLevelMLSDC;
 
-using pfasst::examples::advec_diff::AdvecDiff;
+using pfasst::examples::heat2d::Heat2D;
 
-typedef VectorEncapsulation<double, double>                           EncapType;
-typedef AdvecDiff<pfasst::sweeper_traits<typename EncapType::traits>> SweeperType;
-typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>          TransferTraits;
-typedef Spectral1DTransfer<TransferTraits>                            TransferType;
+typedef VectorEncapsulation<double, double>                        EncapType;
+typedef Heat2D<pfasst::sweeper_traits<typename EncapType::traits>> SweeperType;
+typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>       TransferTraits;
+typedef Spectral2DTransfer<TransferTraits>                         TransferType;
 
 
 namespace pfasst
 {
   namespace examples
   {
-    namespace advec_diff
+    namespace heat2d
     {
       void run_mlsdc(const size_t& ndofs, const size_t& coarse_factor, const size_t& nnodes,
                      const QuadratureType& quad_type, const double& t_0, const double& dt,
@@ -60,7 +60,7 @@ namespace pfasst
         mlsdc.run();
         mlsdc.post_run();
       }
-    }  // ::pfasst::examples::advec_diff
+    }  // ::pfasst::examples::heat2d
   } // ::pfasst::examples
 }  // ::pfasst
 
@@ -95,7 +95,5 @@ int main(int argc, char** argv)
   }
   const size_t niter = get_value<size_t>("num_iters", 5);
 
-  pfasst::examples::advec_diff::run_mlsdc(ndofs, coarse_factor, nnodes, quad_type, t_0, dt, t_end, niter);
-
-  return 0;
+  pfasst::examples::heat2d::run_mlsdc(ndofs, coarse_factor, nnodes, quad_type, t_0, dt, t_end, niter);
 }

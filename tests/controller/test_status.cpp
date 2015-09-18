@@ -18,7 +18,7 @@ class Interface
 
 TEST_F(Interface, has_a_step)
 {
-  EXPECT_THAT(status.get_step(), Eq(0));
+  ASSERT_THAT(status.get_step(), Eq(0));
 
   status.step() = 1;
   EXPECT_THAT(status.get_step(), Eq(1));
@@ -26,7 +26,7 @@ TEST_F(Interface, has_a_step)
 
 TEST_F(Interface, has_an_iteration)
 {
-  EXPECT_THAT(status.get_iteration(), Eq(0));
+  ASSERT_THAT(status.get_iteration(), Eq(0));
 
   status.iteration() = 1;
   EXPECT_THAT(status.get_iteration(), Eq(1));
@@ -34,7 +34,7 @@ TEST_F(Interface, has_an_iteration)
 
 TEST_F(Interface, has_a_time_point)
 {
-  EXPECT_THAT(status.get_time(), Eq(0.0));
+  ASSERT_THAT(status.get_time(), Eq(0.0));
 
   status.time() = 1.42;
   EXPECT_THAT(status.get_time(), Eq(1.42));
@@ -42,23 +42,41 @@ TEST_F(Interface, has_a_time_point)
 
 TEST_F(Interface, has_a_time_delta)
 {
-  EXPECT_THAT(status.get_dt(), Eq(0.0));
+  ASSERT_THAT(status.get_dt(), Eq(0.0));
 
   status.dt() = 0.42;
   EXPECT_THAT(status.get_dt(), Eq(0.42));
 }
 
-TEST_F(Interface, has_a_state)
+TEST_F(Interface, has_a_primary_state)
 {
-  EXPECT_THAT(status.get_state(), Eq(pfasst::State::UNKNOWN));
+  ASSERT_THAT(status.get_primary_state(), Eq((+pfasst::PrimaryState::UNKNOWN_PRIMARY)));
 
-  status.state() = pfasst::State::CONVERGED;
-  EXPECT_THAT(status.get_state(), Eq(pfasst::State::CONVERGED));
+  status.set_primary_state(pfasst::PrimaryState::CONVERGED);
+  EXPECT_THAT(status.get_primary_state(), Eq((+pfasst::PrimaryState::CONVERGED)));
+}
+
+TEST_F(Interface, has_a_secondary_state)
+{
+  ASSERT_THAT(status.get_secondary_state(), Eq((+pfasst::SecondaryState::UNKNOWN_SECONDARY)));
+
+  status.set_primary_state(pfasst::PrimaryState::ITERATING);
+  status.set_secondary_state(pfasst::SecondaryState::ITER_FINE);
+  EXPECT_THAT(status.get_secondary_state(), Eq((+pfasst::SecondaryState::ITER_FINE)));
+}
+
+TEST_F(Interface, combination_of_primary_and_secondary_states_are_validated)
+{
+  ASSERT_THAT(status.get_primary_state(), Eq((+pfasst::PrimaryState::UNKNOWN_PRIMARY)));
+  ASSERT_THAT(status.get_secondary_state(), Eq((+pfasst::SecondaryState::UNKNOWN_SECONDARY)));
+
+  status.set_primary_state(pfasst::PrimaryState::ITERATING);
+  EXPECT_THROW(status.set_secondary_state(pfasst::SecondaryState::CONV_CHECK), runtime_error);
 }
 
 TEST_F(Interface, has_an_absolute_residual_norm)
 {
-  EXPECT_THAT(status.get_abs_res_norm(), Eq(0.0));
+  ASSERT_THAT(status.get_abs_res_norm(), Eq(0.0));
 
   status.abs_res_norm() = 0.1;
   EXPECT_THAT(status.get_abs_res_norm(), Eq(0.1));
@@ -66,7 +84,7 @@ TEST_F(Interface, has_an_absolute_residual_norm)
 
 TEST_F(Interface, has_a_relative_residual_norm)
 {
-  EXPECT_THAT(status.get_rel_res_norm(), Eq(0.0));
+  ASSERT_THAT(status.get_rel_res_norm(), Eq(0.0));
 
   status.rel_res_norm() = 0.1;
   EXPECT_THAT(status.get_rel_res_norm(), Eq(0.1));

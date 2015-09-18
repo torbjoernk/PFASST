@@ -43,7 +43,10 @@ list(APPEND 3rdparty_DEPENDEND_LIBS ${Boost_LIBRARIES})
 
 
 ###
+# Leathers
 list(APPEND 3rdparty_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/leathers)
+# BetterEnums
+list(APPEND 3rdparty_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/better-enums)
 
 
 message(STATUS "--------------------------------------------------------------------------------")

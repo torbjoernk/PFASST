@@ -29,11 +29,14 @@ class StatusMock
     MOCK_METHOD0_T(dt, precision&());
     MOCK_CONST_METHOD0_T(get_dt, precision());
 
-    MOCK_METHOD0_T(state, pfasst::State&());
-    MOCK_CONST_METHOD0_T(get_state, pfasst::State());
+    MOCK_METHOD1_T(set_primary_state, void(const pfasst::PrimaryState& state));
+    MOCK_CONST_METHOD0_T(get_primary_state, pfasst::PrimaryState());
+
+    MOCK_METHOD1_T(set_secondary_state, void(const pfasst::SecondaryState& state));
+    MOCK_CONST_METHOD0_T(get_secondary_state, pfasst::SecondaryState());
 
     MOCK_METHOD0_T(residual, precision&());
     MOCK_CONST_METHOD0_T(get_residual, precision());
-    
+
     MOCK_CONST_METHOD1_T(log, void(el::base::type::ostream_t& os));
 };

@@ -61,8 +61,7 @@ namespace pfasst
 
         MPI_Comm _comm;
 
-        list<MPI_Status>                 _stati;
-        map<pair<int, int>, MPI_Request> _requests;
+        vector<shared_ptr<MPI_Request>> _requests;
 
       public:
         explicit MpiP2P(MPI_Comm comm = MPI_COMM_WORLD);
@@ -80,8 +79,10 @@ namespace pfasst
         virtual bool is_first() const override;
         virtual bool is_last() const override;
 
-        virtual void cleanup() override;
+        virtual void cleanup(const bool discard = false) override;
         virtual void abort(const int& err_code) override;
+
+        virtual bool probe(const int src_rank, const int tag) override;
 
         virtual void send(const double* const data, const int count, const int dest_rank, const int tag) override;
         virtual void send_status(const StatusDetail<double>* const data, const int count, const int dest_rank, const int tag) override;
