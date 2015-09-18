@@ -62,7 +62,7 @@ namespace pfasst
     }
 
     this->setup_tmat(fine->get_quadrature(), coarse->get_quadrature());
-    ML_CVLOG(1, "TRANS", "tmat: " << this->tmat);
+//     ML_CVLOG(1, "TRANS", "tmat: " << this->tmat);
 
     // +1 here for additional value in states
     const size_t num_coarse_nodes = coarse->get_quadrature()->get_num_nodes() + 1;
@@ -81,25 +81,25 @@ namespace pfasst
     for (size_t m = 1; m < num_coarse_nodes; ++m) {
       this->restrict_data(fine->get_states()[m], coarse_delta);
       coarse_delta->scaled_add(-1.0, coarse->get_states()[m]);
-      ML_CVLOG(1, "TRANS", "  cd["<<m<<"]: " << to_string(coarse_delta));
+//       ML_CVLOG(1, "TRANS", "  cd["<<m<<"]: " << to_string(coarse_delta));
       this->interpolate_data(coarse_delta, fine_deltas[m]);
-      ML_CVLOG(1, "TRANS", "  fd["<<m<<"]: " << to_string(fine_deltas[m]));
+//       ML_CVLOG(1, "TRANS", "  fd["<<m<<"]: " << to_string(fine_deltas[m]));
     }
 
     // step 2: add coarse level correction onto fine level's states
-    ML_CVLOG(1, "TRANS", "fine states and deltas before interpolation:");
-    for (size_t m = 0; m < num_coarse_nodes; ++m) {
-      ML_CVLOG(1, "TRANS", "  f["<<m<<"]:  " << to_string(fine->get_states()[m]));
-      ML_CVLOG(1, "TRANS", "  fd["<<m<<"]: " << to_string(fine_deltas[m]));
-    }
+//     ML_CVLOG(1, "TRANS", "fine states and deltas before interpolation:");
+//     for (size_t m = 0; m < num_coarse_nodes; ++m) {
+//       ML_CVLOG(1, "TRANS", "  f["<<m<<"]:  " << to_string(fine->get_states()[m]));
+//       ML_CVLOG(1, "TRANS", "  fd["<<m<<"]: " << to_string(fine_deltas[m]));
+//     }
 
     // u^F = u^F - T f_delta
     encap::mat_apply(fine->states(), -1.0, this->tmat, fine_deltas, false);
 
-    ML_CVLOG(1, "TRANS", "fine states after interpolation:");
-    for (auto& n : fine->states()) {
-      ML_CVLOG(1, "TRANS", "  " << to_string(n));
-    }
+//     ML_CVLOG(1, "TRANS", "fine states after interpolation:");
+//     for (auto& n : fine->states()) {
+//       ML_CVLOG(1, "TRANS", "  " << to_string(n));
+//     }
 
     // update function evaluations on fine level
     fine->reevaluate();

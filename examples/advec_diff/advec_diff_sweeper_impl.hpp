@@ -83,7 +83,7 @@ namespace pfasst
           }
         }
 
-        ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "EXACT t=" << t << ": " << LOG_FLOAT << to_string(result));
+//         ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "EXACT t=" << t << ": " << LOG_FLOAT << to_string(result));
 
         return result;
       }
@@ -169,8 +169,8 @@ namespace pfasst
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           const time_type ds = dt * (nodes[m] - nodes[0]);
           error[m] = pfasst::encap::axpy(-1.0, this->exact(t + ds), this->get_states()[m]);
-          ML_CVLOG(3, this->get_logger_id(), LOG_FIXED << "error t=" << (t + ds) << ": "
-                                          << LOG_FLOAT << to_string(error[m]));
+//           ML_CVLOG(3, this->get_logger_id(), LOG_FIXED << "error t=" << (t + ds) << ": "
+//                                           << LOG_FLOAT << to_string(error[m]));
         }
 
         return error;
@@ -206,7 +206,7 @@ namespace pfasst
                                                        const shared_ptr<typename SweeperTrait::encap_type> u)
       {
         ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "evaluating EXPLICIT part at t=" << t);
-        ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
+//         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
 
         spatial_type c = - this->_v / spatial_type(this->get_num_dofs());
 
@@ -220,7 +220,7 @@ namespace pfasst
 
         this->_num_expl_f_evals++;
 
-        ML_CVLOG(5, this->get_logger_id(), "\t  -> " << to_string(result));
+//         ML_CVLOG(5, this->get_logger_id(), "\t  -> " << to_string(result));
         return result;
       }
 
@@ -230,7 +230,7 @@ namespace pfasst
                                                        const shared_ptr<typename SweeperTrait::encap_type> u)
       {
         ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "evaluating IMPLICIT part at t=" << t);
-        ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
+//         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
 
         spatial_type c = this->_nu / spatial_type(this->get_num_dofs());
 
@@ -244,7 +244,7 @@ namespace pfasst
 
         this->_num_impl_f_evals++;
 
-        ML_CVLOG(5, this->get_logger_id(), "\t  -> " << to_string(result));
+//         ML_CVLOG(5, this->get_logger_id(), "\t  -> " << to_string(result));
         return result;
       }
 
@@ -257,9 +257,9 @@ namespace pfasst
                                                     const shared_ptr<typename SweeperTrait::encap_type> rhs)
       {
         ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "IMPLICIT spatial SOLVE at t=" << t << " with dt=" << dt);
-        ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tf:   " << to_string(f));
-        ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
-        ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\trhs: " << to_string(rhs));
+//         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tf:   " << to_string(f));
+//         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
+//         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\trhs: " << to_string(rhs));
 
         spatial_type c = this->_nu * dt;
 
@@ -275,9 +275,9 @@ namespace pfasst
 
         this->_num_impl_solves++;
 
-        ML_CVLOG(5, this->get_logger_id(), "\t->");
-        ML_CVLOG(5, this->get_logger_id(), "\t  f: " << to_string(f));
-        ML_CVLOG(5, this->get_logger_id(), "\t  u: " << to_string(u));
+//         ML_CVLOG(5, this->get_logger_id(), "\t->");
+//         ML_CVLOG(5, this->get_logger_id(), "\t  f: " << to_string(f));
+//         ML_CVLOG(5, this->get_logger_id(), "\t  u: " << to_string(u));
       }
     }  // ::pfasst::examples::advec_diff
   }  // ::pfasst::examples
