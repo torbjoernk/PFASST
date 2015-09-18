@@ -264,11 +264,11 @@ namespace pfasst
     this->integrate_end_state(this->get_status()->get_dt());
 
     assert(this->get_quadrature() != nullptr);
-    ML_CVLOG(2, this->get_logger_id(), "solution at nodes:");
-    for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
-      ML_CVLOG(2, this->get_logger_id(), "  " << m << ": " << to_string(this->get_states()[m]));
-    }
-    ML_CVLOG(1, this->get_logger_id(), "solution at t_end: " << to_string(this->get_end_state()));
+//     ML_CVLOG(2, this->get_logger_id(), "solution at nodes:");
+//     for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
+//       ML_CVLOG(2, this->get_logger_id(), "  " << m << ": " << to_string(this->get_states()[m]));
+//     }
+//     ML_CVLOG(1, this->get_logger_id(), "solution at t_end: " << to_string(this->get_end_state()));
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -295,11 +295,11 @@ namespace pfasst
     this->integrate_end_state(this->get_status()->get_dt());
 
     assert(this->get_quadrature() != nullptr);
-    ML_CVLOG(2, this->get_logger_id(), "solution at nodes:");
-    for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
-      ML_CVLOG(2, this->get_logger_id(), "\t" << m << ": " << to_string(this->get_states()[m]));
-    }
-    ML_CVLOG(1, this->get_logger_id(), "solution at t_end:" << to_string(this->get_end_state()));
+//     ML_CVLOG(2, this->get_logger_id(), "solution at nodes:");
+//     for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
+//       ML_CVLOG(2, this->get_logger_id(), "\t" << m << ": " << to_string(this->get_states()[m]));
+//     }
+//     ML_CVLOG(1, this->get_logger_id(), "solution at t_end:" << to_string(this->get_end_state()));
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -309,11 +309,11 @@ namespace pfasst
     ML_CVLOG(4, this->get_logger_id(), "post step");
 
     assert(this->get_quadrature() != nullptr);
-    ML_CVLOG(2, this->get_logger_id(), "solution at nodes:");
-    for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
-      ML_CVLOG(2, this->get_logger_id(), "\t" << m << ": " << to_string(this->get_states()[m]));
-    }
-    ML_CVLOG(1, this->get_logger_id(), "solution at t_end: " << to_string(this->get_end_state()));
+//     ML_CVLOG(2, this->get_logger_id(), "solution at nodes:");
+//     for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
+//       ML_CVLOG(2, this->get_logger_id(), "\t" << m << ": " << to_string(this->get_states()[m]));
+//     }
+//     ML_CVLOG(1, this->get_logger_id(), "solution at t_end: " << to_string(this->get_end_state()));
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -424,7 +424,7 @@ namespace pfasst
       assert(this->get_states().size() > 0);
 
       this->end_state()->data() = this->get_states().back()->get_data();
-      ML_CVLOG(1, this->get_logger_id(), "end state: " << to_string(this->get_end_state()));
+//       ML_CVLOG(1, this->get_logger_id(), "end state: " << to_string(this->get_end_state()));
     } else {
       throw runtime_error("integration of end state for quadrature not including right time interval boundary");
     }

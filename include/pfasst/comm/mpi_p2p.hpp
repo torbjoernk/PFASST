@@ -61,8 +61,7 @@ namespace pfasst
 
         MPI_Comm _comm;
 
-        list<MPI_Status>                 _stati;
-        map<pair<int, int>, MPI_Request> _requests;
+        vector<shared_ptr<MPI_Request>> _requests;
 
       public:
         explicit MpiP2P(MPI_Comm comm = MPI_COMM_WORLD);

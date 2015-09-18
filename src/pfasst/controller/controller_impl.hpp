@@ -60,7 +60,7 @@ namespace pfasst
       ML_CLOG(WARNING, this->get_logger_id(), "Total number of steps was already computed. Skipping.");
       return;
     }
-    
+
     if (this->get_status()->get_t_end() <= 0) {
       ML_CLOG(ERROR, this->get_logger_id(), "Time end point (" << this->get_status()->get_t_end()
                                          << ") must be non-zero positive.");
@@ -72,7 +72,7 @@ namespace pfasst
                                          << ") must be non-zero positive.");
       throw logic_error("time delta must be non-zero positive");
     }
-    
+
     if (this->get_status()->get_time() >= this->get_status()->get_t_end()) {
       ML_CLOG(ERROR, this->get_logger_id(), "Time end point (" << this->get_status()->get_t_end()
                                          << ") must be greater than the current time point ("
@@ -200,10 +200,6 @@ namespace pfasst
   void
   Controller<TransferT, CommT>::post_run() {
     ML_CLOG(INFO, this->get_logger_id(), "Run Finished.");
-    auto status_summary = this->get_status()->summary();
-    for (const auto& line : status_summary) {
-      ML_CLOG(INFO, this->get_logger_id(), line);
-    }
   }
 
   template<class TransferT, class CommT>
@@ -213,6 +209,10 @@ namespace pfasst
     const time_type delta_time = num_steps * this->get_status()->get_dt();
     const time_type new_time = this->get_status()->get_time() + delta_time;
 
+    auto status_summary = this->get_status()->summary();
+    for (const auto& line : status_summary) {
+      ML_CLOG(INFO, this->get_logger_id(), line);
+    }
 
     if (new_time > this->get_status()->get_t_end() && !almost_equal(new_time, this->get_status()->get_t_end())) {
       ML_CLOG(WARNING, this->get_logger_id(), "Not advancing " << num_steps
