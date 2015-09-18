@@ -115,8 +115,8 @@ namespace pfasst
         const time_type t = this->get_status()->get_time();
         const time_type dt = this->get_status()->get_dt();
 
-        auto error = this->compute_error(t);
-        auto rel_error = this->compute_relative_error(error, t);
+//         auto error = this->compute_error(t);
+//         auto rel_error = this->compute_relative_error(error, t);
 
         assert(this->get_quadrature() != nullptr);
         auto nodes = this->get_quadrature()->get_nodes();
@@ -128,14 +128,16 @@ namespace pfasst
           ML_CVLOG(1, this->get_logger_id(), "  t["<<m<<"]=" << LOG_FIXED << (t + dt * nodes[m])
                                           << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[m]
                                           << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[m]
-                                          << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[m])
-                                          << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[m]));
+//                                           << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[m])
+//                                           << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[m])
+                  );
         }
         ML_CLOG(INFO, this->get_logger_id(), "  t["<<num_nodes<<"]=" << LOG_FIXED << (t + dt * nodes[num_nodes])
                                           << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[num_nodes]
                                           << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[num_nodes]
-                                          << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[num_nodes])
-                                          << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[num_nodes]));
+//                                           << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[num_nodes])
+//                                           << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[num_nodes])
+               );
 
         return converged;
       }
