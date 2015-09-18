@@ -52,7 +52,6 @@ TEST_F(StateAwareness, being_first_or_last)
 }
 
 
-
 class MessagePassing
   : public ::testing::Test
 {
