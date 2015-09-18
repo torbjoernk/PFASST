@@ -149,7 +149,7 @@ namespace pfasst
 
       // iterate on each time step
       do {
-        if (this->get_status()->get_primary_state() == PrimaryState::PREDICTING) {
+        if (this->get_status()->get_primary_state() == (+PrimaryState::PREDICTING)) {
           ML_CLOG(INFO, this->get_logger_id(), "");
           ML_CLOG(INFO, this->get_logger_id(), "MLSDC Prediction step");
 
