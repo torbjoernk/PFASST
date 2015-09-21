@@ -72,7 +72,7 @@ namespace pfasst
 
           virtual void post_step() override;
 
-          virtual bool converged() override;
+          virtual bool converged(const bool& pre_check = false) override;
 
           size_t get_num_dofs() const;
       };

@@ -106,35 +106,37 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       bool
-      AdvecDiff<SweeperTrait, Enabled>::converged()
+      AdvecDiff<SweeperTrait, Enabled>::converged(const bool& pre_check)
       {
-        const bool converged = IMEX<SweeperTrait, Enabled>::converged();
+        const bool converged = IMEX<SweeperTrait, Enabled>::converged(pre_check);
 
-        assert(this->get_status() != nullptr);
-        const time_type t = this->get_status()->get_time();
-        const time_type dt = this->get_status()->get_dt();
+        if (!pre_check) {
+          assert(this->get_status() != nullptr);
+          const time_type t = this->get_status()->get_time();
+          const time_type dt = this->get_status()->get_dt();
 
-        auto error = this->compute_error(t);
-        auto rel_error = this->compute_relative_error(error, t);
+          auto error = this->compute_error(t);
+          auto rel_error = this->compute_relative_error(error, t);
 
-        assert(this->get_quadrature() != nullptr);
-        auto nodes = this->get_quadrature()->get_nodes();
-        const auto num_nodes = this->get_quadrature()->get_num_nodes();
-        nodes.insert(nodes.begin(), time_type(0.0));
+          assert(this->get_quadrature() != nullptr);
+          auto nodes = this->get_quadrature()->get_nodes();
+          const auto num_nodes = this->get_quadrature()->get_num_nodes();
+          nodes.insert(nodes.begin(), time_type(0.0));
 
-        ML_CVLOG(1, this->get_logger_id(), "Observables after " << ((this->get_status()->get_iteration() == 0) ? string("prediction") : string("iteration ") + to_string(this->get_status()->get_iteration())));
-        for (size_t m = 0; m < num_nodes; ++m) {
-          ML_CVLOG(1, this->get_logger_id(), "  t["<<m<<"]=" << LOG_FIXED << (t + dt * nodes[m])
-                                          << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[m]
-                                          << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[m]
-                                          << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[m])
-                                          << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[m]));
+          ML_CVLOG(1, this->get_logger_id(), "Observables after " << ((this->get_status()->get_iteration() == 0) ? string("prediction") : string("iteration ") + to_string(this->get_status()->get_iteration())));
+          for (size_t m = 0; m < num_nodes; ++m) {
+            ML_CVLOG(1, this->get_logger_id(), "  t["<<m<<"]=" << LOG_FIXED << (t + dt * nodes[m])
+                                            << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[m]
+                                            << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[m]
+                                            << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[m])
+                                            << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[m]));
+          }
+          ML_CLOG(INFO, this->get_logger_id(), "  t["<<num_nodes<<"]=" << LOG_FIXED << (t + dt * nodes[num_nodes])
+                                            << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[num_nodes]
+                                            << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[num_nodes]
+                                            << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[num_nodes])
+                                            << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[num_nodes]));
         }
-        ML_CLOG(INFO, this->get_logger_id(), "  t["<<num_nodes<<"]=" << LOG_FIXED << (t + dt * nodes[num_nodes])
-                                          << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[num_nodes]
-                                          << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[num_nodes]
-                                          << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[num_nodes])
-                                          << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[num_nodes]));
 
         return converged;
       }

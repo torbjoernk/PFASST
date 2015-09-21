@@ -168,7 +168,7 @@ namespace pfasst
 
     this->get_check_prev_status();
 
-    const bool fine_converged = this->get_fine()->converged();
+    const bool fine_converged = this->get_fine()->converged(true);
     const bool previous_done = (this->get_communicator()->is_first())
                                ? true
                                : this->_prev_status->get_primary_state() <= (+PrimaryState::FAILED);
@@ -205,6 +205,8 @@ namespace pfasst
     }
 
     this->send_status();
+
+    this->get_fine()->converged(false);
 
     return (this->get_status()->get_primary_state() > (+PrimaryState::FAILED));
   }

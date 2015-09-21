@@ -158,7 +158,7 @@ namespace pfasst
   bool
   SDC<TransferT>::advance_iteration()
   {
-    if (this->get_sweeper()->converged()) {
+    if (this->get_sweeper()->converged(false)) {
       ML_CLOG(INFO, this->get_logger_id(), "Sweeper has converged.");
       return false;
     } else if (Controller<TransferT>::advance_iteration()) {

@@ -370,44 +370,68 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   bool
-  Sweeper<SweeperTrait, Enabled>::converged()
+  Sweeper<SweeperTrait, Enabled>::converged(const bool& pre_check)
   {
-    this->compute_residuals();
+    this->compute_residuals(pre_check);
+
     const size_t num_residuals = this->get_residuals().size();
     this->_abs_res_norms.resize(num_residuals);
     this->_rel_res_norms.resize(num_residuals);
 
     assert(this->get_residuals().back() != nullptr);
     this->_abs_res_norms.back() = this->get_residuals().back()->norm0();
+    this->_rel_res_norms.back() = this->_abs_res_norms.back() / this->get_states().back()->norm0();
 
-    for (size_t m = 0; m < num_residuals; ++m) {
-      assert(this->get_residuals()[m] != nullptr);
-      const auto norm = this->get_residuals()[m]->norm0();
-      this->_abs_res_norms[m] = norm;
-      this->_rel_res_norms[m] = this->_abs_res_norms[m] / this->get_states()[m]->norm0();
-    }
+    if (pre_check) {
+      if (this->_abs_residual_tol > 0.0 || this->_rel_residual_tol > 0.0) {
+        ML_CVLOG(4, this->get_logger_id(), "preliminary convergence check");
 
-    this->status()->abs_res_norm() = *(max_element(this->_abs_res_norms.cbegin(), this->_abs_res_norms.cend()));
-    this->status()->rel_res_norm() = *(max_element(this->_rel_res_norms.cbegin(), this->_rel_res_norms.cend()));
+        if (this->_abs_res_norms.back() < this->_abs_residual_tol) {
+          ML_CVLOG(1, this->get_logger_id(), "Sweeper has converged w.r.t. absolute residual tolerance: " << LOG_FLOAT
+                                          << this->_abs_res_norms.back() << " < " << this->_abs_residual_tol);
+        } else if (this->_rel_res_norms.back() < this->_rel_residual_tol) {
+          ML_CVLOG(1, this->get_logger_id(), "Sweeper has converged w.r.t. relative residual tolerance: " << LOG_FLOAT
+                                          << this->_rel_res_norms.back() << " < " << this->_rel_residual_tol);
+        } else {
+          ML_CVLOG(1, this->get_logger_id(), "Sweeper has not yet converged to neither residual tolerance.");
+        }
 
-    if (this->_abs_residual_tol > 0.0 || this->_rel_residual_tol > 0.0) {
-      ML_CVLOG(4, this->get_logger_id(), "convergence check");
-
-      if (this->status()->abs_res_norm() < this->_abs_residual_tol) {
-        ML_CVLOG(1, this->get_logger_id(), "Sweeper has converged w.r.t. absolute residual tolerance: " << LOG_FLOAT
-                                        << this->status()->abs_res_norm() << " < " << this->_abs_residual_tol);
-      } else if (this->status()->rel_res_norm() < this->_rel_residual_tol) {
-        ML_CVLOG(1, this->get_logger_id(), "Sweeper has converged w.r.t. relative residual tolerance: " << LOG_FLOAT
-                                        << this->status()->rel_res_norm() << " < " << this->_rel_residual_tol);
+        return (   this->_abs_res_norms.back() < this->_abs_residual_tol
+                || this->_rel_res_norms.back() < this->_rel_residual_tol);
       } else {
-        ML_CVLOG(1, this->get_logger_id(), "Sweeper has not yet converged to neither residual tolerance.");
+        ML_CLOG(WARNING, this->get_logger_id(), "No residual tolerances set. Thus skipping convergence check.");
+        return false;
+      }
+    } else {
+      for (size_t m = 0; m < num_residuals - 1; ++m) {
+        assert(this->get_residuals()[m] != nullptr);
+        const auto norm = this->get_residuals()[m]->norm0();
+        this->_abs_res_norms[m] = norm;
+        this->_rel_res_norms[m] = this->_abs_res_norms[m] / this->get_states()[m]->norm0();
       }
 
-      return (   this->status()->abs_res_norm() < this->_abs_residual_tol
-              || this->status()->rel_res_norm() < this->_rel_residual_tol);
-    } else {
-      ML_CLOG(WARNING, this->get_logger_id(), "No residual tolerances set. Thus skipping convergence check.");
-      return false;
+      this->status()->abs_res_norm() = *(max_element(this->_abs_res_norms.cbegin(), this->_abs_res_norms.cend()));
+      this->status()->rel_res_norm() = *(max_element(this->_rel_res_norms.cbegin(), this->_rel_res_norms.cend()));
+
+      if (this->_abs_residual_tol > 0.0 || this->_rel_residual_tol > 0.0) {
+        ML_CVLOG(4, this->get_logger_id(), "convergence check");
+
+        if (this->status()->abs_res_norm() < this->_abs_residual_tol) {
+          ML_CVLOG(1, this->get_logger_id(), "Sweeper has converged w.r.t. absolute residual tolerance: " << LOG_FLOAT
+                                          << this->status()->abs_res_norm() << " < " << this->_abs_residual_tol);
+        } else if (this->status()->rel_res_norm() < this->_rel_residual_tol) {
+          ML_CVLOG(1, this->get_logger_id(), "Sweeper has converged w.r.t. relative residual tolerance: " << LOG_FLOAT
+                                          << this->status()->rel_res_norm() << " < " << this->_rel_residual_tol);
+        } else {
+          ML_CVLOG(1, this->get_logger_id(), "Sweeper has not yet converged to neither residual tolerance.");
+        }
+
+        return (   this->status()->abs_res_norm() < this->_abs_residual_tol
+                || this->status()->rel_res_norm() < this->_rel_residual_tol);
+      } else {
+        ML_CLOG(WARNING, this->get_logger_id(), "No residual tolerances set. Thus skipping convergence check.");
+        return false;
+      }
     }
   }
 
@@ -432,7 +456,7 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
-  Sweeper<SweeperTrait, Enabled>::compute_residuals()
+  Sweeper<SweeperTrait, Enabled>::compute_residuals(const bool& only_last)
   {
     throw runtime_error("computation of residuals");
   }

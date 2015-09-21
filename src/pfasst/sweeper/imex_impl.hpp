@@ -359,7 +359,7 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
-  IMEX<SweeperTrait, Enabled>::compute_residuals()
+  IMEX<SweeperTrait, Enabled>::compute_residuals(const bool& only_last)
   {
     ML_CVLOG(4, this->get_logger_id(), "computing residuals");
 
@@ -370,30 +370,42 @@ namespace pfasst
     const time_type dt = this->get_status()->get_dt();
     const size_t num_nodes = this->get_quadrature()->get_num_nodes() + 1;
 
-    for (size_t m = 0; m < num_nodes; ++m) {
-      assert(this->get_states()[m] != nullptr);
-      assert(this->residuals()[m] != nullptr);
+    if (only_last) {
+      const size_t cols = this->get_quadrature()->get_q_mat().cols();
+      const size_t rows = this->get_quadrature()->get_q_mat().rows();
+      this->residuals().back()->data() = this->get_initial_state()->get_data();
+      this->residuals().back()->scaled_add(-1.0, this->get_states().back());
+      this->residuals().back()->scaled_add(1.0, this->get_tau().back());
+      for (size_t n = 0; n < cols; ++n) {
+        this->residuals().back()->scaled_add(dt * this->get_quadrature()->get_q_mat()(rows - 1, n), this->_expl_rhs[n]);
+        this->residuals().back()->scaled_add(dt * this->get_quadrature()->get_q_mat()(rows - 1, n), this->_impl_rhs[n]);
+      }
+    } else {
+      for (size_t m = 0; m < num_nodes; ++m) {
+        assert(this->get_states()[m] != nullptr);
+        assert(this->residuals()[m] != nullptr);
 
-//       ML_CVLOG(5, this->get_logger_id(), "  res["<<m<<"] = u[0]   = " << to_string(this->get_initial_state()));
-      this->residuals()[m]->data() = this->get_initial_state()->get_data();
-//       ML_CVLOG(5, this->get_logger_id(), "        -= u["<<m<<"]   = " << to_string(this->get_states()[m]));
-      this->residuals()[m]->scaled_add(-1.0, this->get_states()[m]);
+  //       ML_CVLOG(5, this->get_logger_id(), "  res["<<m<<"] = u[0]   = " << to_string(this->get_initial_state()));
+        this->residuals()[m]->data() = this->get_initial_state()->get_data();
+  //       ML_CVLOG(5, this->get_logger_id(), "        -= u["<<m<<"]   = " << to_string(this->get_states()[m]));
+        this->residuals()[m]->scaled_add(-1.0, this->get_states()[m]);
 
-      assert(this->get_tau()[m] != nullptr);
-//       ML_CVLOG(5, this->get_logger_id(), "        += tau["<<m<<"] = " << to_string(this->get_tau()[m]));
-      this->residuals()[m]->scaled_add(1.0, this->get_tau()[m]);
-    }
+        assert(this->get_tau()[m] != nullptr);
+  //       ML_CVLOG(5, this->get_logger_id(), "        += tau["<<m<<"] = " << to_string(this->get_tau()[m]));
+        this->residuals()[m]->scaled_add(1.0, this->get_tau()[m]);
+      }
 
-    ML_CVLOG(5, this->get_logger_id(), "  res += dt * Q * F_ex");
-    encap::mat_apply(this->residuals(), dt, this->get_quadrature()->get_q_mat(), this->_expl_rhs, false);
+      ML_CVLOG(5, this->get_logger_id(), "  res += dt * Q * F_ex");
+      encap::mat_apply(this->residuals(), dt, this->get_quadrature()->get_q_mat(), this->_expl_rhs, false);
 
-    ML_CVLOG(5, this->get_logger_id(), "  res += dt * Q * F_im");
-    encap::mat_apply(this->residuals(), dt, this->get_quadrature()->get_q_mat(), this->_impl_rhs, false);
+      ML_CVLOG(5, this->get_logger_id(), "  res += dt * Q * F_im");
+      encap::mat_apply(this->residuals(), dt, this->get_quadrature()->get_q_mat(), this->_impl_rhs, false);
 
-    ML_CVLOG(5, this->get_logger_id(), "  ==>");
-    for (size_t m = 0; m < num_nodes; ++m) {
-      ML_CVLOG(5, this->get_logger_id(), "    |res["<<m<<"]| = " << LOG_FLOAT << this->get_residuals()[m]->norm0());
-//                                       << "    res["<<m<<"] = " << to_string(this->get_residuals()[m]));
+      ML_CVLOG(5, this->get_logger_id(), "  ==>");
+      for (size_t m = 0; m < num_nodes; ++m) {
+        ML_CVLOG(5, this->get_logger_id(), "    |res["<<m<<"]| = " << LOG_FLOAT << this->get_residuals()[m]->norm0());
+  //                                       << "    res["<<m<<"] = " << to_string(this->get_residuals()[m]));
+      }
     }
   }
 
