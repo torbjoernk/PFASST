@@ -111,7 +111,7 @@ namespace pfasst
     ML_CLOG(INFO, this->get_logger_id(), "  T:         " << LOG_FIXED << this->get_status()->get_t_end());
     ML_CLOG(INFO, this->get_logger_id(), "  num steps: " << LOG_FIXED << this->get_status()->get_num_steps());
     ML_CLOG(INFO, this->get_logger_id(), "  max iter:  " << LOG_FIXED << this->get_status()->get_max_iterations());
-    ML_CLOG(INFO, this->get_logger_id(), "  Initial Value: " << to_string(this->get_sweeper()->get_initial_state()));
+//     ML_CLOG(INFO, this->get_logger_id(), "  Initial Value: " << to_string(this->get_sweeper()->get_initial_state()));
 
     // iterate over time steps
     do {
