@@ -127,7 +127,7 @@ namespace pfasst
       }
 
       this->_requests.erase(remove(this->_requests.begin(), this->_requests.end(), nullptr),
-                            this->_requests.cend());
+                            this->_requests.end());
 
       ML_CLOG(DEBUG, "COMM_P2P", "done");
     }
