@@ -8,7 +8,6 @@ using namespace std;
 #include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
 #include "pfasst/quadrature.hpp"
-#include "pfasst/encap/vector.hpp"
 
 
 namespace pfasst
@@ -66,7 +65,7 @@ namespace pfasst
 
       } else {
         complex<fine_spatial_type> *coarse_z = this->fft.forward(coarse);
-        complex<fine_spatial_type> *fine_z = this->fft.get_workspace(fine_ndofs)->z;
+        complex<fine_spatial_type> *fine_z = this->fft.get_workspace(fine->get_dimwise_num_dofs())->z;
 
         const size_t coarse_dim_dofs = sqrt(coarse_ndofs);
         const size_t fine_dim_dofs   = sqrt(fine_ndofs);

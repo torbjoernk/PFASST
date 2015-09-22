@@ -37,7 +37,7 @@ namespace pfasst
 
       } else {
         complex<fine_spatial_type> *coarse_z = this->fft.forward(coarse);
-        complex<fine_spatial_type> *fine_z = this->fft.get_workspace(fine_ndofs)->z;
+        complex<fine_spatial_type> *fine_z = this->fft.get_workspace(fine->get_dimwise_num_dofs())->z;
 
         for (size_t i = 0; i < fine_ndofs; i++) {
           fine_z[i] = 0.0;
