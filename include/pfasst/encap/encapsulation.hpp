@@ -209,6 +209,9 @@ namespace pfasst
          */
         virtual const typename EncapsulationTrait::data_type& get_data() const;
 
+        virtual size_t get_total_num_dofs() const;
+        virtual array<int, EncapsulationTrait::DIM> get_dimwise_num_dofs() const;
+
         /**
          * Computes maximums norm of encapsulated data.
          *

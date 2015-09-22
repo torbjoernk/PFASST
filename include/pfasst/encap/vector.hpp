@@ -47,6 +47,9 @@ namespace pfasst
 
         virtual       typename EncapsulationTrait::data_type& data();
         virtual const typename EncapsulationTrait::data_type& get_data() const;
+        virtual size_t get_total_num_dofs() const;
+        // assuming square-shaped space
+        virtual array<int, EncapsulationTrait::DIM> get_dimwise_num_dofs() const;
 
         virtual void zero();
         virtual void scaled_add(const typename EncapsulationTrait::time_type& a,
@@ -71,9 +74,10 @@ namespace pfasst
      */
     template<
       typename time_precision,
-      typename spatial_precision
+      typename spatial_precision,
+      size_t Dim
     >
-    using VectorEncapsulation = Encapsulation<vector_encap_traits<time_precision, spatial_precision>>;
+    using VectorEncapsulation = Encapsulation<vector_encap_traits<time_precision, spatial_precision, Dim>>;
 
 
     template<
