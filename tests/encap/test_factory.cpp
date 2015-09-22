@@ -6,8 +6,8 @@ using namespace std;
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/encapsulation.hpp>
 #include <pfasst/encap/vector.hpp>
-typedef pfasst::vector_encap_traits<double, double> VectorEncapTrait;
-typedef pfasst::encap::Encapsulation<VectorEncapTrait> VectorEncapsulation;
+typedef pfasst::vector_encap_traits<double, double, 1>        VectorEncapTrait;
+typedef pfasst::encap::Encapsulation<VectorEncapTrait>        VectorEncapsulation;
 typedef pfasst::encap::EncapsulationFactory<VectorEncapTrait> VectorEncapsulationFactory;
 
 typedef ::testing::Types<VectorEncapsulationFactory> FactoryTypes;

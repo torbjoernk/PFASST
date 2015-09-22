@@ -8,7 +8,7 @@ using pfasst::Transfer;
 
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
-typedef pfasst::vector_encap_traits<double, double> VectorEncapTrait;
+typedef pfasst::vector_encap_traits<double, double, 1> VectorEncapTrait;
 
 // #include "sweeper/mocks.hpp"
 // typedef SweeperMock<double, VectorEncapsulation> Sweeper;
@@ -24,7 +24,7 @@ class Interface
 {
   protected:
     typedef Transfer<pfasst::transfer_traits<Sweeper, Sweeper, 2>> transfer_type;
-    typedef pfasst::encap::VectorEncapsulation<double, double>     encap_type;
+    typedef pfasst::encap::VectorEncapsulation<double, double, 1>  encap_type;
 
     transfer_type          transfer;
     shared_ptr<Sweeper>    coarse_sweeper;

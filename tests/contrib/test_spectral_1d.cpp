@@ -5,7 +5,7 @@ using pfasst::contrib::Spectral1DTransfer;
 
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
-typedef pfasst::vector_encap_traits<double, double> VectorEncapTrait;
+typedef pfasst::vector_encap_traits<double, double, 1> VectorEncapTrait;
 
 #include "pfasst/sweeper/sweeper.hpp"
 typedef pfasst::Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> Sweeper;
@@ -19,7 +19,7 @@ class Interpolation
 {
   protected:
     typedef Spectral1DTransfer<pfasst::transfer_traits<Sweeper, Sweeper, 2>> transfer_type;
-    typedef pfasst::encap::VectorEncapsulation<double, double>               encap_type;
+    typedef pfasst::encap::VectorEncapsulation<double, double, 1>            encap_type;
 
     transfer_type          transfer;
     shared_ptr<Sweeper>    coarse_sweeper;
