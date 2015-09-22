@@ -22,8 +22,8 @@ namespace pfasst
         pfasst::SDC<
           pfasst::contrib::Spectral2DTransfer<
             pfasst::transfer_traits<
-              Heat2D<pfasst::sweeper_traits<vector_encap_traits<double, double>>>,
-              Heat2D<pfasst::sweeper_traits<vector_encap_traits<double, double>>>,
+              Heat2D<pfasst::sweeper_traits<vector_encap_traits<double, double, 2>>>,
+              Heat2D<pfasst::sweeper_traits<vector_encap_traits<double, double, 2>>>,
               1
             >
           >
@@ -36,7 +36,7 @@ namespace pfasst
         using pfasst::contrib::Spectral2DTransfer;
         using pfasst::SDC;
 
-        typedef vector_encap_traits<double, double>                                      EncapTraits;
+        typedef vector_encap_traits<double, double, 2>                                   EncapTraits;
         typedef Heat2D<pfasst::sweeper_traits<EncapTraits>>                              SweeperType;
         typedef Spectral2DTransfer<pfasst::transfer_traits<SweeperType, SweeperType, 1>> TransferType;
 
@@ -74,8 +74,8 @@ namespace pfasst
     using pfasst::quadrature::QuadratureType;
     using pfasst::examples::heat2d::Heat2D;
 
-    typedef pfasst::vector_encap_traits<double, double> EncapTraits;
-    typedef Heat2D<pfasst::sweeper_traits<EncapTraits>> SweeperType;
+    typedef pfasst::vector_encap_traits<double, double, 2> EncapTraits;
+    typedef Heat2D<pfasst::sweeper_traits<EncapTraits>>    SweeperType;
 
     pfasst::init(argc, argv, SweeperType::init_opts);
 

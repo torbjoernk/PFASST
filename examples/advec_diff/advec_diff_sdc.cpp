@@ -17,7 +17,7 @@ using pfasst::SDC;
 
 using pfasst::examples::advec_diff::AdvecDiff;
 
-typedef VectorEncapsulation<double, double>                                      EncapType;
+typedef VectorEncapsulation<double, double, 1>                                   EncapType;
 typedef AdvecDiff<pfasst::sweeper_traits<typename EncapType::traits>>            SweeperType;
 typedef Spectral1DTransfer<pfasst::transfer_traits<SweeperType, SweeperType, 1>> TransferType;
 

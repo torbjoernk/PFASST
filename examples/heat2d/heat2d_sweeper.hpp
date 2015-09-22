@@ -6,7 +6,7 @@
 using namespace std;
 
 #include <pfasst/sweeper/imex.hpp>
-#include <pfasst/contrib/fft_2d.hpp>
+#include <pfasst/contrib/fft.hpp>
 
 
 namespace pfasst
@@ -23,10 +23,10 @@ namespace pfasst
         : public IMEX<SweeperTrait, Enabled>
       {
         static_assert(is_same<
-                        vector<typename SweeperTrait::time_type>,
-                        typename SweeperTrait::encap_type::data_type
+                        typename SweeperTrait::encap_type::traits::dim_type,
+                        integral_constant<size_t, 2>
                       >::value,
-                      "Heat2D Sweeper requires encapsulated vectors");
+                      "Heat2D Sweeper requires 2D data structures");
 
         public:
           typedef          SweeperTrait         traits;
@@ -40,8 +40,8 @@ namespace pfasst
           time_type    _t0;
           spatial_type _nu;
 
-          pfasst::contrib::FFT2D<spatial_type> _fft;
-          vector<vector<spatial_type>>         _lap;
+          pfasst::contrib::FFT<encap_type> _fft;
+          vector<vector<spatial_type>>     _lap;
 
         protected:
           virtual shared_ptr<typename SweeperTrait::encap_type> evaluate_rhs_expl(const typename SweeperTrait::time_type& t,

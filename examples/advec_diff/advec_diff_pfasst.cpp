@@ -24,7 +24,7 @@ typedef pfasst::comm::MpiP2P CommunicatorType;
 
 using pfasst::examples::advec_diff::AdvecDiff;
 
-typedef VectorEncapsulation<double, double>                           EncapType;
+typedef VectorEncapsulation<double, double, 1>                        EncapType;
 typedef AdvecDiff<pfasst::sweeper_traits<typename EncapType::traits>> SweeperType;
 typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>          TransferTraits;
 typedef Spectral1DTransfer<TransferTraits>                            TransferType;

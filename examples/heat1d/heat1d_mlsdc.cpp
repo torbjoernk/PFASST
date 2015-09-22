@@ -17,7 +17,7 @@ using pfasst::TwoLevelMLSDC;
 
 using pfasst::examples::heat1d::Heat1D;
 
-typedef VectorEncapsulation<double, double>                        EncapType;
+typedef VectorEncapsulation<double, double, 1>                     EncapType;
 typedef Heat1D<pfasst::sweeper_traits<typename EncapType::traits>> SweeperType;
 typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>       TransferTraits;
 typedef Spectral1DTransfer<TransferTraits>                         TransferType;

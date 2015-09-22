@@ -14,10 +14,10 @@ using boost::math::constants::pi;
 using boost::math::constants::two_pi;
 
 #include "pfasst/util.hpp"
-#include "pfasst/contrib/fft_2d.hpp"
+#include "pfasst/contrib/fft.hpp"
 #include "pfasst/encap/vector.hpp"
-using FFT = pfasst::contrib::FFT2D<double>;
-using Vector = pfasst::encap::VectorEncapsulation<double, double>;
+using Vector = pfasst::encap::VectorEncapsulation<double, double, 2>;
+using FFT = pfasst::contrib::FFT<Vector>;
 
 double func_sin_cos(const double& x, const double& y)
 {
@@ -30,7 +30,7 @@ double func_e_x(const double& x, const double& y)
 }
 
 #define func func_sin_cos
-//#define func func_e_x
+// #define func func_e_x
 
 void print_vec_2d(const shared_ptr<Vector>& vec, const pair<size_t, size_t>& dims) {
   for (size_t xi = 0; xi < dims.first; ++xi) {
@@ -87,7 +87,7 @@ void interpolate_data(FFT& fft, const shared_ptr<Vector>& coarse, shared_ptr<Vec
     print_arr_2d(coarse_z, make_pair(coarse_dim_dofs, coarse_dim_dofs));
     cout << endl;
 
-    complex<double> *fine_z = fft.get_workspace(fine_ndofs)->z;
+    complex<double> *fine_z = fft.get_workspace(fine->get_dimwise_num_dofs())->z;
 
     for (size_t i = 0; i < fine_ndofs; i++) {
       fine_z[i] = 0.0;
