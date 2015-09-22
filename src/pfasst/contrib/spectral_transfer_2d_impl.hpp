@@ -1,4 +1,4 @@
-#include "pfasst/contrib/spectral_2d.hpp"
+#include "pfasst/contrib/spectral_transfer.hpp"
 
 #include <cassert>
 #include <memory>
@@ -43,13 +43,17 @@ namespace pfasst
      * @endverbatim
      * @endinterl
      */
-    template<
-      class TransferTraits,
-      typename Enabled
-    >
+    template<class TransferTraits>
     void
-    Spectral2DTransfer<TransferTraits, Enabled>::interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
-                                                                  shared_ptr<typename TransferTraits::fine_encap_type> fine)
+    SpectralTransfer<
+      TransferTraits,
+      typename enable_if<
+                 is_same<
+                   typename TransferTraits::fine_encap_traits::dim_type,
+                   integral_constant<size_t, 2>
+                 >::value
+               >::type>::interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
+                                          shared_ptr<typename TransferTraits::fine_encap_type> fine)
     {
       ML_CVLOG(1, "TRANS", "interpolate data");
 
@@ -128,13 +132,17 @@ namespace pfasst
       }
     }
 
-    template<
-      class TransferTraits,
-      typename Enabled
-    >
+    template<class TransferTraits>
     void
-    Spectral2DTransfer<TransferTraits, Enabled>::restrict_data(const shared_ptr<typename TransferTraits::fine_encap_type> fine,
-                                                               shared_ptr<typename TransferTraits::coarse_encap_type> coarse)
+    SpectralTransfer<
+      TransferTraits,
+      typename enable_if<
+                 is_same<
+                   typename TransferTraits::fine_encap_traits::dim_type,
+                   integral_constant<size_t, 2>
+                 >::value
+               >::type>::restrict_data(const shared_ptr<typename TransferTraits::fine_encap_type> fine,
+                                       shared_ptr<typename TransferTraits::coarse_encap_type> coarse)
     {
       ML_CVLOG(1, "TRANS", "restrict data");
 

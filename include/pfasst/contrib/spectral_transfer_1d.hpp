@@ -1,5 +1,5 @@
-#ifndef _PFASST__TRANSFER__SPECTRAL_2D_HPP_
-#define _PFASST__TRANSFER__SPECTRAL_2D_HPP_
+#ifndef _PFASST__TRANSFER__SPECTRAL_TRANSFER_1D_HPP_
+#define _PFASST__TRANSFER__SPECTRAL_TRANSFER_1D_HPP_
 
 #include "pfasst/transfer/polynomial.hpp"
 
@@ -16,11 +16,15 @@ namespace pfasst
   namespace contrib
   {
     template<
-      class TransferTraits,
-      typename Enabled = void
+      class TransferTraits
     >
-    class Spectral2DTransfer
-            : public PolynomialTransfer<TransferTraits, Enabled>
+    class SpectralTransfer<TransferTraits, typename enable_if<
+                 is_same<
+                   typename TransferTraits::fine_encap_traits::dim_type,
+                   integral_constant<size_t, 1>
+                 >::value
+               >::type>
+      : public PolynomialTransfer<TransferTraits>
     {
       public:
         typedef TransferTraits traits;
@@ -39,18 +43,6 @@ namespace pfasst
         pfasst::contrib::FFT<fine_encap_type> fft;
 
       public:
-        Spectral2DTransfer() = default;
-
-        Spectral2DTransfer(const Spectral2DTransfer<TransferTraits, Enabled> &other) = default;
-
-        Spectral2DTransfer(Spectral2DTransfer<TransferTraits, Enabled> &&other) = default;
-
-        virtual ~Spectral2DTransfer() = default;
-
-        Spectral2DTransfer<TransferTraits, Enabled>& operator=(const Spectral2DTransfer<TransferTraits, Enabled> &other) = default;
-
-        Spectral2DTransfer<TransferTraits, Enabled>& operator=(Spectral2DTransfer<TransferTraits, Enabled> &&other) = default;
-
         virtual void interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
                                       shared_ptr<typename TransferTraits::fine_encap_type> fine);
 
@@ -60,6 +52,6 @@ namespace pfasst
   }  // ::pfasst::contrib
 }  // ::pfasst
 
-#include "pfasst/contrib/spectral_2d_impl.hpp"
+#include "pfasst/contrib/spectral_transfer_1d_impl.hpp"
 
-#endif  // _PFASST__TRANSFER__SPECTRAL_2D_HPP_
+#endif  // _PFASST__TRANSFER__SPECTRAL_TRANSFER_1D_HPP_

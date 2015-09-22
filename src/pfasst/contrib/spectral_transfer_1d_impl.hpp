@@ -1,4 +1,4 @@
-#include "pfasst/contrib/spectral_1d.hpp"
+#include "pfasst/contrib/spectral_transfer_1d.hpp"
 
 #include <cassert>
 #include <memory>
@@ -8,20 +8,23 @@ using namespace std;
 #include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
 #include "pfasst/quadrature.hpp"
-#include "pfasst/encap/vector.hpp"
 
 
 namespace pfasst
 {
   namespace contrib
   {
-    template<
-      class TransferTraits,
-      typename Enabled
-    >
+    template<class TransferTraits>
     void
-    Spectral1DTransfer<TransferTraits, Enabled>::interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
-                                                                  shared_ptr<typename TransferTraits::fine_encap_type> fine)
+    SpectralTransfer<
+      TransferTraits,
+      typename enable_if<
+                 is_same<
+                   typename TransferTraits::fine_encap_traits::dim_type,
+                   integral_constant<size_t, 1>
+                 >::value
+               >::type>::interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
+                                          shared_ptr<typename TransferTraits::fine_encap_type> fine)
     {
       ML_CVLOG(1, "TRANS", "interpolate data");
 
@@ -60,13 +63,17 @@ namespace pfasst
       }
     }
 
-    template<
-      class TransferTraits,
-      typename Enabled
-    >
+    template<class TransferTraits>
     void
-    Spectral1DTransfer<TransferTraits, Enabled>::restrict_data(const shared_ptr<typename TransferTraits::fine_encap_type> fine,
-                                                               shared_ptr<typename TransferTraits::coarse_encap_type> coarse)
+    SpectralTransfer<
+      TransferTraits,
+      typename enable_if<
+                 is_same<
+                   typename TransferTraits::fine_encap_traits::dim_type,
+                   integral_constant<size_t, 1>
+                 >::value
+               >::type>::restrict_data(const shared_ptr<typename TransferTraits::fine_encap_type> fine,
+                                       shared_ptr<typename TransferTraits::coarse_encap_type> coarse)
     {
       ML_CVLOG(1, "TRANS", "restrict data");
 
