@@ -5,21 +5,21 @@ using namespace std;
 #include <pfasst/quadrature.hpp>
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/controller/sdc.hpp>
-#include <pfasst/contrib/spectral_1d.hpp>
+#include <pfasst/contrib/spectral_transfer.hpp>
 
 #include "advec_diff_sweeper.hpp"
 
 using pfasst::encap::VectorEncapsulation;
 using pfasst::quadrature::quadrature_factory;
 using pfasst::quadrature::QuadratureType;
-using pfasst::contrib::Spectral1DTransfer;
+using pfasst::contrib::SpectralTransfer;
 using pfasst::SDC;
 
 using pfasst::examples::advec_diff::AdvecDiff;
 
 typedef VectorEncapsulation<double, double, 1>                                   EncapType;
 typedef AdvecDiff<pfasst::sweeper_traits<typename EncapType::traits>>            SweeperType;
-typedef Spectral1DTransfer<pfasst::transfer_traits<SweeperType, SweeperType, 1>> TransferType;
+typedef SpectralTransfer<pfasst::transfer_traits<SweeperType, SweeperType, 1>>   TransferType;
 
 
 namespace pfasst

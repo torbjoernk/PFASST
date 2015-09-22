@@ -5,7 +5,7 @@ using namespace std;
 #include <pfasst/quadrature.hpp>
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/controller/sdc.hpp>
-#include <pfasst/contrib/spectral_2d.hpp>
+#include <pfasst/contrib/spectral_transfer.hpp>
 
 #include "heat2d_sweeper.hpp"
 
@@ -20,7 +20,7 @@ namespace pfasst
     {
       shared_ptr<
         pfasst::SDC<
-          pfasst::contrib::Spectral2DTransfer<
+          pfasst::contrib::SpectralTransfer<
             pfasst::transfer_traits<
               Heat2D<pfasst::sweeper_traits<vector_encap_traits<double, double, 2>>>,
               Heat2D<pfasst::sweeper_traits<vector_encap_traits<double, double, 2>>>,
@@ -33,12 +33,12 @@ namespace pfasst
               const double& t_0, const double& dt, const double& t_end, const size_t& niter)
       {
         using pfasst::quadrature::quadrature_factory;
-        using pfasst::contrib::Spectral2DTransfer;
+        using pfasst::contrib::SpectralTransfer;
         using pfasst::SDC;
 
-        typedef vector_encap_traits<double, double, 2>                                   EncapTraits;
-        typedef Heat2D<pfasst::sweeper_traits<EncapTraits>>                              SweeperType;
-        typedef Spectral2DTransfer<pfasst::transfer_traits<SweeperType, SweeperType, 1>> TransferType;
+        typedef vector_encap_traits<double, double, 2>                                 EncapTraits;
+        typedef Heat2D<pfasst::sweeper_traits<EncapTraits>>                            SweeperType;
+        typedef SpectralTransfer<pfasst::transfer_traits<SweeperType, SweeperType, 1>> TransferType;
 
         auto sdc = make_shared<SDC<TransferType>>();
 
