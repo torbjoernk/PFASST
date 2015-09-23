@@ -51,10 +51,10 @@ namespace pfasst
     Sweeper<SweeperTrait, Enabled>::pre_predict();
 
     assert(this->get_quadrature() != nullptr);
-    auto nodes = this->get_quadrature()->get_nodes();
-    nodes.insert(nodes.begin(), time_type(0.0));
-    const size_t num_nodes = this->get_quadrature()->get_num_nodes();
-
+//     auto nodes = this->get_quadrature()->get_nodes();
+//     nodes.insert(nodes.begin(), time_type(0.0));
+//     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
+// 
 //     ML_CVLOG(2, this->get_logger_id(), "initial values for prediction");
 //     for (size_t m = 0; m <= num_nodes; ++m) {
 //       ML_CVLOG(2, this->get_logger_id(), LOG_FIXED << "  t["<<m<<"]=" << nodes[m]);
