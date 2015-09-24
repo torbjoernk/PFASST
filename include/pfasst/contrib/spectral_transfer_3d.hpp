@@ -1,5 +1,5 @@
-#ifndef _PFASST__TRANSFER__SPECTRAL_TRANSFER_HPP_
-#define _PFASST__TRANSFER__SPECTRAL_TRANSFER_HPP_
+#ifndef _PFASST__TRANSFER__SPECTRAL_TRANSFER_3D_HPP_
+#define _PFASST__TRANSFER__SPECTRAL_TRANSFER_3D_HPP_
 
 #include "pfasst/transfer/polynomial.hpp"
 
@@ -16,10 +16,14 @@ namespace pfasst
   namespace contrib
   {
     template<
-      class TransferTraits,
-      typename Enabled = void
+      class TransferTraits
     >
-    class SpectralTransfer
+    class SpectralTransfer<TransferTraits, typename enable_if<
+                 is_same<
+                   typename TransferTraits::fine_encap_traits::dim_type,
+                   integral_constant<size_t, 3>
+                 >::value
+               >::type>
       : public PolynomialTransfer<TransferTraits>
     {
       public:
@@ -39,13 +43,6 @@ namespace pfasst
         pfasst::contrib::FFT<fine_encap_type> fft;
 
       public:
-        SpectralTransfer() = default;
-        SpectralTransfer(const SpectralTransfer<TransferTraits, Enabled> &other) = default;
-        SpectralTransfer(SpectralTransfer<TransferTraits, Enabled> &&other) = default;
-        virtual ~SpectralTransfer() = default;
-        SpectralTransfer<TransferTraits, Enabled>& operator=(const SpectralTransfer<TransferTraits, Enabled> &other) = default;
-        SpectralTransfer<TransferTraits, Enabled>& operator=(SpectralTransfer<TransferTraits, Enabled> &&other) = default;
-
         virtual void interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
                                       shared_ptr<typename TransferTraits::fine_encap_type> fine);
 
@@ -55,8 +52,6 @@ namespace pfasst
   }  // ::pfasst::contrib
 }  // ::pfasst
 
-#include "pfasst/contrib/spectral_transfer_1d.hpp"
-#include "pfasst/contrib/spectral_transfer_2d.hpp"
-#include "pfasst/contrib/spectral_transfer_3d.hpp"
+#include "pfasst/contrib/spectral_transfer_3d_impl.hpp"
 
-#endif  // _PFASST__TRANSFER__SPECTRAL_TRANSFER_HPP_
+#endif  // _PFASST__TRANSFER__SPECTRAL_TRANSFER_3D_HPP_

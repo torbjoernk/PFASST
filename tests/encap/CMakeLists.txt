@@ -8,6 +8,7 @@ include_directories(
 
 set(TESTS
     test_encapsulation_vector
+    test_encapsulation_eigen3_vector
     test_factory
 )
 
