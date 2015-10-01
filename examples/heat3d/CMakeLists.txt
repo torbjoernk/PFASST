@@ -8,7 +8,7 @@ include_directories(
 
 set(heat3d_examples
     heat3d_sdc
-#     heat3d_mlsdc
+    heat3d_mlsdc
 )
 
 set(heat3d_mpi_examples

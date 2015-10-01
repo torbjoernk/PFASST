@@ -6,6 +6,7 @@
 using namespace std;
 
 #include "pfasst/globals.hpp"
+#include "pfasst/util.hpp"
 #include "pfasst/logging.hpp"
 #include "pfasst/quadrature.hpp"
 
@@ -72,7 +73,17 @@ namespace pfasst
         complex<fine_spatial_type> *fine_z = this->fft.get_workspace(fine->get_dimwise_num_dofs())->z;
 
         const size_t coarse_dim_dofs = cbrt(coarse_ndofs);
+        if (pow(coarse_dim_dofs, 3) != coarse_ndofs) {
+          ML_CLOG(FATAL, "TRANS",
+                  "Coarse space is not a cube: " << coarse_dim_dofs << "^3 != " << coarse_ndofs);
+          throw runtime_error("coarse space not a cube");
+        }
         const size_t fine_dim_dofs   = cbrt(fine_ndofs);
+        if (pow(fine_dim_dofs, 3) != fine_ndofs) {
+          ML_CLOG(FATAL, "TRANS",
+                  "Fine space is not a cube: " << fine_dim_dofs << "^3 != " << fine_ndofs);
+          throw runtime_error("fine space not a cube");
+        }
 
         if (fine_dim_dofs != coarse_dim_dofs * 2) {
           ML_CLOG(FATAL, "TRANS", "FFTW based interpolation in 3D only for coarsening factor of 2");
@@ -86,45 +97,36 @@ namespace pfasst
         // FFTW is not normalized
         double c = 1.0 / (double)coarse_ndofs;
 
-        // TODO
-        for (size_t yi = 0; yi < coarse_dim_dofs; ++yi) {
-          // y is second dim (i.e. columns)
-          for (size_t xi = 0; xi < coarse_dim_dofs; ++xi) {
-            // x is first dim (i.e. rows)
-            const size_t coarse_index = yi * coarse_dim_dofs + xi;
-            assert(coarse_index < coarse_ndofs);
+        // a few utility functions
+        auto is_in_first_half = [&](const size_t i) {
+          return (i < coarse_dim_dofs / 2);
+        };
+        auto get_fine_dim_back_index = [&](const size_t ci) {
+          return fine_dim_dofs - (fine_dim_dofs / 4) + ci - coarse_dim_dofs / 2;
+        };
+        auto get_fine_dim_index = [&](const size_t ci) {
+          return is_in_first_half(ci) ? ci : get_fine_dim_back_index(ci);
+        };
 
-            if (yi < coarse_dim_dofs / 2 && xi < coarse_dim_dofs / 2) {
-              // positive frequencies (in top-left corner)
-              const size_t fine_index = yi * fine_dim_dofs + xi;
+        for (size_t zi = 0; zi < coarse_dim_dofs; ++zi) {
+          // z is third dim (i.e. slices)
+          const size_t fine_zi = get_fine_dim_index(zi);
+
+          for (size_t yi = 0; yi < coarse_dim_dofs; ++yi) {
+            // y is second dim (i.e. columns)
+            const size_t fine_yi = get_fine_dim_index(yi);
+
+            for (size_t xi = 0; xi < coarse_dim_dofs; ++xi) {
+              // x is first dim (i.e. rows)
+              const size_t fine_xi = get_fine_dim_index(xi);
+
+              const size_t coarse_index = linearized_index(make_tuple(zi, yi, xi), coarse_dim_dofs);
+              assert(coarse_index < coarse_ndofs);
+
+              const size_t fine_index = linearized_index(make_tuple(fine_zi, fine_yi, fine_xi), fine_dim_dofs);
               assert(fine_index < fine_ndofs);
-              fine_z[fine_index] = c * coarse_z[coarse_index];
 
-            } else if (yi < coarse_dim_dofs / 2 && xi >= coarse_dim_dofs / 2) {
-              // x-negative, y-positive frequencies (in top-right corner)
-              const size_t fine_tail_col = fine_dim_dofs - (fine_dim_dofs / 4) + xi - coarse_dim_dofs / 2;
-              const size_t fine_index = yi * fine_dim_dofs + fine_tail_col;
-              assert(fine_index < fine_ndofs);
               fine_z[fine_index] = c * coarse_z[coarse_index];
-
-            } else if (yi >= coarse_dim_dofs / 2 && xi < coarse_dim_dofs / 2) {
-              // x-positive, y-negative frequencies (in bottom-left corner)
-              const size_t fine_tail_row = fine_dim_dofs - (fine_dim_dofs / 4) + yi - coarse_dim_dofs / 2;
-              const size_t fine_index = fine_tail_row * fine_dim_dofs + xi;
-              assert(fine_index < fine_ndofs);
-              fine_z[fine_index] = c * coarse_z[coarse_index];
-
-            } else if (yi >= coarse_dim_dofs / 2 && xi >= coarse_dim_dofs / 2) {
-              // negative frequencies (bottom-right corner)
-              const size_t fine_tail_row = fine_dim_dofs - (fine_dim_dofs / 4) + yi - coarse_dim_dofs / 2;
-              const size_t fine_tail_col = fine_dim_dofs - (fine_dim_dofs / 4) + xi - coarse_dim_dofs / 2;
-              const size_t fine_index = fine_tail_row * fine_dim_dofs + fine_tail_col;
-              assert(fine_index < fine_ndofs);
-              fine_z[fine_index] = c * coarse_z[coarse_index];
-
-            } else {
-              // fine center null-plus
-              continue;
             }
           }
         }
@@ -159,9 +161,19 @@ namespace pfasst
 
       } else {
         const size_t coarse_dim_dofs = cbrt(coarse_ndofs);
+        if (pow(coarse_dim_dofs, 3) != coarse_ndofs) {
+          ML_CLOG(FATAL, "TRANS",
+                  "Coarse space is not a cube: " << coarse_dim_dofs << "^3 != " << coarse_ndofs);
+          throw runtime_error("coarse space not a cube");
+        }
         const size_t fine_dim_dofs   = cbrt(fine_ndofs);
-        const size_t factor = fine_dim_dofs / coarse_dim_dofs;
+        if (pow(fine_dim_dofs, 3) != fine_ndofs) {
+          ML_CLOG(FATAL, "TRANS",
+                  "Fine space is not a cube: " << fine_dim_dofs << "^3 != " << fine_ndofs);
+          throw runtime_error("fine space not a cube");
+        }
 
+        const size_t factor = fine_dim_dofs / coarse_dim_dofs;
         if (fine_dim_dofs != coarse_dim_dofs * 2) {
           ML_CLOG(FATAL, "TRANS", "FFTW based interpolation in 3D only for coarsening factor of 2");
           throw runtime_error("unsupported coarsening factor for FFTW interpolation");
@@ -170,9 +182,9 @@ namespace pfasst
         for (size_t yi = 0; yi < coarse_dim_dofs; ++yi) {
           for (size_t xi = 0; xi < coarse_dim_dofs; ++xi) {
             for (size_t zi = 0; zi < coarse_dim_dofs; ++zi) {
-              const size_t coarse_index = yi * coarse_dim_dofs + xi * coarse_dim_dofs + zi;
+              const size_t coarse_index = linearized_index(make_tuple(zi, yi, xi), coarse_dim_dofs);
               assert(coarse_index < coarse_ndofs);
-              const size_t fine_index = factor * (yi * fine_dim_dofs + xi * fine_dim_dofs + zi);
+              const size_t fine_index = factor * linearized_index(make_tuple(zi, yi, xi), fine_dim_dofs);
               assert(fine_index < fine_ndofs);
               coarse->data()[coarse_index] = fine->get_data()[fine_index];
             }

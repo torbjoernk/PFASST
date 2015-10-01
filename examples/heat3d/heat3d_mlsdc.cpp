@@ -7,7 +7,7 @@ using namespace std;
 #include <pfasst/controller/two_level_mlsdc.hpp>
 #include <pfasst/contrib/spectral_transfer.hpp>
 
-#include "heat2d_sweeper.hpp"
+#include "heat3d_sweeper.hpp"
 
 using pfasst::encap::VectorEncapsulation;
 using pfasst::quadrature::quadrature_factory;
@@ -15,10 +15,10 @@ using pfasst::quadrature::QuadratureType;
 using pfasst::contrib::SpectralTransfer;
 using pfasst::TwoLevelMLSDC;
 
-using pfasst::examples::heat2d::Heat2D;
+using pfasst::examples::heat3d::Heat3D;
 
-typedef VectorEncapsulation<double, double, 2>                     EncapType;
-typedef Heat2D<pfasst::sweeper_traits<typename EncapType::traits>> SweeperType;
+typedef VectorEncapsulation<double, double, 3>                     EncapType;
+typedef Heat3D<pfasst::sweeper_traits<typename EncapType::traits>> SweeperType;
 typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>       TransferTraits;
 typedef SpectralTransfer<TransferTraits>                           TransferType;
 
@@ -27,7 +27,7 @@ namespace pfasst
 {
   namespace examples
   {
-    namespace heat2d
+    namespace heat3d
     {
       void run_mlsdc(const size_t& ndofs, const size_t& coarse_factor, const size_t& nnodes,
                      const QuadratureType& quad_type, const double& t_0, const double& dt,
@@ -60,7 +60,7 @@ namespace pfasst
         mlsdc.run();
         mlsdc.post_run();
       }
-    }  // ::pfasst::examples::heat2d
+    }  // ::pfasst::examples::heat3d
   } // ::pfasst::examples
 }  // ::pfasst
 
@@ -95,5 +95,5 @@ int main(int argc, char** argv)
   }
   const size_t niter = get_value<size_t>("num_iters", 5);
 
-  pfasst::examples::heat2d::run_mlsdc(ndofs, coarse_factor, nnodes, quad_type, t_0, dt, t_end, niter);
+  pfasst::examples::heat3d::run_mlsdc(ndofs, coarse_factor, nnodes, quad_type, t_0, dt, t_end, niter);
 }

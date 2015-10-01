@@ -54,6 +54,55 @@ namespace pfasst
     return abs(a) < numeric_limits<precision>::epsilon();
   }
 
+
+  template<
+    class... Args,
+    typename enable_if<sizeof...(Args) == 2>::type* = nullptr
+  >
+  static constexpr size_t
+  linearized_index(const tuple<Args...>& indices, const size_t dim_ndofs)
+  {
+    return get<0>(indices) * dim_ndofs + get<1>(indices);
+  }
+
+  template<
+    class... Args,
+    typename enable_if<sizeof...(Args) == 3>::type* = nullptr
+  >
+  static constexpr size_t
+  linearized_index(const tuple<Args...>& indices, const size_t dim_ndofs)
+  {
+    return get<0>(indices) * pow(dim_ndofs, 2) + get<1>(indices) * dim_ndofs + get<2>(indices);
+  }
+
+
+  template<
+    size_t N,
+    typename enable_if<N == 2>::type* = nullptr
+  >
+  static const tuple<size_t, size_t>
+  split_index(const size_t index, const size_t dim_ndofs)
+  {
+    const size_t xi = index % dim_ndofs;
+    const size_t yi = (index - xi) / dim_ndofs;
+    return make_pair(yi, xi);
+  }
+
+  template<
+    size_t N,
+    typename enable_if<N == 3>::type* = nullptr
+  >
+  static const tuple<size_t, size_t, size_t>
+  split_index(const size_t index, const size_t dim_ndofs)
+  {
+    const size_t xi = index % dim_ndofs;
+    const size_t zyi = index - xi;
+    const size_t zi = (zyi >= pow(dim_ndofs, 2)) ? floor(zyi / pow(dim_ndofs, 2)) : 0;
+    const size_t yi = (zyi - zi * pow(dim_ndofs, 2)) / dim_ndofs;
+    return make_tuple(zi, yi, xi);
+  }
+
+
   /**
    * A string representation of `std::vector`.
    *

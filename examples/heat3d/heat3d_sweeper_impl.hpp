@@ -42,26 +42,25 @@ namespace pfasst
       {
         this->encap_factory()->set_size(ndofs * ndofs * ndofs);
 
-        for (size_t yi = 0; yi < ndofs; ++yi) {
-          this->_lap[yi] = vector<spatial_type>(ndofs);
+        for (size_t zi = 0; zi < ndofs; ++zi) {
+          this->_lap[zi] = vector<vector<spatial_type>>(ndofs);
+          const spatial_type kzi = two_pi<spatial_type>()
+                                   * ((zi <= ndofs / 2) ? spatial_type(zi) : spatial_type(zi) - spatial_type(ndofs));
+          const spatial_type kzi_sqt = pfasst::almost_zero(pow(kzi, 2)) ? 0.0 : -pow(kzi, 2);
 
-          const spatial_type kyi = two_pi<spatial_type>()
-                                   * ((yi <= ndofs / 2) ? spatial_type(yi) : spatial_type(yi) - spatial_type(ndofs));
-          const spatial_type kyi_sqt = pfasst::almost_zero(pow(kyi, 2)) ? 0.0 : -pow(kyi, 2);
+          for (size_t yi = 0; yi < ndofs; ++yi) {
+            this->_lap[zi][yi] = vector<spatial_type>(ndofs);
 
-          for (size_t xi = 0; xi < ndofs; ++xi) {
-            this->_lap[yi][xi] = vector<spatial_type>(ndofs);
+            const spatial_type kyi = two_pi<spatial_type>()
+                                     * ((yi <= ndofs / 2) ? spatial_type(yi) : spatial_type(yi) - spatial_type(ndofs));
+            const spatial_type kyi_sqt = pfasst::almost_zero(pow(kyi, 2)) ? 0.0 : -pow(kyi, 2);
 
-            const spatial_type kxi = two_pi<spatial_type>()
-                                     * ((xi <= ndofs / 2) ? spatial_type(xi) : spatial_type(xi) - spatial_type(ndofs));
-            const spatial_type kxi_sqt = pfasst::almost_zero(pow(kxi, 2)) ? 0.0 : -pow(kxi, 2);
+            for (size_t xi = 0; xi < ndofs; ++xi) {
+              const spatial_type kxi = two_pi<spatial_type>()
+                                       * ((xi <= ndofs / 2) ? spatial_type(xi) : spatial_type(xi) - spatial_type(ndofs));
+              const spatial_type kxi_sqt = pfasst::almost_zero(pow(kxi, 2)) ? 0.0 : -pow(kxi, 2);
 
-            for (size_t zi = 0; zi < ndofs; ++zi) {
-              const spatial_type kzi = two_pi<spatial_type>()
-                                       * ((zi <= ndofs / 2) ? spatial_type(zi) : spatial_type(zi) - spatial_type(ndofs));
-              const spatial_type kzi_sqt = pfasst::almost_zero(pow(kzi, 2)) ? 0.0 : -pow(kzi, 2);
-
-              this->_lap[yi][xi][zi] = kzi_sqt + kyi_sqt + kxi_sqt;
+              this->_lap[zi][yi][xi] = kzi_sqt + kyi_sqt + kxi_sqt;
             }
           }
         }
@@ -87,16 +86,15 @@ namespace pfasst
         const spatial_type dy = 1.0 / spatial_type(dofs_p_dim);
         const spatial_type dz = 1.0 / spatial_type(dofs_p_dim);
 
-        for (size_t yi = 0; yi < dofs_p_dim; ++yi) {
-          for (size_t xi = 0; xi < dofs_p_dim; ++xi) {
-            for (size_t zi = 0; zi < dofs_p_dim; ++zi) {
-              result->data()[yi * dofs_p_dim + xi * dofs_p_dim + zi] = (sin(two_pi<spatial_type>() * yi * dy) + sin(two_pi<spatial_type>() * xi * dx) + sin(two_pi<spatial_type>() * zi * dz)) * exp(-t * 4 * pi_sqr<spatial_type>() * this->_nu);
+        for (size_t zi = 0; zi < dofs_p_dim; ++zi) {
+          for (size_t yi = 0; yi < dofs_p_dim; ++yi) {
+            for (size_t xi = 0; xi < dofs_p_dim; ++xi) {
+              result->data()[linearized_index(make_tuple(zi, yi, xi), dofs_p_dim)] = (sin(two_pi<spatial_type>() * zi * dz) + sin(two_pi<spatial_type>() * yi * dy) + sin(two_pi<spatial_type>() * xi * dx)) * exp(-t * 4 * pi_sqr<spatial_type>() * this->_nu);
             }
           }
         }
 
-        ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "EXACT t=" << t// << ": " << LOG_FLOAT << to_string(result)
-        );
+//         ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "EXACT t=" << t << ": " << LOG_FLOAT << to_string(result));
 
         return result;
       }
@@ -161,7 +159,6 @@ namespace pfasst
       {
         return this->get_encap_factory().size();
       }
-
 
       template<class SweeperTrait, typename Enabled>
       vector<shared_ptr<typename SweeperTrait::encap_type>>
@@ -257,12 +254,10 @@ namespace pfasst
 
         auto* z = this->_fft.forward(u);
 
-        for (size_t yi = 0; yi < dofs_p_dim; ++yi) {
-          for (size_t xi = 0; xi < dofs_p_dim; ++xi) {
-            for (size_t zi = 0; zi < dofs_p_dim; ++zi) {
-              z[yi * dofs_p_dim + xi * dofs_p_dim + zi] *= c * this->_lap[yi][xi][zi];
-            }
-          }
+        size_t zi, yi, xi;
+        for (size_t i = 0; i < this->get_num_dofs(); ++i) {
+          tie(zi, yi, xi) = split_index<3>(i, dofs_p_dim);
+          z[i] *= c * this->_lap[zi][yi][xi];
         }
 
         auto result = this->get_encap_factory().create();
@@ -288,26 +283,21 @@ namespace pfasst
 //         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\trhs: " << to_string(rhs));
 
         const spatial_type c = this->_nu * dt;
-        const size_t dofs_p_dim = cbrt(this->get_num_dofs());
+        const size_t ndofs = this->get_num_dofs();
+        const size_t dofs_p_dim = cbrt(ndofs);
 
         auto* z = this->_fft.forward(rhs);
 
-        for (size_t yi = 0; yi < dofs_p_dim; ++yi) {
-          for (size_t xi = 0; xi < dofs_p_dim; ++xi) {
-            for (size_t zi = 0; zi < dofs_p_dim; ++zi) {
-              z[yi * dofs_p_dim + xi * dofs_p_dim + zi] /= (1.0 - c * this->_lap[yi][xi][zi]) * spatial_type(this->get_num_dofs());
-            }
-          }
+        size_t zi, yi, xi;
+        for (size_t i = 0; i < ndofs; ++i) {
+          tie(zi, yi, xi) = split_index<3>(i, dofs_p_dim);
+          z[i] /= (1.0 - c * this->_lap[zi][yi][xi]) * spatial_type(ndofs);
         }
 
         this->_fft.backward(u);
 
-        for (size_t yi = 0; yi < dofs_p_dim; ++yi) {
-          for (size_t xi = 0; xi < dofs_p_dim; ++xi) {
-            for (size_t zi = 0; zi < dofs_p_dim; ++zi) {
-              f->data()[yi * dofs_p_dim + xi * dofs_p_dim + zi] = (u->get_data()[yi * dofs_p_dim + xi * dofs_p_dim + zi] - rhs->get_data()[yi * dofs_p_dim + xi * dofs_p_dim + zi]) / dt;
-            }
-          }
+        for (size_t i = 0; i < ndofs; ++i) {
+          f->data()[i] = (u->get_data()[i] - rhs->get_data()[i]) / dt;
         }
 
         this->_num_impl_solves++;

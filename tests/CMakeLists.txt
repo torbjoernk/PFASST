@@ -8,6 +8,7 @@ include_directories(
 
 set(TESTS
     test_logging
+    test_utils
 )
 
 set(TESTS_MPI

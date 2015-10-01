@@ -18,19 +18,19 @@ using namespace boost::math::constants;
 using pfasst::contrib::FFT;
 
 #include <pfasst/encap/vector.hpp>
-typedef pfasst::encap::VectorEncapsulation<double, double, 1> VectorType;
+using VectorType = pfasst::encap::VectorEncapsulation<double, double, 1>;
 
 #include <pfasst/logging.hpp>
 
 
-typedef ::testing::Types<FFT<VectorType>> FFT1DTypes;
-INSTANTIATE_TYPED_TEST_CASE_P(FFT1D, Concepts, FFT1DTypes);
+typedef ::testing::Types<FFT<VectorType>> FFTTypes;
+INSTANTIATE_TYPED_TEST_CASE_P(FFT1D, Concepts, FFTTypes);
 
 class Interface
   : public ::testing::Test
 {
   protected:
-    typedef FFT<VectorType> fft_type;
+    using fft_type = FFT<VectorType>;
 
     fft_type fft;
 };
@@ -38,6 +38,7 @@ class Interface
 TEST_F(Interface, query_z_pointer_for_specific_num_dofs)
 {
   complex<double>* z_ptr = fft.get_workspace({1})->z;
+  EXPECT_THAT(z_ptr, NotNull());
 }
 
 
@@ -87,18 +88,14 @@ class DiscreteFastFourierTransform
 TEST_P(DiscreteFastFourierTransform, forward_transform)
 {
   size_t ndofs = values->get_data().size();
-//   LOG(INFO) << "values: " << values->get_data();
   for (size_t k = 0; k < ndofs; ++k) {
     const double precision = k * ndofs * numeric_limits<double>::epsilon();
 
-//     LOG(INFO) << "k=" << k;
-//     LOG(INFO) << "  cos(2pi*k*t): " << two_pi_k_t(values, k);
     vector<complex<double>> forward(ndofs);
     auto* fft_forward = fft.forward(make_shared<VectorType>(two_pi_k_t(values, k)));
     for (size_t i = 0; i < ndofs; ++i) {
       forward[i] = fft_forward[i];
     }
-//     LOG(INFO) << "       --> fft: " << forward;
 
     for (size_t i = 0; i < ndofs; ++i) {
       EXPECT_THAT(forward[i].imag(), DoubleNear(0.0, precision));
@@ -118,13 +115,10 @@ TEST_P(DiscreteFastFourierTransform, forward_transform)
 TEST_P(DiscreteFastFourierTransform, backward_transform)
 {
   size_t ndofs = values->get_data().size();
-//   LOG(INFO) << "values: " << values->get_data();
   for (size_t k = 0; k < ndofs; ++k) {
     const double precision = k * ndofs * numeric_limits<double>::epsilon();
 
-//     LOG(INFO) << "k=" << k;
     shared_ptr<VectorType> test_values = make_shared<VectorType>(two_pi_k_t(values, k));
-//     LOG(INFO) << "  cos(2pi*k*t): " << test_values->get_data();
     fft.forward(test_values);
 
     shared_ptr<VectorType> backward = make_shared<VectorType>();
@@ -135,7 +129,6 @@ TEST_P(DiscreteFastFourierTransform, backward_transform)
 
     fft.backward(backward);
 
-//     LOG(INFO) << "  --> backward: " << backward->get_data();
     for (size_t i = 0; i < ndofs; ++i) {
       EXPECT_THAT(backward->get_data()[i], DoubleNear(expected->get_data()[i], precision));
     }
