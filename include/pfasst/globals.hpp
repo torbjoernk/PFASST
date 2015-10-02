@@ -118,7 +118,7 @@ struct PP_CAT(static_warning,__LINE__) { \
 
 namespace pfasst
 {
-  typedef double time_precision;
+  using time_precision = double;
 }
 
 #endif  // _GLOBALS__HPP_

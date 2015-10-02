@@ -15,7 +15,7 @@ namespace pfasst
   template<class SweeperTrait, typename Enabled>
   Sweeper<SweeperTrait, Enabled>::Sweeper()
     :   _quadrature(nullptr)
-      , _factory(make_shared<typename SweeperTrait::encap_type::factory_type>())
+      , _factory(make_shared<typename SweeperTrait::encap_t::factory_t>())
       , _states(0)
       , _previous_states(0)
       , _end_state(nullptr)
@@ -28,49 +28,49 @@ namespace pfasst
   {}
 
   template<class SweeperTrait, typename Enabled>
-  shared_ptr<IQuadrature<typename SweeperTrait::time_type>>&
+  shared_ptr<IQuadrature<typename SweeperTrait::time_t>>&
   Sweeper<SweeperTrait, Enabled>::quadrature()
   {
     return this->_quadrature;
   }
 
   template<class SweeperTrait, typename Enabled>
-  const shared_ptr<IQuadrature<typename SweeperTrait::time_type>>
+  const shared_ptr<IQuadrature<typename SweeperTrait::time_t>>
   Sweeper<SweeperTrait, Enabled>::get_quadrature() const
   {
     return this->_quadrature;
   }
 
   template<class SweeperTrait, typename Enabled>
-  shared_ptr<Status<typename SweeperTrait::time_type>>&
+  shared_ptr<Status<typename SweeperTrait::time_t>>&
   Sweeper<SweeperTrait, Enabled>::status()
   {
     return this->_status;
   }
 
   template<class SweeperTrait, typename Enabled>
-  const shared_ptr<Status<typename SweeperTrait::time_type>>
+  const shared_ptr<Status<typename SweeperTrait::time_t>>
   Sweeper<SweeperTrait, Enabled>::get_status() const
   {
     return this->_status;
   }
 
   template<class SweeperTrait, typename Enabled>
-  shared_ptr<typename SweeperTrait::encap_type::factory_type>&
+  shared_ptr<typename SweeperTrait::encap_t::factory_t>&
   Sweeper<SweeperTrait, Enabled>::encap_factory()
   {
     return this->_factory;
   }
 
   template<class SweeperTrait, typename Enabled>
-  const typename SweeperTrait::encap_type::factory_type&
+  const typename SweeperTrait::encap_t::factory_t&
   Sweeper<SweeperTrait, Enabled>::get_encap_factory() const
   {
     return *(this->_factory);
   }
 
   template<class SweeperTrait, typename Enabled>
-  shared_ptr<typename SweeperTrait::encap_type>&
+  shared_ptr<typename SweeperTrait::encap_t>&
   Sweeper<SweeperTrait, Enabled>::initial_state()
   {
     if (this->get_states().size() == 0) {
@@ -81,7 +81,7 @@ namespace pfasst
   }
 
   template<class SweeperTrait, typename Enabled>
-  const shared_ptr<typename SweeperTrait::encap_type>
+  const shared_ptr<typename SweeperTrait::encap_t>
   Sweeper<SweeperTrait, Enabled>::get_initial_state() const
   {
     if (this->get_states().size() == 0) {
@@ -92,70 +92,70 @@ namespace pfasst
   }
 
   template<class SweeperTrait, typename Enabled>
-  vector<shared_ptr<typename SweeperTrait::encap_type>>&
+  vector<shared_ptr<typename SweeperTrait::encap_t>>&
   Sweeper<SweeperTrait, Enabled>::states()
   {
     return this->_states;
   }
 
   template<class SweeperTrait, typename Enabled>
-  const vector<shared_ptr<typename SweeperTrait::encap_type>>&
+  const vector<shared_ptr<typename SweeperTrait::encap_t>>&
   Sweeper<SweeperTrait, Enabled>::get_states() const
   {
     return this->_states;
   }
 
   template<class SweeperTrait, typename Enabled>
-  vector<shared_ptr<typename SweeperTrait::encap_type>>&
+  vector<shared_ptr<typename SweeperTrait::encap_t>>&
   Sweeper<SweeperTrait, Enabled>::previous_states()
   {
     return this->_previous_states;
   }
 
   template<class SweeperTrait, typename Enabled>
-  const vector<shared_ptr<typename SweeperTrait::encap_type>>&
+  const vector<shared_ptr<typename SweeperTrait::encap_t>>&
   Sweeper<SweeperTrait, Enabled>::get_previous_states() const
   {
     return this->_previous_states;
   }
 
   template<class SweeperTrait, typename Enabled>
-  shared_ptr<typename SweeperTrait::encap_type>&
+  shared_ptr<typename SweeperTrait::encap_t>&
   Sweeper<SweeperTrait, Enabled>::end_state()
   {
     return this->_end_state;
   }
 
   template<class SweeperTrait, typename Enabled>
-  const shared_ptr<typename SweeperTrait::encap_type>
+  const shared_ptr<typename SweeperTrait::encap_t>
   Sweeper<SweeperTrait, Enabled>::get_end_state() const
   {
     return this->_end_state;
   }
 
   template<class SweeperTrait, typename Enabled>
-  vector<shared_ptr<typename SweeperTrait::encap_type>>&
+  vector<shared_ptr<typename SweeperTrait::encap_t>>&
   Sweeper<SweeperTrait, Enabled>::tau()
   {
     return this->_tau;
   }
 
   template<class SweeperTrait, typename Enabled>
-  const vector<shared_ptr<typename SweeperTrait::encap_type>>&
+  const vector<shared_ptr<typename SweeperTrait::encap_t>>&
   Sweeper<SweeperTrait, Enabled>::get_tau() const
   {
     return this->_tau;
   }
 
   template<class SweeperTrait, typename Enabled>
-  vector<shared_ptr<typename SweeperTrait::encap_type>>&
+  vector<shared_ptr<typename SweeperTrait::encap_t>>&
   Sweeper<SweeperTrait, Enabled>::residuals()
   {
     return this->_residuals;
   }
 
   template<class SweeperTrait, typename Enabled>
-  const vector<shared_ptr<typename SweeperTrait::encap_type>>&
+  const vector<shared_ptr<typename SweeperTrait::encap_t>>&
   Sweeper<SweeperTrait, Enabled>::get_residuals() const
   {
     return this->_residuals;
@@ -180,22 +180,22 @@ namespace pfasst
   Sweeper<SweeperTrait, Enabled>::set_options()
   {
     ML_CVLOG(3, this->get_logger_id(), "setting options from runtime parameters (if available)");
-    this->_abs_residual_tol = config::get_value<typename traits::spatial_type>("abs_res_tol", this->_abs_residual_tol);
-    this->_rel_residual_tol = config::get_value<typename traits::spatial_type>("rel_res_tol", this->_rel_residual_tol);
+    this->_abs_residual_tol = config::get_value<typename traits::spatial_t>("abs_res_tol", this->_abs_residual_tol);
+    this->_rel_residual_tol = config::get_value<typename traits::spatial_t>("rel_res_tol", this->_rel_residual_tol);
     ML_CVLOG(3, this->get_logger_id(), "  absolut residual tolerance:  " << this->_abs_residual_tol);
     ML_CVLOG(3, this->get_logger_id(), "  relative residual tolerance: " << this->_rel_residual_tol);
   }
 
   template<class SweeperTrait, typename Enabled>
   void
-  Sweeper<SweeperTrait, Enabled>::set_abs_residual_tol(const typename SweeperTrait::spatial_type& abs_res_tol)
+  Sweeper<SweeperTrait, Enabled>::set_abs_residual_tol(const typename SweeperTrait::spatial_t& abs_res_tol)
   {
     this->_abs_residual_tol = abs_res_tol;
   }
 
   template<class SweeperTrait, typename Enabled>
   void
-  Sweeper<SweeperTrait, Enabled>::set_rel_residual_tol(const typename SweeperTrait::spatial_type& rel_res_tol)
+  Sweeper<SweeperTrait, Enabled>::set_rel_residual_tol(const typename SweeperTrait::spatial_t& rel_res_tol)
   {
     this->_rel_residual_tol = rel_res_tol;
   }
@@ -361,8 +361,8 @@ namespace pfasst
   }
 
   template<class SweeperTrait, typename Enabled>
-  vector<shared_ptr<typename SweeperTrait::encap_type>>
-  Sweeper<SweeperTrait, Enabled>::integrate(const typename SweeperTrait::time_type& dt)
+  vector<shared_ptr<typename SweeperTrait::encap_t>>
+  Sweeper<SweeperTrait, Enabled>::integrate(const typename SweeperTrait::time_t& dt)
   {
     UNUSED(dt);
     throw runtime_error("integration over dt");
@@ -437,7 +437,7 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
-  Sweeper<SweeperTrait, Enabled>::integrate_end_state(const typename SweeperTrait::time_type& dt)
+  Sweeper<SweeperTrait, Enabled>::integrate_end_state(const typename SweeperTrait::time_t& dt)
   {
     UNUSED(dt);
     assert(this->get_quadrature() != nullptr);

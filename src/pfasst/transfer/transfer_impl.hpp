@@ -11,8 +11,8 @@ namespace pfasst
 {
   template<class TransferTraits, typename Enabled>
   void
-  Transfer<TransferTraits, Enabled>::interpolate_initial(const shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse,
-                                                         shared_ptr<typename TransferTraits::fine_sweeper_type> fine)
+  Transfer<TransferTraits, Enabled>::interpolate_initial(const shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse,
+                                                         shared_ptr<typename TransferTraits::fine_sweeper_t> fine)
   {
     UNUSED(coarse); UNUSED(fine);
     throw runtime_error("interpolation of initial values for generic Sweeper");
@@ -20,8 +20,8 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  Transfer<TransferTraits, Enabled>::interpolate(const shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse,
-                                                 shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
+  Transfer<TransferTraits, Enabled>::interpolate(const shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse,
+                                                 shared_ptr<typename TransferTraits::fine_sweeper_t> fine,
                                                  const bool initial)
   {
     UNUSED(coarse); UNUSED(fine); UNUSED(initial);
@@ -30,8 +30,8 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  Transfer<TransferTraits, Enabled>::interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
-                                                      shared_ptr<typename TransferTraits::fine_encap_type> fine)
+  Transfer<TransferTraits, Enabled>::interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_t> coarse,
+                                                      shared_ptr<typename TransferTraits::fine_encap_t> fine)
   {
     UNUSED(coarse); UNUSED(fine);
     throw runtime_error("interpolation for generic Encapsulations");
@@ -39,8 +39,8 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  Transfer<TransferTraits, Enabled>::restrict_initial(const shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
-                                                      shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse)
+  Transfer<TransferTraits, Enabled>::restrict_initial(const shared_ptr<typename TransferTraits::fine_sweeper_t> fine,
+                                                      shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse)
   {
     UNUSED(coarse); UNUSED(fine);
     throw runtime_error("restriction of initial value for generic Sweeper");
@@ -48,8 +48,8 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  Transfer<TransferTraits, Enabled>::restrict(const shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
-                                              shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse,
+  Transfer<TransferTraits, Enabled>::restrict(const shared_ptr<typename TransferTraits::fine_sweeper_t> fine,
+                                              shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse,
                                               const bool initial)
   {
     UNUSED(coarse); UNUSED(fine); UNUSED(initial);
@@ -58,8 +58,8 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  Transfer<TransferTraits, Enabled>::restrict_data(const shared_ptr<typename TransferTraits::fine_encap_type> fine,
-                                                   shared_ptr<typename TransferTraits::coarse_encap_type> coarse)
+  Transfer<TransferTraits, Enabled>::restrict_data(const shared_ptr<typename TransferTraits::fine_encap_t> fine,
+                                                   shared_ptr<typename TransferTraits::coarse_encap_t> coarse)
   {
     UNUSED(coarse); UNUSED(fine);
     throw runtime_error("restriction for generic Encapsulations");
@@ -67,9 +67,9 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  Transfer<TransferTraits, Enabled>::fas(const typename TransferTraits::fine_time_type& dt,
-                                         const shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
-                                         shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse)
+  Transfer<TransferTraits, Enabled>::fas(const typename TransferTraits::fine_time_t& dt,
+                                         const shared_ptr<typename TransferTraits::fine_sweeper_t> fine,
+                                         shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse)
   {
     UNUSED(dt); UNUSED(coarse); UNUSED(fine);
     throw runtime_error("FAS correction for generic Sweeper");

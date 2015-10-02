@@ -25,14 +25,14 @@ namespace pfasst
     class FFT
     {
       public:
-        typedef Encapsulation encap_type;
+        using encap_t = Encapsulation;
 
       protected:
         struct workspace {
           fftw_plan           ffft;
           fftw_plan           ifft;
           fftw_complex*       wk;
-          complex<typename encap_type::spatial_type>* z;
+          complex<typename encap_t::traits::spatial_t>* z;
         };
 
         map<array<int, Encapsulation::traits::DIM>, shared_ptr<workspace>> workspaces;
@@ -45,7 +45,7 @@ namespace pfasst
         FFT<Encapsulation>& operator=(const FFT<Encapsulation>& other) = default;
         FFT<Encapsulation>& operator=(FFT<Encapsulation>&& other) = default;
 
-        complex<typename Encapsulation::spatial_type>* forward(const shared_ptr<Encapsulation> x);
+        complex<typename Encapsulation::traits::spatial_t>* forward(const shared_ptr<Encapsulation> x);
         void backward(shared_ptr<Encapsulation> x);
 
         shared_ptr<workspace> get_workspace(const array<int, Encapsulation::traits::DIM>& ndofs);

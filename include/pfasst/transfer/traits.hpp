@@ -15,19 +15,19 @@ namespace pfasst
   >
   struct transfer_traits
   {
-    typedef          CoarseSweeper                       coarse_sweeper_type;
-    typedef typename coarse_sweeper_type::traits         coarse_sweeper_traits;
-    typedef typename coarse_sweeper_traits::encap_traits coarse_encap_traits;
-    typedef typename coarse_sweeper_traits::encap_type   coarse_encap_type;
-    typedef typename coarse_sweeper_traits::time_type    coarse_time_type;
-    typedef typename coarse_sweeper_traits::spatial_type coarse_spatial_type;
+    using coarse_sweeper_t = CoarseSweeper;
+    using coarse_sweeper_traits = typename coarse_sweeper_t::traits;
+    using coarse_encap_traits = typename coarse_sweeper_traits::encap_traits;
+    using coarse_encap_t = typename coarse_sweeper_traits::encap_t;
+    using coarse_time_t = typename coarse_sweeper_traits::time_t;
+    using coarse_spatial_t = typename coarse_sweeper_traits::spatial_t;
 
-    typedef          FineSweeper                         fine_sweeper_type;
-    typedef typename fine_sweeper_type::traits           fine_sweeper_traits;
-    typedef typename fine_sweeper_traits::encap_traits   fine_encap_traits;
-    typedef typename fine_sweeper_traits::encap_type     fine_encap_type;
-    typedef typename fine_sweeper_traits::time_type      fine_time_type;
-    typedef typename fine_sweeper_traits::spatial_type   fine_spatial_type;
+    using fine_sweeper_t = FineSweeper;
+    using fine_sweeper_traits = typename fine_sweeper_t::traits;
+    using fine_encap_traits = typename fine_sweeper_traits::encap_traits;
+    using fine_encap_t = typename fine_sweeper_traits::encap_t;
+    using fine_time_t = typename fine_sweeper_traits::time_t;
+    using fine_spatial_t = typename fine_sweeper_traits::spatial_t;
 
     static const size_t num_levels = NumLevels;
   };

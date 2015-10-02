@@ -23,16 +23,16 @@ namespace pfasst
                   "SDC only works for single sweeper setups.");
 
     public:
-      typedef          TransferT                             transfer_type;
-      typedef typename transfer_type::traits::fine_time_type time_type;
+      using transfer_t = TransferT;
+      using time_t = typename transfer_t::traits::fine_time_t;
 
       static void init_loggers();
 
     protected:
-      shared_ptr<typename transfer_type::traits::fine_sweeper_type> _sweeper;
+      shared_ptr<typename transfer_t::traits::fine_sweeper_t> _sweeper;
 
       shared_ptr<void>               _transfer;
-      shared_ptr<Status<time_type>>  _status;
+      shared_ptr<Status<time_t>>     _status;
       shared_ptr<comm::Communicator> _comm;
       bool                           _ready;
 
@@ -53,8 +53,8 @@ namespace pfasst
 
       virtual void add_transfer(shared_ptr<TransferT> transfer) override;
 
-      virtual const shared_ptr<typename TransferT::traits::fine_sweeper_type> get_sweeper() const;
-      virtual       shared_ptr<typename TransferT::traits::fine_sweeper_type> get_sweeper();
+      virtual const shared_ptr<typename TransferT::traits::fine_sweeper_t> get_sweeper() const;
+      virtual       shared_ptr<typename TransferT::traits::fine_sweeper_t> get_sweeper();
 
       virtual void set_options() override;
 

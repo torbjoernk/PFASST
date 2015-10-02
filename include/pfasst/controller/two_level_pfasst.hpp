@@ -35,15 +35,15 @@ namespace pfasst
     using TagType = pfasst::detail::TagType;
 
     public:
-      typedef          TransferT                             transfer_type;
-      typedef          CommT                                 comm_type;
-      typedef typename transfer_type::traits::fine_time_type time_type;
+      using transfer_t = TransferT;
+      using comm_t = CommT;
+      using time_t = typename transfer_t::traits::fine_time_t;
 
       static void init_loggers();
 
     protected:
-      shared_ptr<Status<time_type>> _prev_status;
-      shared_ptr<Status<time_type>> _prev_status_temp;
+      shared_ptr<Status<time_t>> _prev_status;
+      shared_ptr<Status<time_t>> _prev_status_temp;
       size_t _time_block = 0;
 
       virtual void send_status();

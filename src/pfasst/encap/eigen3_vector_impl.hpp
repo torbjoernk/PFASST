@@ -16,10 +16,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::Encapsulation(const size_t size)
       : _data(size)
     {
@@ -30,11 +27,8 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
-               >::type>::Encapsulation(const typename EncapsulationTrait::data_type& data)
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
+               >::type>::Encapsulation(const typename EncapsulationTrait::data_t& data)
       : Encapsulation<EncapsulationTrait>(data.rows())
     {
       this->data() = data;
@@ -45,39 +39,30 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
-               >::type>::operator=(const typename EncapsulationTrait::data_type& data)
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
+               >::type>::operator=(const typename EncapsulationTrait::data_t& data)
     {
       this->data() = data;
       return *this;
     }
 
     template<class EncapsulationTrait>
-    typename EncapsulationTrait::data_type&
+    typename EncapsulationTrait::data_t&
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::data()
     {
       return this->_data;
     }
 
     template<class EncapsulationTrait>
-    const typename EncapsulationTrait::data_type&
+    const typename EncapsulationTrait::data_t&
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::get_data() const
     {
       return this->_data;
@@ -88,10 +73,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::get_total_num_dofs() const
     {
       assert(this->get_data().rows() == this->get_data().cols());
@@ -103,10 +85,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::get_dimwise_num_dofs() const
     {
       array<int, EncapsulationTrait::DIM> dimwise_ndofs;
@@ -131,10 +110,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::zero()
     {
       this->data().setZero();
@@ -145,25 +121,19 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
-               >::type>::scaled_add(const typename EncapsulationTrait::time_type& a,
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
+               >::type>::scaled_add(const typename EncapsulationTrait::time_t& a,
                                    const shared_ptr<Encapsulation<EncapsulationTrait>> y)
     {
       this->data() += a * y->get_data();
     }
 
     template<class EncapsulationTrait>
-    typename EncapsulationTrait::spatial_type
+    typename EncapsulationTrait::spatial_t
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::norm0() const
     {
       return this->get_data().template lpNorm<Eigen::Infinity>();
@@ -175,10 +145,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::probe(shared_ptr<CommT> comm, const int src_rank, const int tag)
     {
       return comm->probe(src_rank, tag);
@@ -190,10 +157,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::send(shared_ptr<CommT> comm, const int dest_rank,
                               const int tag, const bool blocking)
     {
@@ -211,10 +175,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::recv(shared_ptr<CommT> comm, const int src_rank,
                               const int tag, const bool blocking)
     {
@@ -232,10 +193,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::bcast(shared_ptr<CommT> comm, const int root_rank)
     {
       comm->bcast(this->data().data(), this->get_data().cols() * this->get_data().rows(), root_rank);
@@ -246,10 +204,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::log(el::base::type::ostream_t& os) const
     {
       os << "EigenVector(" << this->get_data() << ")";
@@ -260,10 +215,7 @@ namespace pfasst
     EncapsulationFactory<
       EncapsulationTrait,
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::EncapsulationFactory(const size_t size)
       : _size(size)
     {}
@@ -273,10 +225,7 @@ namespace pfasst
     EncapsulationFactory<
       EncapsulationTrait,
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::create() const
     {
       return make_shared<Encapsulation<EncapsulationTrait>>(this->size());
@@ -287,10 +236,7 @@ namespace pfasst
     EncapsulationFactory<
       EncapsulationTrait,
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::set_size(const size_t& size)
     {
       this->_size = size;
@@ -301,10 +247,7 @@ namespace pfasst
     EncapsulationFactory<
       EncapsulationTrait,
       typename enable_if<
-                 is_same<
-                   EigenVector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::size() const
     {
       return this->_size;

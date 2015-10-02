@@ -12,7 +12,7 @@ namespace pfasst
   {
     template<class EncapsulationTrait>
     shared_ptr<Encapsulation<EncapsulationTrait>>
-    axpy(const typename EncapsulationTrait::time_type& a,
+    axpy(const typename EncapsulationTrait::time_t& a,
          const shared_ptr<Encapsulation<EncapsulationTrait>> x,
          const shared_ptr<Encapsulation<EncapsulationTrait>> y)
     {
@@ -25,8 +25,8 @@ namespace pfasst
     template<class EncapsulationTrait>
     void
     mat_apply(vector<shared_ptr<Encapsulation<EncapsulationTrait>>>& x,
-              const typename EncapsulationTrait::time_type& a,
-              const Matrix<typename EncapsulationTrait::time_type>& mat,
+              const typename EncapsulationTrait::time_t& a,
+              const Matrix<typename EncapsulationTrait::time_t>& mat,
               const vector<shared_ptr<Encapsulation<EncapsulationTrait>>>& y,
               const bool zero_vec_x)
     {
@@ -53,8 +53,8 @@ namespace pfasst
 
     template<class EncapsulationTrait>
     vector<shared_ptr<Encapsulation<EncapsulationTrait>>>
-    mat_mul_vec(const typename EncapsulationTrait::time_type& a,
-                const Matrix<typename EncapsulationTrait::time_type>& mat,
+    mat_mul_vec(const typename EncapsulationTrait::time_t& a,
+                const Matrix<typename EncapsulationTrait::time_t>& mat,
                 const vector<shared_ptr<Encapsulation<EncapsulationTrait>>>& x)
     {
       assert((size_t)mat.cols() == x.size());
@@ -73,7 +73,7 @@ namespace pfasst
     }
 
     template<class EncapsulationTrait>
-    typename EncapsulationTrait::spatial_type
+    typename EncapsulationTrait::spatial_t
     norm0(const shared_ptr<Encapsulation<EncapsulationTrait>> x)
     {
       return x->norm0();

@@ -136,35 +136,32 @@ namespace pfasst
         , el::Loggable
     {
       public:
-        typedef          EncapsulationTrait            traits;
-        typedef typename traits::time_type             time_type;
-        typedef typename traits::spatial_type          spatial_type;
-        typedef typename traits::data_type             data_type;
-        typedef          EncapsulationFactory<traits>  factory_type;
+        using traits = EncapsulationTrait;
+        using factory_t = EncapsulationFactory<traits>;
 
       //! @internal
       //! time_type must be an arithmetic type
-      static_assert(is_arithmetic<time_type>::value,
+      static_assert(is_arithmetic<typename traits::time_t>::value,
                     "time precision must be an arithmetic type");
-      static_assert(is_arithmetic<spatial_type>::value,
+      static_assert(is_arithmetic<typename traits::spatial_t>::value,
                     "spatial precision must be an arithmetic type");
-      static_assert(is_constructible<data_type>::value,
+      static_assert(is_constructible<typename traits::data_t>::value,
                     "Data Type must be constructible");
-      static_assert(is_default_constructible<data_type>::value,
+      static_assert(is_default_constructible<typename traits::data_t>::value,
                     "Data Type must be default constructible");
-      static_assert(is_destructible<data_type>::value,
+      static_assert(is_destructible<typename traits::data_t>::value,
                     "Data Type must be destructible");
-      static_assert(is_assignable<data_type, data_type>::value,
+      static_assert(is_assignable<typename traits::data_t, typename traits::data_t>::value,
                     "Data Type must be assignable");
 
       //! @cond static_warnings
-      STATIC_WARNING(is_move_constructible<data_type>::value,
+      STATIC_WARNING(is_move_constructible<typename traits::data_t>::value,
                      "Data Type should be move constructible");
-      STATIC_WARNING(is_copy_constructible<data_type>::value,
+      STATIC_WARNING(is_copy_constructible<typename traits::data_t>::value,
                      "Data Type should be copy constructible");
-      STATIC_WARNING(is_move_assignable<data_type>::value,
+      STATIC_WARNING(is_move_assignable<typename traits::data_t>::value,
                      "Data Type should be move assignable");
-      STATIC_WARNING(is_copy_assignable<data_type>::value,
+      STATIC_WARNING(is_copy_assignable<typename traits::data_t>::value,
                      "Data Type should be copy assignable");
       //! @endcond
       //! @endinternal
@@ -172,7 +169,7 @@ namespace pfasst
       protected:
         //! @{
         //! actual storage of encapsulated data
-        data_type _data;
+        typename traits::data_t _data;
         //! @}
 
       public:
@@ -185,11 +182,11 @@ namespace pfasst
          *
          * @param[in] data
          */
-        Encapsulation(const typename EncapsulationTrait::data_type& data);
+        Encapsulation(const typename EncapsulationTrait::data_t& data);
         Encapsulation(const Encapsulation<EncapsulationTrait, Enabled>& other)= default;
         Encapsulation(Encapsulation<EncapsulationTrait, Enabled>&& other) = default;
         virtual ~Encapsulation() = default;
-        Encapsulation<EncapsulationTrait, Enabled>& operator=(const typename EncapsulationTrait::data_type& data);
+        Encapsulation<EncapsulationTrait, Enabled>& operator=(const typename EncapsulationTrait::data_t& data);
         Encapsulation<EncapsulationTrait, Enabled>& operator=(const Encapsulation<EncapsulationTrait, Enabled>& other)= default;
         Encapsulation<EncapsulationTrait, Enabled>& operator=(Encapsulation<EncapsulationTrait, Enabled>&& other)= default;
         //! @}
@@ -201,13 +198,13 @@ namespace pfasst
          *
          * @returns encapsulated data for modification, e.g. as an lvalue
          */
-        virtual       typename EncapsulationTrait::data_type& data();
+        virtual       typename EncapsulationTrait::data_t& data();
         /**
          * Read-only accessor for encapsulated data.
          *
          * @returns encapsulated data
          */
-        virtual const typename EncapsulationTrait::data_type& get_data() const;
+        virtual const typename EncapsulationTrait::data_t& get_data() const;
 
         virtual size_t get_total_num_dofs() const;
         virtual array<int, EncapsulationTrait::DIM> get_dimwise_num_dofs() const;
@@ -219,7 +216,7 @@ namespace pfasst
          *
          * @note The implementation is strongly dependent on the encapsulated data type.
          */
-        virtual typename EncapsulationTrait::spatial_type norm0() const;
+        virtual typename EncapsulationTrait::spatial_t norm0() const;
 
         /**
          * Streams string representation of Encapsulation.
@@ -245,7 +242,7 @@ namespace pfasst
          * @param[in] a scaling factor
          * @param[in] y other data to be scaled and added onto this one
          */
-        virtual void scaled_add(const typename EncapsulationTrait::time_type& a,
+        virtual void scaled_add(const typename EncapsulationTrait::time_t& a,
                                 const shared_ptr<Encapsulation<EncapsulationTrait>> y);
         //! @}
 
@@ -312,8 +309,7 @@ namespace pfasst
     class EncapsulationFactory
     {
       public:
-        typedef          Encapsulation<EncapsulationTrait> encap_type;
-        typedef typename EncapsulationTrait::data_type     data_type;
+        using encap_t = Encapsulation<EncapsulationTrait>;
 
         //! @{
         EncapsulationFactory();

@@ -22,10 +22,8 @@ namespace pfasst
     >
     class Encapsulation<EncapsulationTrait,
                         typename enable_if<
-                                   is_same<
-                                     EigenVector<typename EncapsulationTrait::spatial_type>,
-                                     typename EncapsulationTrait::data_type
-                                   >::value>::type>
+                                   is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
+                                 >::type>
       :   public enable_shared_from_this<Encapsulation<EncapsulationTrait>>
         , public el::Loggable
     {
@@ -33,31 +31,28 @@ namespace pfasst
                     "Eigen3 only supports 1D and 2D.");
 
       public:
-        typedef          EncapsulationTrait           traits;
-        typedef typename traits::time_type            time_type;
-        typedef typename traits::spatial_type         spatial_type;
-        typedef typename traits::data_type            data_type;
-        typedef          EncapsulationFactory<traits> factory_type;
+        using traits = EncapsulationTrait;
+        using factory_t = EncapsulationFactory<traits>;
 
       protected:
-        data_type _data;
+        typename traits::data_t _data;
 
       public:
         explicit Encapsulation(const size_t size = 0);
-        Encapsulation(const typename EncapsulationTrait::data_type& data);
-        Encapsulation<EncapsulationTrait>& operator=(const typename EncapsulationTrait::data_type& data);
+        Encapsulation(const typename EncapsulationTrait::data_t& data);
+        Encapsulation<EncapsulationTrait>& operator=(const typename EncapsulationTrait::data_t& data);
 
-        virtual       typename EncapsulationTrait::data_type& data();
-        virtual const typename EncapsulationTrait::data_type& get_data() const;
+        virtual       typename EncapsulationTrait::data_t& data();
+        virtual const typename EncapsulationTrait::data_t& get_data() const;
         virtual size_t get_total_num_dofs() const;
         // assuming square-shaped space
         virtual array<int, EncapsulationTrait::DIM> get_dimwise_num_dofs() const;
 
         virtual void zero();
-        virtual void scaled_add(const typename EncapsulationTrait::time_type& a,
+        virtual void scaled_add(const typename EncapsulationTrait::time_t& a,
                                 const shared_ptr<Encapsulation<EncapsulationTrait>> y);
 
-        virtual typename EncapsulationTrait::spatial_type norm0() const;
+        virtual typename EncapsulationTrait::spatial_t norm0() const;
 
         template<class CommT>
         bool probe(shared_ptr<CommT> comm, const int src_rank, const int tag);
@@ -77,9 +72,9 @@ namespace pfasst
     template<
       typename time_precision,
       typename spatial_precision,
-      size_t Dimension
+      size_t Dim
     >
-    using EigenVectorEncapsulation = Encapsulation<eigen3_encap_traits<time_precision, spatial_precision, Dimension>>;
+    using EigenVectorEncapsulation = Encapsulation<eigen3_encap_traits<time_precision, spatial_precision, Dim>>;
 
 
     template<
@@ -87,10 +82,8 @@ namespace pfasst
     >
     class EncapsulationFactory<EncapsulationTrait,
                                typename enable_if<
-                                          is_same<
-                                            EigenVector<typename EncapsulationTrait::spatial_type>,
-                                            typename EncapsulationTrait::data_type
-                                          >::value>::type>
+                                          is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
+                                        >::type>
       : public enable_shared_from_this<EncapsulationFactory<EncapsulationTrait>>
     {
       protected:
