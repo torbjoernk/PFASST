@@ -7,7 +7,7 @@ using namespace std;
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/encap/eigen3_vector.hpp>
 template<class prec1, class prec2, size_t Dim>
-using EncapsulationTraits = pfasst::vector_encap_traits<prec1, prec2, Dim>;
+using EncapsulationTraits = pfasst::encap::vector_encap_traits<prec1, prec2, Dim>;
 // using EncapsulationTraits = pfasst::eigen3_encap_traits<prec1, prec2, Dim>;
 
 #include <pfasst/controller/sdc.hpp>

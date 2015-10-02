@@ -30,12 +30,13 @@ namespace pfasst
       {
         config::options::add_option<size_t>("Advection-Diffusion", "num_dofs", "number spatial degrees of freedom on fine level");
         config::options::add_option<size_t>("Advection-Diffusion", "coarse_factor", "coarsening factor");
-        config::options::add_option<spatial_type>("Advection-Diffusion", "nu", "diffusivity");
-        config::options::add_option<spatial_type>("Advection-Diffusion", "vel", "velocity of advection");
+        config::options::add_option<typename traits::spatial_t>("Advection-Diffusion", "nu", "diffusivity");
+        config::options::add_option<typename traits::spatial_t>("Advection-Diffusion", "vel", "velocity of advection");
       }
 
       template<class SweeperTrait, typename Enabled>
-      AdvecDiff<SweeperTrait, Enabled>::AdvecDiff(const size_t& ndofs, const typename SweeperTrait::spatial_type& nu, const typename SweeperTrait::spatial_type& v)
+      AdvecDiff<SweeperTrait, Enabled>::AdvecDiff(const size_t& ndofs, const typename SweeperTrait::spatial_t& nu,
+                                                  const typename SweeperTrait::spatial_t& v)
         :   IMEX<SweeperTrait, Enabled>()
           , _t0(1.0)
           , _nu(nu)
@@ -46,10 +47,10 @@ namespace pfasst
         this->encap_factory()->set_size(ndofs);
 
         for (size_t i = 0; i < ndofs; ++i) {
-          spatial_type kx = two_pi<spatial_type>()
-                            * ((i <= ndofs / 2) ? spatial_type(i)
-                                                : spatial_type(i) - spatial_type(ndofs));
-          this->_ddx[i] = complex<spatial_type>(0.0, 1.0) * kx;
+          typename traits::spatial_t kx = two_pi<typename traits::spatial_t>()
+                            * ((i <= ndofs / 2) ? typename traits::spatial_t(i)
+                                                : typename traits::spatial_t(i) - typename traits::spatial_t(ndofs));
+          this->_ddx[i] = complex<typename traits::spatial_t>(0.0, 1.0) * kx;
           this->_lap[i] = pfasst::almost_zero(kx * kx) ? 0.0 : -kx * kx;
         }
       }
@@ -60,17 +61,17 @@ namespace pfasst
       {
         IMEX<SweeperTrait, Enabled>::set_options();
 
-        this->_nu = config::get_value<typename traits::spatial_type>("nu", DEFAULT_DIFFUSIVITY);
-        this->_v = config::get_value<typename traits::spatial_type>("vel", DEFAULT_VELOCITY);
+        this->_nu = config::get_value<typename traits::spatial_t>("nu", DEFAULT_DIFFUSIVITY);
+        this->_v = config::get_value<typename traits::spatial_t>("vel", DEFAULT_VELOCITY);
       }
 
       template<class SweeperTrait, typename Enabled>
-      shared_ptr<typename SweeperTrait::encap_type>
-      AdvecDiff<SweeperTrait, Enabled>::exact(const typename SweeperTrait::time_type& t)
+      shared_ptr<typename SweeperTrait::encap_t>
+      AdvecDiff<SweeperTrait, Enabled>::exact(const typename SweeperTrait::time_t& t)
       {
         auto result = this->get_encap_factory().create();
 
-        const spatial_type dx = 1.0 / sqrt(4.0 * pi<spatial_type>() * this->_nu * (t + this->_t0));
+        const typename traits::spatial_t dx = 1.0 / sqrt(4.0 * pi<typename traits::spatial_t>() * this->_nu * (t + this->_t0));
 
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
           result->data()[i] = 0.0;
@@ -78,7 +79,7 @@ namespace pfasst
 
         for (int ii = -2; ii < 3; ++ii) {
           for (size_t i = 0; i < this->get_num_dofs(); ++i) {
-            spatial_type x = spatial_type(i) / this->get_num_dofs() - 0.5 + ii - t * this->_v;
+            typename traits::spatial_t x = typename traits::spatial_t(i) / this->get_num_dofs() - 0.5 + ii - t * this->_v;
             result->data()[i] += dx * exp(-x * x / (4 * this->_nu * (t + this->_t0)));
           }
         }
@@ -112,8 +113,8 @@ namespace pfasst
 
         if (!pre_check) {
           assert(this->get_status() != nullptr);
-          const time_type t = this->get_status()->get_time();
-          const time_type dt = this->get_status()->get_dt();
+          const typename traits::time_t t = this->get_status()->get_time();
+          const typename traits::time_t dt = this->get_status()->get_dt();
 
           auto error = this->compute_error(t);
           auto rel_error = this->compute_relative_error(error, t);
@@ -121,7 +122,7 @@ namespace pfasst
           assert(this->get_quadrature() != nullptr);
           auto nodes = this->get_quadrature()->get_nodes();
           const auto num_nodes = this->get_quadrature()->get_num_nodes();
-          nodes.insert(nodes.begin(), time_type(0.0));
+          nodes.insert(nodes.begin(), typename traits::time_t(0.0));
 
           ML_CVLOG(1, this->get_logger_id(), "Observables after " << ((this->get_status()->get_iteration() == 0) ? string("prediction") : string("iteration ") + to_string(this->get_status()->get_iteration())));
           for (size_t m = 0; m < num_nodes; ++m) {
@@ -150,26 +151,26 @@ namespace pfasst
 
 
       template<class SweeperTrait, typename Enabled>
-      vector<shared_ptr<typename SweeperTrait::encap_type>>
-      AdvecDiff<SweeperTrait, Enabled>::compute_error(const typename SweeperTrait::time_type& t)
+      vector<shared_ptr<typename SweeperTrait::encap_t>>
+      AdvecDiff<SweeperTrait, Enabled>::compute_error(const typename SweeperTrait::time_t& t)
       {
         ML_CVLOG(4, this->get_logger_id(), "computing error");
 
         assert(this->get_status() != nullptr);
-        const time_type dt = this->get_status()->get_dt();
+        const typename traits::time_t dt = this->get_status()->get_dt();
 
         assert(this->get_quadrature() != nullptr);
         auto nodes = this->get_quadrature()->get_nodes();
         const auto num_nodes = this->get_quadrature()->get_num_nodes();
-        nodes.insert(nodes.begin(), time_type(0.0));
+        nodes.insert(nodes.begin(), typename traits::time_t(0.0));
 
-        vector<shared_ptr<encap_type>> error;
+        vector<shared_ptr<typename traits::encap_t>> error;
         error.resize(num_nodes + 1);
         generate(error.begin(), error.end(),
-                 bind(&encap_type::factory_type::create, this->encap_factory()));
+                 bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
         for (size_t m = 1; m < num_nodes + 1; ++m) {
-          const time_type ds = dt * (nodes[m] - nodes[0]);
+          const typename traits::time_t ds = dt * (nodes[m] - nodes[0]);
           error[m] = pfasst::encap::axpy(-1.0, this->exact(t + ds), this->get_states()[m]);
 //           ML_CVLOG(3, this->get_logger_id(), LOG_FIXED << "error t=" << (t + ds) << ": "
 //                                           << LOG_FLOAT << to_string(error[m]));
@@ -179,21 +180,21 @@ namespace pfasst
       }
 
       template<class SweeperTrait, typename Enabled>
-      vector<shared_ptr<typename SweeperTrait::encap_type>>
-      AdvecDiff<SweeperTrait, Enabled>::compute_relative_error(const vector<shared_ptr<typename SweeperTrait::encap_type>>& error,
-                                                               const typename SweeperTrait::time_type& t)
+      vector<shared_ptr<typename SweeperTrait::encap_t>>
+      AdvecDiff<SweeperTrait, Enabled>::compute_relative_error(const vector<shared_ptr<typename SweeperTrait::encap_t>>& error,
+                                                               const typename SweeperTrait::time_t& t)
       {
         UNUSED(t);
 
         assert(this->get_quadrature() != nullptr);
         auto nodes = this->get_quadrature()->get_nodes();
         const auto num_nodes = this->get_quadrature()->get_num_nodes();
-        nodes.insert(nodes.begin(), time_type(0.0));
+        nodes.insert(nodes.begin(), typename traits::time_t(0.0));
 
-        vector<shared_ptr<encap_type>> rel_error;
+        vector<shared_ptr<typename traits::encap_t>> rel_error;
         rel_error.resize(error.size());
         generate(rel_error.begin(), rel_error.end(),
-                 bind(&encap_type::factory_type::create, this->encap_factory()));
+                 bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           rel_error[m]->scaled_add(1.0 / this->get_states()[m]->norm0(), error[m]);
@@ -203,14 +204,14 @@ namespace pfasst
       }
 
       template<class SweeperTrait, typename Enabled>
-      shared_ptr<typename SweeperTrait::encap_type>
-      AdvecDiff<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
-                                                       const shared_ptr<typename SweeperTrait::encap_type> u)
+      shared_ptr<typename SweeperTrait::encap_t>
+      AdvecDiff<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_t& t,
+                                                       const shared_ptr<typename SweeperTrait::encap_t> u)
       {
         ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "evaluating EXPLICIT part at t=" << t);
 //         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
 
-        spatial_type c = - this->_v / spatial_type(this->get_num_dofs());
+        typename traits::spatial_t c = - this->_v / typename traits::spatial_t(this->get_num_dofs());
 
         auto* z = this->_fft.forward(u);
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
@@ -227,14 +228,14 @@ namespace pfasst
       }
 
       template<class SweeperTrait, typename Enabled>
-      shared_ptr<typename SweeperTrait::encap_type>
-      AdvecDiff<SweeperTrait, Enabled>::evaluate_rhs_impl(const typename SweeperTrait::time_type& t,
-                                                       const shared_ptr<typename SweeperTrait::encap_type> u)
+      shared_ptr<typename SweeperTrait::encap_t>
+      AdvecDiff<SweeperTrait, Enabled>::evaluate_rhs_impl(const typename SweeperTrait::time_t& t,
+                                                       const shared_ptr<typename SweeperTrait::encap_t> u)
       {
         ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "evaluating IMPLICIT part at t=" << t);
 //         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
 
-        spatial_type c = this->_nu / spatial_type(this->get_num_dofs());
+        typename traits::spatial_t c = this->_nu / typename traits::spatial_t(this->get_num_dofs());
 
         auto* z = this->_fft.forward(u);
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
@@ -252,22 +253,22 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       void
-      AdvecDiff<SweeperTrait, Enabled>::implicit_solve(shared_ptr<typename SweeperTrait::encap_type> f,
-                                                    shared_ptr<typename SweeperTrait::encap_type> u,
-                                                    const typename SweeperTrait::time_type& t,
-                                                    const typename SweeperTrait::time_type& dt,
-                                                    const shared_ptr<typename SweeperTrait::encap_type> rhs)
+      AdvecDiff<SweeperTrait, Enabled>::implicit_solve(shared_ptr<typename SweeperTrait::encap_t> f,
+                                                    shared_ptr<typename SweeperTrait::encap_t> u,
+                                                    const typename SweeperTrait::time_t& t,
+                                                    const typename SweeperTrait::time_t& dt,
+                                                    const shared_ptr<typename SweeperTrait::encap_t> rhs)
       {
         ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "IMPLICIT spatial SOLVE at t=" << t << " with dt=" << dt);
 //         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tf:   " << to_string(f));
 //         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
 //         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\trhs: " << to_string(rhs));
 
-        spatial_type c = this->_nu * dt;
+        typename traits::spatial_t c = this->_nu * dt;
 
         auto* z = this->_fft.forward(rhs);
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
-          z[i] /= (1.0 - c * this->_lap[i]) * spatial_type(this->get_num_dofs());
+          z[i] /= (1.0 - c * this->_lap[i]) * typename traits::spatial_t(this->get_num_dofs());
         }
         this->_fft.backward(u);
 
