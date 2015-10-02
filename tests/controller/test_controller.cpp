@@ -13,14 +13,14 @@ using pfasst::Controller;
 #include "sweeper/mocks.hpp"
 #include "transfer/mocks.hpp"
 
-typedef pfasst::vector_encap_traits<double, double, 1>        VectorEncapTrait;
-typedef pfasst::encap::Encapsulation<VectorEncapTrait>        VectorEncapsulation;
-typedef SweeperMock<pfasst::sweeper_traits<VectorEncapTrait>> SweeperType;
-typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>  TransferTraits;
-typedef TransferMock<TransferTraits>                          TransferType;
+using encap_traits_t = pfasst::encap::vector_encap_traits<double, double, 1>;
+using encap_t = pfasst::encap::Encapsulation<encap_traits_t>;
+using sweeper_t = SweeperMock<pfasst::sweeper_traits<encap_traits_t>>;
+using transfer_traits_t = pfasst::transfer_traits<sweeper_t, sweeper_t, 2>;
+using transfer_t = TransferMock<transfer_traits_t>;
 
 
-typedef ::testing::Types<Controller<TransferType>> ControllerTypes;
+using ControllerTypes = ::testing::Types<Controller<transfer_t>>;
 INSTANTIATE_TYPED_TEST_CASE_P(Controller, Concepts, ControllerTypes);
 
 
@@ -28,13 +28,12 @@ class Interface
   : public ::testing::Test
 {
   protected:
-    shared_ptr<Controller<TransferType>> controller;
-
+    shared_ptr<Controller<transfer_t>> controller;
     shared_ptr<pfasst::Status<double>> status;
 
     virtual void SetUp()
     {
-      this->controller = make_shared<Controller<TransferType>>();
+      this->controller = make_shared<Controller<transfer_t>>();
       this->status = make_shared<pfasst::Status<double>>();
     }
 };
@@ -61,14 +60,13 @@ class Setup
   : public ::testing::Test
 {
   protected:
-    shared_ptr<Controller<TransferType>> controller;
-
+    shared_ptr<Controller<transfer_t>> controller;
     shared_ptr<pfasst::Status<double>> status;
-    shared_ptr<TransferType> transfer;
+    shared_ptr<transfer_t> transfer;
 
     virtual void SetUp()
     {
-      this->controller = make_shared<Controller<TransferType>>();
+      this->controller = make_shared<Controller<transfer_t>>();
       this->status = make_shared<pfasst::Status<double>>();
     }
 };
@@ -93,13 +91,12 @@ class Logic
   : public ::testing::Test
 {
   protected:
-    shared_ptr<Controller<TransferType>> controller;
-
+    shared_ptr<Controller<transfer_t>> controller;
     shared_ptr<pfasst::Status<double>> status;
 
     virtual void SetUp()
     {
-      this->controller = make_shared<Controller<TransferType>>();
+      this->controller = make_shared<Controller<transfer_t>>();
       this->status = make_shared<pfasst::Status<double>>();
     }
 };

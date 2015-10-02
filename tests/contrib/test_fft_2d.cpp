@@ -18,21 +18,20 @@ using namespace boost::math::constants;
 using pfasst::contrib::FFT;
 
 #include <pfasst/encap/vector.hpp>
-using VectorType = pfasst::encap::VectorEncapsulation<double, double, 2>;
+using encap_t = pfasst::encap::VectorEncapsulation<double, double, 2>;
+using fft_t = FFT<encap_t>;
 
 #include <pfasst/logging.hpp>
 
 
-typedef ::testing::Types<FFT<VectorType>> FFTTypes;
+using FFTTypes = ::testing::Types<fft_t>;
 INSTANTIATE_TYPED_TEST_CASE_P(FFT2D, Concepts, FFTTypes);
 
 class Interface
   : public ::testing::Test
 {
   protected:
-    using fft_type = FFT<VectorType>;
-
-    fft_type fft;
+    fft_t fft;
 };
 
 TEST_F(Interface, query_z_pointer_for_specific_num_dofs)
@@ -43,20 +42,18 @@ TEST_F(Interface, query_z_pointer_for_specific_num_dofs)
 
 
 class DiscreteFastFourierTransform
-  : public ::testing::TestWithParam<shared_ptr<VectorType>>
+  : public ::testing::TestWithParam<shared_ptr<encap_t>>
 {
   protected:
-    typedef FFT<VectorType> fft_type;
-
-    fft_type fft;
-    shared_ptr<VectorType> values;
+    fft_t fft;
+    shared_ptr<encap_t> values;
 
     virtual void SetUp()
     {
       this->values = GetParam();
     }
 
-    vector<double> two_pi_k_t(const shared_ptr<VectorType> vec, const size_t& k)
+    vector<double> two_pi_k_t(const shared_ptr<encap_t> vec, const size_t& k)
     {
       const size_t ndofs = vec->get_data().size();
       const size_t dim_ndofs = sqrt(ndofs);
@@ -81,14 +78,14 @@ TEST_P(DiscreteFastFourierTransform, backward_transform)
   for (size_t k = 0; k < dim_ndofs; ++k) {
     const double precision = k * ndofs * 1.3 * numeric_limits<double>::epsilon();
 
-    shared_ptr<VectorType> test_values = make_shared<VectorType>(two_pi_k_t(values, k));
+    shared_ptr<encap_t> test_values = make_shared<encap_t>(two_pi_k_t(values, k));
 
     fft.forward(test_values);
 
-    shared_ptr<VectorType> backward = make_shared<VectorType>();
+    shared_ptr<encap_t> backward = make_shared<encap_t>();
     backward->data().resize(ndofs);
     backward->zero();
-    shared_ptr<VectorType> expected = make_shared<VectorType>(backward->get_data());
+    shared_ptr<encap_t> expected = make_shared<encap_t>(backward->get_data());
     expected->scaled_add(ndofs, test_values);
 
     fft.backward(backward);
@@ -99,14 +96,14 @@ TEST_P(DiscreteFastFourierTransform, backward_transform)
   }
 }
 
-auto values_3 = make_shared<VectorType>(
+auto values_3 = make_shared<encap_t>(
   vector<double>{
     0.0,     third<double>(),     two_thirds<double>(),
     1.0, 1 + third<double>(), 1 + two_thirds<double>(),
     2.0, 2 + third<double>(), 2 + two_thirds<double>()
   }
 );
-auto values_4 = make_shared<VectorType>(
+auto values_4 = make_shared<encap_t>(
   vector<double>{
     0.0, 0.25, 0.5, 0.75,
     1.0, 1.25, 1.5, 1.75,
@@ -114,7 +111,7 @@ auto values_4 = make_shared<VectorType>(
     3.0, 3.25, 3.5, 3.75
   }
 );
-auto values_5 = make_shared<VectorType>(
+auto values_5 = make_shared<encap_t>(
   vector<double>{
     0.0, 0.2, 0.4, 0.6, 0.8,
     1.0, 1.2, 1.4, 1.6, 1.8,
@@ -123,7 +120,7 @@ auto values_5 = make_shared<VectorType>(
     4.0, 4.2, 4.4, 4.6, 4.8
   }
 );
-auto values_10 = make_shared<VectorType>(
+auto values_10 = make_shared<encap_t>(
   vector<double>{
     0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9,
     1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9,

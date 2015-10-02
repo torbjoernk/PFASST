@@ -12,15 +12,15 @@ using pfasst::TwoLevelMLSDC;
 #include "sweeper/mocks.hpp"
 #include "transfer/mocks.hpp"
 
-typedef pfasst::vector_encap_traits<double, double, 1>                  VectorEncapTrait;
-typedef pfasst::encap::Encapsulation<VectorEncapTrait>                  VectorEncapsulation;
-typedef NiceMock<SweeperMock<pfasst::sweeper_traits<VectorEncapTrait>>> SweeperType;
-typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>            TransferTraits;
-typedef NiceMock<TransferMock<TransferTraits>>                          TransferType;
-typedef NiceMock<CommMock>                                              CommunicatorType;
+using encap_traits_t = pfasst::encap::vector_encap_traits<double, double, 1>;
+using encap_t = pfasst::encap::Encapsulation<encap_traits_t>;
+using sweeper_t = SweeperMock<pfasst::sweeper_traits<encap_traits_t>>;
+using transfer_traits_t = pfasst::transfer_traits<sweeper_t, sweeper_t, 2>;
+using transfer_t = TransferMock<transfer_traits_t>;
+using comm_t = NiceMock<CommMock>;
 
 
-typedef ::testing::Types<TwoLevelMLSDC<TransferType>> ControllerTypes;
+using ControllerTypes = ::testing::Types<TwoLevelMLSDC<transfer_t>>;
 INSTANTIATE_TYPED_TEST_CASE_P(TwoLevelMLSDC, Concepts, ControllerTypes);
 
 
@@ -28,16 +28,15 @@ class Interface
   : public ::testing::Test
 {
   protected:
-    shared_ptr<TwoLevelMLSDC<TransferType>> controller;
-
-    shared_ptr<pfasst::Status<double>> status;
-    shared_ptr<CommunicatorType> comm;
+    shared_ptr<TwoLevelMLSDC<transfer_t>> controller;
+    shared_ptr<pfasst::Status<double>>    status;
+    shared_ptr<comm_t>                    comm;
 
     virtual void SetUp()
     {
-      this->controller = make_shared<TwoLevelMLSDC<TransferType>>();
+      this->controller = make_shared<TwoLevelMLSDC<transfer_t>>();
       this->status = make_shared<pfasst::Status<double>>();
-      this->comm = make_shared<CommunicatorType>();
+      this->comm = make_shared<comm_t>();
     }
 };
 
@@ -76,25 +75,24 @@ class Setup
   : public ::testing::Test
 {
   protected:
-    shared_ptr<TwoLevelMLSDC<TransferType>> controller;
-
-    shared_ptr<pfasst::Status<double>> status;
-    shared_ptr<SweeperType> sweeper1;
-    shared_ptr<SweeperType> sweeper2;
-    shared_ptr<TransferType> transfer;
-    shared_ptr<VectorEncapsulation> sweeper1_initial;
-    shared_ptr<VectorEncapsulation> sweeper1_end;
-    shared_ptr<VectorEncapsulation> sweeper2_initial;
-    shared_ptr<VectorEncapsulation> sweeper2_end;
+    shared_ptr<TwoLevelMLSDC<transfer_t>> controller;
+    shared_ptr<pfasst::Status<double>>    status;
+    shared_ptr<sweeper_t>                 sweeper1;
+    shared_ptr<sweeper_t>                 sweeper2;
+    shared_ptr<transfer_t>                transfer;
+    shared_ptr<encap_t>                   sweeper1_initial;
+    shared_ptr<encap_t>                   sweeper1_end;
+    shared_ptr<encap_t>                   sweeper2_initial;
+    shared_ptr<encap_t>                   sweeper2_end;
 
     virtual void SetUp()
     {
-      this->controller = make_shared<TwoLevelMLSDC<TransferType>>();
-      this->transfer = make_shared<TransferType>();
+      this->controller = make_shared<TwoLevelMLSDC<transfer_t>>();
+      this->transfer = make_shared<transfer_t>();
       this->status = make_shared<pfasst::Status<double>>();
 
-      this->sweeper1 = make_shared<SweeperType>();
-      this->sweeper2 = make_shared<SweeperType>();
+      this->sweeper1 = make_shared<sweeper_t>();
+      this->sweeper2 = make_shared<sweeper_t>();
 
       this->sweeper1_initial = this->sweeper1->get_encap_factory().create();
       this->sweeper1_end = this->sweeper1->get_encap_factory().create();
@@ -150,7 +148,7 @@ TEST_F(Setup, exactly_two_levels_must_be_added)
   ASSERT_THAT(controller->get_num_levels(), Eq(0));
   EXPECT_THROW(controller->setup(), logic_error);
 
-  controller = make_shared<TwoLevelMLSDC<TransferType>>();
+  controller = make_shared<TwoLevelMLSDC<transfer_t>>();
   controller->status() = status;
   controller->status()->t_end() = 0.1;
   controller->status()->dt() = 0.1;
@@ -160,7 +158,7 @@ TEST_F(Setup, exactly_two_levels_must_be_added)
   ASSERT_THAT(controller->get_num_levels(), Eq(1));
   EXPECT_THROW(controller->setup(), logic_error);
 
-  controller = make_shared<TwoLevelMLSDC<TransferType>>();
+  controller = make_shared<TwoLevelMLSDC<transfer_t>>();
   controller->status() = status;
   controller->status()->t_end() = 0.1;
   controller->status()->dt() = 0.1;
@@ -203,20 +201,19 @@ class Logic
   : public ::testing::Test
 {
   protected:
-    shared_ptr<TwoLevelMLSDC<TransferType>> controller;
-
-    shared_ptr<pfasst::Status<double>> status;
-    shared_ptr<SweeperType> sweeper1;
-    shared_ptr<SweeperType> sweeper2;
-    shared_ptr<TransferType> transfer;
+    shared_ptr<TwoLevelMLSDC<transfer_t>> controller;
+    shared_ptr<pfasst::Status<double>>    status;
+    shared_ptr<sweeper_t>                 sweeper1;
+    shared_ptr<sweeper_t>                 sweeper2;
+    shared_ptr<transfer_t>                transfer;
 
     virtual void SetUp()
     {
-      this->controller = make_shared<TwoLevelMLSDC<TransferType>>();
-      this->transfer = make_shared<TransferType>();
+      this->controller = make_shared<TwoLevelMLSDC<transfer_t>>();
+      this->transfer = make_shared<transfer_t>();
       this->status = make_shared<pfasst::Status<double>>();
-      this->sweeper1 = make_shared<SweeperType>();
-      this->sweeper2 = make_shared<SweeperType>();
+      this->sweeper1 = make_shared<sweeper_t>();
+      this->sweeper2 = make_shared<sweeper_t>();
       this->controller->add_sweeper(this->sweeper1, true);
       this->controller->add_sweeper(this->sweeper2, false);
       this->controller->add_transfer(this->transfer);

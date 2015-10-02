@@ -3,9 +3,9 @@
 #include <pfasst/controller/status.hpp>
 
 #include "comm/mocks.hpp"
-typedef CommMock CommunicatorType;
+using comm_t = CommMock;
 
-typedef ::testing::Types<pfasst::Status<double>> StatusTypes;
+using StatusTypes = ::testing::Types<pfasst::Status<double>>;
 INSTANTIATE_TYPED_TEST_CASE_P(Status, Concepts, StatusTypes);
 
 
@@ -96,13 +96,13 @@ class Communication
 {
   protected:
     shared_ptr<pfasst::Status<double>> status;
-    shared_ptr<CommunicatorType> comm;
+    shared_ptr<comm_t>                 comm;
 
   public:
     virtual void SetUp()
     {
       this->status = make_shared<pfasst::Status<double>>();
-      this->comm = make_shared<CommunicatorType>();
+      this->comm = make_shared<comm_t>();
     }
 };
 

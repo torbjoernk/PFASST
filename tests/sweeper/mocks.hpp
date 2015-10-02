@@ -14,21 +14,21 @@ class SweeperMock
   : public pfasst::Sweeper<SweeperTrait, Enabled>
 {
   public:
-    typedef          SweeperTrait traits;
+    using traits = SweeperTrait;
 
   public:
-    MOCK_METHOD0_T(quadrature, shared_ptr<IQuadrature<typename SweeperTrait::time_type>>&());
-    MOCK_CONST_METHOD0_T(get_quadrature, const shared_ptr<IQuadrature<typename SweeperTrait::time_type>>());
+    MOCK_METHOD0_T(quadrature, shared_ptr<IQuadrature<typename SweeperTrait::time_t>>&());
+    MOCK_CONST_METHOD0_T(get_quadrature, const shared_ptr<IQuadrature<typename SweeperTrait::time_t>>());
 
-    MOCK_METHOD0_T(status, shared_ptr<pfasst::Status<typename SweeperTrait::time_type>>&());
-    MOCK_CONST_METHOD0_T(get_status, const shared_ptr<pfasst::Status<typename SweeperTrait::time_type>>());
+    MOCK_METHOD0_T(status, shared_ptr<pfasst::Status<typename SweeperTrait::time_t>>&());
+    MOCK_CONST_METHOD0_T(get_status, const shared_ptr<pfasst::Status<typename SweeperTrait::time_t>>());
 
-//     MOCK_METHOD0_T(encap_factory, shared_ptr<typename SweeperTrait::encap_type::factory_type>&());
-//     MOCK_CONST_METHOD0_T(get_encap_factory, const shared_ptr<typename SweeperTrait::encap_type::factory_type>());
+//     MOCK_METHOD0_T(encap_factory, shared_ptr<typename SweeperTrait::encap_t::factory_t>&());
+//     MOCK_CONST_METHOD0_T(get_encap_factory, const shared_ptr<typename SweeperTrait::encap_t::factory_t>());
 
-    MOCK_METHOD0_T(initial_state, shared_ptr<typename SweeperTrait::encap_type>&());
-    MOCK_CONST_METHOD0_T(get_initial_state, const shared_ptr<typename SweeperTrait::encap_type>());
-    MOCK_CONST_METHOD0_T(get_end_state, const shared_ptr<typename SweeperTrait::encap_type>());
+    MOCK_METHOD0_T(initial_state, shared_ptr<typename SweeperTrait::encap_t>&());
+    MOCK_CONST_METHOD0_T(get_initial_state, const shared_ptr<typename SweeperTrait::encap_t>());
+    MOCK_CONST_METHOD0_T(get_end_state, const shared_ptr<typename SweeperTrait::encap_t>());
 
     MOCK_METHOD0_T(setup, void());
 
@@ -47,7 +47,7 @@ class SweeperMock
     MOCK_METHOD0_T(post_step, void());
 
     MOCK_METHOD1_T(reevaluate, void(const bool initial_only));
-    MOCK_METHOD1_T(integrate, vector<shared_ptr<typename SweeperTrait::encap_type>>(const typename SweeperTrait::time_type& dt));
+    MOCK_METHOD1_T(integrate, vector<shared_ptr<typename SweeperTrait::encap_t>>(const typename SweeperTrait::time_t& dt));
 
     MOCK_METHOD1_T(converged, bool(bool));
 };
