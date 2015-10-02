@@ -299,6 +299,13 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
+  IMEX<SweeperTrait, Enabled>::advance()
+  {
+    this->advance(1);
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  void
   IMEX<SweeperTrait, Enabled>::reevaluate(const bool initial_only)
   {
     assert(this->get_status() != nullptr);
@@ -325,6 +332,13 @@ namespace pfasst
         this->_impl_rhs[m] = this->evaluate_rhs_impl(t, this->get_states()[m]);
       }
     }
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  void
+  IMEX<SweeperTrait, Enabled>::reevaluate()
+  {
+    this->reevaluate(false);
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -407,6 +421,13 @@ namespace pfasst
   //                                       << "    res["<<m<<"] = " << to_string(this->get_residuals()[m]));
       }
     }
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  void
+  IMEX<SweeperTrait, Enabled>::compute_residuals()
+  {
+    this->compute_residuals(false);
   }
 
   template<class SweeperTrait, typename Enabled>

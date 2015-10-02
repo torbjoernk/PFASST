@@ -325,6 +325,13 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
+  Sweeper<SweeperTrait, Enabled>::advance()
+  {
+    this->advance(1);
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  void
   Sweeper<SweeperTrait, Enabled>::spread()
   {
     ML_CVLOG(4, this->get_logger_id(), "spreading initial value to all states");
@@ -361,6 +368,13 @@ namespace pfasst
   }
 
   template<class SweeperTrait, typename Enabled>
+  void
+  Sweeper<SweeperTrait, Enabled>::reevaluate()
+  {
+    this->reevaluate(false);
+  }
+
+  template<class SweeperTrait, typename Enabled>
   vector<shared_ptr<typename SweeperTrait::encap_t>>
   Sweeper<SweeperTrait, Enabled>::integrate(const typename SweeperTrait::time_t& dt)
   {
@@ -370,7 +384,7 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   bool
-  Sweeper<SweeperTrait, Enabled>::converged(const bool& pre_check)
+  Sweeper<SweeperTrait, Enabled>::converged(const bool pre_check)
   {
     this->compute_residuals(pre_check);
 
@@ -436,6 +450,13 @@ namespace pfasst
   }
 
   template<class SweeperTrait, typename Enabled>
+  bool
+  Sweeper<SweeperTrait, Enabled>::converged()
+  {
+    return this->converged(false);
+  }
+
+  template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::integrate_end_state(const typename SweeperTrait::time_t& dt)
   {
@@ -458,6 +479,14 @@ namespace pfasst
   void
   Sweeper<SweeperTrait, Enabled>::compute_residuals(const bool& only_last)
   {
+    UNUSED(only_last);
     throw runtime_error("computation of residuals");
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  void
+  Sweeper<SweeperTrait, Enabled>::compute_residuals()
+  {
+    this->compute_residuals(false);
   }
 }  // ::pfasst

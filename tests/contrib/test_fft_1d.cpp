@@ -36,7 +36,7 @@ class Interface
 
 TEST_F(Interface, query_z_pointer_for_specific_num_dofs)
 {
-  complex<double>* z_ptr = fft.get_workspace({1})->z;
+  complex<double>* z_ptr = fft.get_workspace({{1}})->z;
   EXPECT_THAT(z_ptr, NotNull());
 }
 

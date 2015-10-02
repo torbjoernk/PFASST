@@ -61,7 +61,8 @@ namespace pfasst
       virtual void setup() override;
       virtual void run() override;
 
-      virtual bool advance_time(const size_t& num_steps = 1) override;
+      virtual bool advance_time(const size_t& num_steps) override;
+      virtual bool advance_time() override;
       virtual bool advance_iteration() override;
   };
 }  // ::pfasst

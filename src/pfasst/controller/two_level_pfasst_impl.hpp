@@ -162,6 +162,13 @@ namespace pfasst
 
   template<class TransferT, class CommT>
   bool
+  TwoLevelPfasst<TransferT, CommT>::advance_time()
+  {
+    return this->advance_time(1);
+  }
+
+  template<class TransferT, class CommT>
+  bool
   TwoLevelPfasst<TransferT, CommT>::advance_iteration()
   {
     this->status()->set_primary_state(PrimaryState::INTER_ITER);

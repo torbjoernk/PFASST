@@ -30,7 +30,8 @@ namespace pfasst
       size_t _num_impl_solves;
 
       virtual void integrate_end_state(const typename SweeperTrait::time_t& dt) override;
-      virtual void compute_residuals(const bool& only_last = false) override;
+      virtual void compute_residuals(const bool& only_last) override;
+      virtual void compute_residuals() override;
 
       virtual shared_ptr<typename SweeperTrait::encap_t> evaluate_rhs_expl(const typename SweeperTrait::time_t& t,
                                                                               const shared_ptr<typename SweeperTrait::encap_t> u);
@@ -67,8 +68,10 @@ namespace pfasst
       virtual void post_sweep() override;
 
       virtual void post_step() override;
-      virtual void advance(const size_t& num_steps = 1) override;
-      virtual void reevaluate(const bool initial_only = false) override;
+      virtual void advance(const size_t& num_steps) override;
+      virtual void advance() override;
+      virtual void reevaluate(const bool initial_only) override;
+      virtual void reevaluate() override;
       virtual vector<shared_ptr<typename SweeperTrait::encap_t>> integrate(const typename SweeperTrait::time_t& dt) override;
   };
 }  // ::pfasst

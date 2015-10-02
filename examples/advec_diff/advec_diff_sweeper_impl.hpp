@@ -107,7 +107,7 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       bool
-      AdvecDiff<SweeperTrait, Enabled>::converged(const bool& pre_check)
+      AdvecDiff<SweeperTrait, Enabled>::converged(const bool pre_check)
       {
         const bool converged = IMEX<SweeperTrait, Enabled>::converged(pre_check);
 
@@ -140,6 +140,13 @@ namespace pfasst
         }
 
         return converged;
+      }
+
+      template<class SweeperTrait, typename Enabled>
+      bool
+      AdvecDiff<SweeperTrait, Enabled>::converged()
+      {
+        return this->converged(false);
       }
 
       template<class SweeperTrait, typename Enabled>

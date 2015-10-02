@@ -243,6 +243,13 @@ namespace pfasst
 
   template<class TransferT, class CommT>
   bool
+  Controller<TransferT, CommT>::advance_time()
+  {
+    return this->advance_time(1);
+  }
+
+  template<class TransferT, class CommT>
+  bool
   Controller<TransferT, CommT>::advance_iteration()
   {
     if (this->get_status()->get_iteration() + 1 > this->get_status()->get_max_iterations()) {

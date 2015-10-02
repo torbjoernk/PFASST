@@ -54,7 +54,8 @@ namespace pfasst
       string                                              _logger_id;
 
       virtual void integrate_end_state(const typename SweeperTrait::time_t& dt);
-      virtual void compute_residuals(const bool& only_last = false);
+      virtual void compute_residuals(const bool& only_last);
+      virtual void compute_residuals();
 
       virtual vector<shared_ptr<typename SweeperTrait::encap_t>>& previous_states();
       virtual shared_ptr<typename SweeperTrait::encap_t>&         end_state();
@@ -107,14 +108,17 @@ namespace pfasst
 
       virtual void post_step();
 
-      virtual void advance(const size_t& num_steps = 1);
+      virtual void advance(const size_t& num_steps);
+      virtual void advance();
 
       virtual void spread();
       virtual void save();
-      virtual void reevaluate(const bool initial_only=false);
+      virtual void reevaluate(const bool initial_only);
+      virtual void reevaluate();
       virtual vector<shared_ptr<typename SweeperTrait::encap_t>> integrate(const typename SweeperTrait::time_t& dt);
 
-      virtual bool converged(const bool& pre_check = false);
+      virtual bool converged(const bool pre_check);
+      virtual bool converged();
   };
 }
 

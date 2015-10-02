@@ -156,6 +156,13 @@ namespace pfasst
 
   template<class TransferT>
   bool
+  SDC<TransferT>::advance_time()
+  {
+    return this->advance_time(1);
+  }
+
+  template<class TransferT>
+  bool
   SDC<TransferT>::advance_iteration()
   {
     if (this->get_sweeper()->converged(false)) {

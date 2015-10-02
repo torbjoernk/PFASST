@@ -97,7 +97,7 @@ namespace pfasst
 
       template<class SweeperTrait, typename Enabled>
       bool
-      Heat1D<SweeperTrait, Enabled>::converged(const bool& pre_check)
+      Heat1D<SweeperTrait, Enabled>::converged(const bool pre_check)
       {
         const bool converged = IMEX<SweeperTrait, Enabled>::converged(pre_check);
 
@@ -130,6 +130,13 @@ namespace pfasst
         }
 
         return converged;
+      }
+
+      template<class SweeperTrait, typename Enabled>
+      bool
+      Heat1D<SweeperTrait, Enabled>::converged()
+      {
+        return this->converged(false);
       }
 
       template<class SweeperTrait, typename Enabled>
@@ -198,6 +205,7 @@ namespace pfasst
       Heat1D<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_t& t,
                                                        const shared_ptr<typename SweeperTrait::encap_t> u)
       {
+        UNUSED(u);
         ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "evaluating EXPLICIT part at t=" << t);
 //         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
 

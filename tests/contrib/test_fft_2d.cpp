@@ -36,7 +36,7 @@ class Interface
 
 TEST_F(Interface, query_z_pointer_for_specific_num_dofs)
 {
-  complex<double>* z_ptr = fft.get_workspace({1, 1})->z;
+  complex<double>* z_ptr = fft.get_workspace({{1, 1}})->z;
   EXPECT_THAT(z_ptr, NotNull());
 }
 
@@ -56,7 +56,6 @@ class DiscreteFastFourierTransform
     vector<double> two_pi_k_t(const shared_ptr<encap_t> vec, const size_t& k)
     {
       const size_t ndofs = vec->get_data().size();
-      const size_t dim_ndofs = sqrt(ndofs);
       vector<double> result(ndofs);
 
       transform(vec->get_data().cbegin(), vec->get_data().cend(),
