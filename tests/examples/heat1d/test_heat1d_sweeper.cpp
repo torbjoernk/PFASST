@@ -7,7 +7,7 @@ using namespace std;
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
 using pfasst::quadrature::QuadratureType;
-typedef pfasst::vector_encap_traits<double, double>                           EncapTraits;
+typedef pfasst::vector_encap_traits<double, double, 1>                        EncapTraits;
 
 #include "examples/heat1d/heat1d_sweeper.hpp"
 typedef pfasst::examples::heat1d::Heat1D<pfasst::sweeper_traits<EncapTraits>> SweeperType;

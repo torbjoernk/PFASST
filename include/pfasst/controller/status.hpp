@@ -2,6 +2,7 @@
 #define _PFASST__CONTROLLER__STATUS_HPP_
 
 #include <limits>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <type_traits>
@@ -44,6 +45,14 @@ namespace pfasst
     UNKNOWN_PRIMARY   = numeric_limits<int>::max()
   )
 
+  template<class CharT, class Traits>
+  inline basic_ostream<CharT, Traits>&
+  operator<<(basic_ostream<CharT, Traits>& os, const pfasst::PrimaryState& state)
+  {
+    os << (+state)._to_string();
+    return os;
+  }
+
   ENUM(SecondaryState, int,
     // inter-level states
     CYCLE_DOWN        =  1,
@@ -64,6 +73,14 @@ namespace pfasst
 
     UNKNOWN_SECONDARY = numeric_limits<int>::max()
   )
+
+  template<class CharT, class Traits>
+  inline basic_ostream<CharT, Traits>&
+  operator<<(basic_ostream<CharT, Traits>& os, const pfasst::SecondaryState& state)
+  {
+    os << (+state)._to_string();
+    return os;
+  }
 
   // the idea for this C++11 constexpr stuff is based on http://stackoverflow.com/a/26079954/588243
   using PrimarySecondaryMapItem = pair<PrimaryState, SecondaryState>;
@@ -119,8 +136,8 @@ namespace pfasst
   >
   struct StatusDetail
   {
-    PrimaryState   primary_state   = pfasst::PrimaryState::UNKNOWN_PRIMARY;
-    SecondaryState secondary_state = pfasst::SecondaryState::UNKNOWN_SECONDARY;
+    PrimaryState   primary_state   = (+pfasst::PrimaryState::UNKNOWN_PRIMARY);
+    SecondaryState secondary_state = (+pfasst::SecondaryState::UNKNOWN_SECONDARY);
 
     size_t    step                 = 0;
     size_t    num_steps            = 0;

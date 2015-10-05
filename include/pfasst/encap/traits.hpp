@@ -19,6 +19,7 @@ namespace pfasst
   template<
     class TimePrecision,
     class SpatialPrecision,
+    size_t Dim,
     class DataT,
     class... Ts
   >
@@ -32,6 +33,9 @@ namespace pfasst
 
     //! public member type for the encapsulated data type
     typedef DataT            data_type;
+
+    typedef integral_constant<size_t, Dim> dim_type;
+    static constexpr size_t  DIM = Dim;
   };
 
 
@@ -45,14 +49,17 @@ namespace pfasst
    */
   template<
     class TimePrecision,
-    class SpatialPrecision
+    class SpatialPrecision,
+    size_t Dim
   >
   struct vector_encap_traits
-    : public encap_traits<TimePrecision, SpatialPrecision, vector<SpatialPrecision>>
+    : public encap_traits<TimePrecision, SpatialPrecision, Dim, vector<SpatialPrecision>>
   {
     typedef TimePrecision        time_type;
     typedef SpatialPrecision     spatial_type;
     typedef vector<spatial_type> data_type;
+    typedef integral_constant<size_t, Dim> dim_type;
+    static constexpr size_t  DIM = Dim;
   };
 
 }  // ::pfasst

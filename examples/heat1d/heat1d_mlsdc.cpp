@@ -5,22 +5,22 @@ using namespace std;
 #include <pfasst/quadrature.hpp>
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/controller/two_level_mlsdc.hpp>
-#include <pfasst/contrib/spectral_1d.hpp>
+#include <pfasst/contrib/spectral_transfer.hpp>
 
 #include "heat1d_sweeper.hpp"
 
 using pfasst::encap::VectorEncapsulation;
 using pfasst::quadrature::quadrature_factory;
 using pfasst::quadrature::QuadratureType;
-using pfasst::contrib::Spectral1DTransfer;
+using pfasst::contrib::SpectralTransfer;
 using pfasst::TwoLevelMLSDC;
 
 using pfasst::examples::heat1d::Heat1D;
 
-typedef VectorEncapsulation<double, double>                        EncapType;
+typedef VectorEncapsulation<double, double, 1>                     EncapType;
 typedef Heat1D<pfasst::sweeper_traits<typename EncapType::traits>> SweeperType;
 typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>       TransferTraits;
-typedef Spectral1DTransfer<TransferTraits>                         TransferType;
+typedef SpectralTransfer<TransferTraits>                           TransferType;
 
 
 namespace pfasst

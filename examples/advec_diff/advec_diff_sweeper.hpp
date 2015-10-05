@@ -6,7 +6,7 @@
 using namespace std;
 
 #include <pfasst/sweeper/imex.hpp>
-#include <pfasst/contrib/fft_1d.hpp>
+#include <pfasst/contrib/fft.hpp>
 
 // I'd really like to have these as static const variable templates but this is only possible since C++14 ... :-(
 #define DEFAULT_DIFFUSIVITY 0.02
@@ -27,10 +27,10 @@ namespace pfasst
         : public IMEX<SweeperTrait, Enabled>
       {
         static_assert(is_same<
-                        vector<typename SweeperTrait::time_type>,
-                        typename SweeperTrait::encap_type::data_type
+                        typename SweeperTrait::encap_type::traits::dim_type,
+                        integral_constant<size_t, 1>
                       >::value,
-                      "Advection Diffusion Sweeper requires encapsulated vectors");
+                      "Advection-Diffusion Sweeper requires 1D data structures");
 
         public:
           typedef          SweeperTrait         traits;
@@ -45,9 +45,9 @@ namespace pfasst
           spatial_type _nu;
           spatial_type _v;
 
-          pfasst::contrib::FFT1D<spatial_type> _fft;
-          vector<complex<spatial_type>>        _ddx;
-          vector<complex<spatial_type>>        _lap;
+          pfasst::contrib::FFT<encap_type> _fft;
+          vector<complex<spatial_type>>    _ddx;
+          vector<complex<spatial_type>>    _lap;
 
         protected:
           virtual shared_ptr<typename SweeperTrait::encap_type> evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
@@ -79,7 +79,7 @@ namespace pfasst
 
           virtual void post_step() override;
 
-          virtual bool converged() override;
+          virtual bool converged(const bool& pre_check = false) override;
 
           size_t get_num_dofs() const;
       };

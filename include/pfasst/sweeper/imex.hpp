@@ -33,7 +33,7 @@ namespace pfasst
       size_t _num_impl_solves;
 
       virtual void integrate_end_state(const typename SweeperTrait::time_type& dt) override;
-      virtual void compute_residuals() override;
+      virtual void compute_residuals(const bool& only_last = false) override;
 
       virtual shared_ptr<typename SweeperTrait::encap_type> evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
                                                                               const shared_ptr<typename SweeperTrait::encap_type> u);

@@ -84,6 +84,41 @@ namespace pfasst
     }
 
     template<class EncapsulationTrait>
+    size_t
+    Encapsulation<
+      EncapsulationTrait, 
+      typename enable_if<
+                 is_same<
+                   vector<typename EncapsulationTrait::spatial_type>,
+                   typename EncapsulationTrait::data_type
+                 >::value
+               >::type>::get_total_num_dofs() const
+    {
+      return this->get_data().size();
+    }
+
+    template<class EncapsulationTrait>
+    array<int, EncapsulationTrait::DIM>
+    Encapsulation<
+      EncapsulationTrait, 
+      typename enable_if<
+                 is_same<
+                   vector<typename EncapsulationTrait::spatial_type>,
+                   typename EncapsulationTrait::data_type
+                 >::value
+               >::type>::get_dimwise_num_dofs() const
+    {
+      array<int, EncapsulationTrait::DIM> dimwise_ndofs;
+      if (EncapsulationTrait::DIM == 1) {
+        dimwise_ndofs.fill((int)this->get_total_num_dofs());
+      } else {
+        dimwise_ndofs.fill((int)sqrt(this->get_total_num_dofs()));
+      }
+
+      return dimwise_ndofs;
+    }
+
+    template<class EncapsulationTrait>
     void
     Encapsulation<
       EncapsulationTrait, 

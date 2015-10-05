@@ -13,7 +13,7 @@ using pfasst::Controller;
 #include "sweeper/mocks.hpp"
 #include "transfer/mocks.hpp"
 
-typedef pfasst::vector_encap_traits<double, double>           VectorEncapTrait;
+typedef pfasst::vector_encap_traits<double, double, 1>        VectorEncapTrait;
 typedef pfasst::encap::Encapsulation<VectorEncapTrait>        VectorEncapsulation;
 typedef SweeperMock<pfasst::sweeper_traits<VectorEncapTrait>> SweeperType;
 typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>  TransferTraits;

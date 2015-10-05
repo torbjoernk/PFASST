@@ -5,7 +5,7 @@ using namespace std;
 #include <pfasst/quadrature.hpp>
 #include <pfasst/encap/vector.hpp>
 #include <pfasst/controller/sdc.hpp>
-#include <pfasst/contrib/spectral_1d.hpp>
+#include <pfasst/contrib/spectral_transfer.hpp>
 
 #include "heat1d_sweeper.hpp"
 
@@ -20,10 +20,10 @@ namespace pfasst
     {
       shared_ptr<
         pfasst::SDC<
-          pfasst::contrib::Spectral1DTransfer<
+          pfasst::contrib::SpectralTransfer<
             pfasst::transfer_traits<
-              Heat1D<pfasst::sweeper_traits<vector_encap_traits<double, double>>>,
-              Heat1D<pfasst::sweeper_traits<vector_encap_traits<double, double>>>,
+              Heat1D<pfasst::sweeper_traits<vector_encap_traits<double, double, 1>>>,
+              Heat1D<pfasst::sweeper_traits<vector_encap_traits<double, double, 1>>>,
               1
             >
           >
@@ -33,12 +33,12 @@ namespace pfasst
               const double& t_0, const double& dt, const double& t_end, const size_t& niter)
       {
         using pfasst::quadrature::quadrature_factory;
-        using pfasst::contrib::Spectral1DTransfer;
+        using pfasst::contrib::SpectralTransfer;
         using pfasst::SDC;
 
-        typedef vector_encap_traits<double, double>                                      EncapTraits;
-        typedef Heat1D<pfasst::sweeper_traits<EncapTraits>>                              SweeperType;
-        typedef Spectral1DTransfer<pfasst::transfer_traits<SweeperType, SweeperType, 1>> TransferType;
+        typedef vector_encap_traits<double, double, 1>                                 EncapTraits;
+        typedef Heat1D<pfasst::sweeper_traits<EncapTraits>>                            SweeperType;
+        typedef SpectralTransfer<pfasst::transfer_traits<SweeperType, SweeperType, 1>> TransferType;
 
         auto sdc = make_shared<SDC<TransferType>>();
 
@@ -74,11 +74,11 @@ namespace pfasst
     using pfasst::quadrature::QuadratureType;
     using pfasst::examples::heat1d::Heat1D;
 
-    typedef pfasst::vector_encap_traits<double, double> EncapTraits;
-    typedef Heat1D<pfasst::sweeper_traits<EncapTraits>> SweeperType;
-  
+    typedef pfasst::vector_encap_traits<double, double, 1> EncapTraits;
+    typedef Heat1D<pfasst::sweeper_traits<EncapTraits>>    SweeperType;
+
     pfasst::init(argc, argv, SweeperType::init_opts);
-  
+
     const size_t ndofs = get_value<size_t>("num_dofs", 8);
     const size_t nnodes = get_value<size_t>("num_nodes", 3);
     const QuadratureType quad_type = QuadratureType::GaussRadau;
@@ -100,7 +100,7 @@ namespace pfasst
       t_end = t_0 + dt * nsteps;
     }
     const size_t niter = get_value<size_t>("num_iters", 5);
-  
+
     pfasst::examples::heat1d::run_sdc(ndofs, nnodes, quad_type, t_0, dt, t_end, niter);
   }
 #endif

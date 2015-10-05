@@ -14,7 +14,7 @@ using pfasst::SDC;
 #include "sweeper/mocks.hpp"
 #include "transfer/mocks.hpp"
 
-typedef pfasst::vector_encap_traits<double, double>                     VectorEncapTrait;
+typedef pfasst::vector_encap_traits<double, double, 1>                  VectorEncapTrait;
 typedef pfasst::encap::Encapsulation<VectorEncapTrait>                  VectorEncapsulation;
 typedef NiceMock<SweeperMock<pfasst::sweeper_traits<VectorEncapTrait>>> SweeperType;
 typedef pfasst::transfer_traits<SweeperType, SweeperType, 1>            TransferTraits;
@@ -219,7 +219,7 @@ TEST_F(Logic, advance_iteration_with_exceeding_max_iteration_threshold)
   ASSERT_THAT(controller->get_status()->get_iteration(), Eq(1));
   ASSERT_THAT(controller->get_status()->get_max_iterations(), Eq(1));
 
-  EXPECT_CALL(*(sweeper.get()), converged()).Times(1).WillRepeatedly(Return(false));
+  EXPECT_CALL(*(sweeper.get()), converged(_)).Times(1).WillRepeatedly(Return(false));
 
   EXPECT_FALSE(controller->advance_iteration());
 
@@ -232,7 +232,7 @@ TEST_F(Logic, advance_iteration)
   ASSERT_THAT(controller->get_status()->get_iteration(), Eq(0));
   ASSERT_THAT(controller->get_status()->get_max_iterations(), Eq(5));
 
-  EXPECT_CALL(*(sweeper.get()), converged()).Times(1);
+  EXPECT_CALL(*(sweeper.get()), converged(_)).Times(1);
   EXPECT_CALL(*(sweeper.get()), save()).Times(1);
 
   EXPECT_TRUE(controller->advance_iteration());
@@ -252,7 +252,7 @@ TEST_F(Logic, single_time_step_sdc)
   controller->setup();
   Mock::VerifyAndClearExpectations(&(*(sweeper.get())));
 
-  EXPECT_CALL(*(sweeper.get()), converged()).Times(4);
+  EXPECT_CALL(*(sweeper.get()), converged(_)).Times(4);
   EXPECT_CALL(*(sweeper.get()), save()).Times(3);
 
   EXPECT_CALL(*(sweeper.get()), pre_predict()).Times(1);

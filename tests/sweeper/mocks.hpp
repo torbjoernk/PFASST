@@ -49,5 +49,5 @@ class SweeperMock
     MOCK_METHOD1_T(reevaluate, void(const bool initial_only));
     MOCK_METHOD1_T(integrate, vector<shared_ptr<typename SweeperTrait::encap_type>>(const typename SweeperTrait::time_type& dt));
 
-    MOCK_METHOD0_T(converged, bool());
+    MOCK_METHOD1_T(converged, bool(bool));
 };
