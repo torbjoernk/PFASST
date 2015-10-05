@@ -21,7 +21,7 @@ namespace pfasst
     }
 
     template<class Encapsulation>
-    complex<typename Encapsulation::spatial_type>*
+    complex<typename Encapsulation::traits::spatial_t>*
     FFT<Encapsulation>::forward(const shared_ptr<Encapsulation> x)
     {
       const auto ndofs = x->get_dimwise_num_dofs();
@@ -57,7 +57,7 @@ namespace pfasst
         wk->wk = fftw_alloc_complex(total_ndofs);
         wk->ffft = fftw_plan_dft(DIM, ndofs.data(), wk->wk, wk->wk, FFTW_FORWARD, FFTW_ESTIMATE);
         wk->ifft = fftw_plan_dft(DIM, ndofs.data(), wk->wk, wk->wk, FFTW_BACKWARD, FFTW_ESTIMATE);
-        wk->z = reinterpret_cast<complex<typename Encapsulation::spatial_type>*>(wk->wk);
+        wk->z = reinterpret_cast<complex<typename Encapsulation::traits::spatial_t>*>(wk->wk);
         workspaces.insert(pair<array<int, Encapsulation::traits::DIM>, shared_ptr<workspace>>(ndofs, wk));
       }
 

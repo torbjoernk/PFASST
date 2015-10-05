@@ -12,7 +12,7 @@ namespace pfasst
 {
   template<class TransferT, class CommT>
   Controller<TransferT, CommT>::Controller()
-    :   _status(make_shared<Status<typename TransferT::traits::fine_time_type>>())
+    :   _status(make_shared<Status<typename TransferT::traits::fine_time_t>>())
       , _ready(false)
       , _logger_id("CONTROL")
   {}
@@ -32,14 +32,14 @@ namespace pfasst
   }
 
   template<class TransferT, class CommT>
-  shared_ptr<Status<typename TransferT::traits::fine_time_type>>&
+  shared_ptr<Status<typename TransferT::traits::fine_time_t>>&
   Controller<TransferT, CommT>::status()
   {
     return this->_status;
   }
 
   template<class TransferT, class CommT>
-  const shared_ptr<Status<typename TransferT::traits::fine_time_type>>
+  const shared_ptr<Status<typename TransferT::traits::fine_time_t>>
   Controller<TransferT, CommT>::get_status() const
   {
     return this->_status;
@@ -123,7 +123,7 @@ namespace pfasst
   Controller<TransferT, CommT>::set_options()
   {
     this->status()->max_iterations() = config::get_value<size_t>("num_iters", this->get_status()->get_max_iterations());
-    this->status()->t_end() = config::get_value<typename TransferT::traits::fine_time_type>("t_end", this->get_status()->get_t_end());
+    this->status()->t_end() = config::get_value<typename TransferT::traits::fine_time_t>("t_end", this->get_status()->get_t_end());
   }
 
   template<class TransferT, class CommT>
@@ -206,8 +206,8 @@ namespace pfasst
   bool
   Controller<TransferT, CommT>::advance_time(const size_t& num_steps)
   {
-    const time_type delta_time = num_steps * this->get_status()->get_dt();
-    const time_type new_time = this->get_status()->get_time() + delta_time;
+    const time_t delta_time = num_steps * this->get_status()->get_dt();
+    const time_t new_time = this->get_status()->get_time() + delta_time;
 
     auto status_summary = this->get_status()->summary();
     for (const auto& line : status_summary) {
@@ -239,6 +239,13 @@ namespace pfasst
 
       return true;
     }
+  }
+
+  template<class TransferT, class CommT>
+  bool
+  Controller<TransferT, CommT>::advance_time()
+  {
+    return this->advance_time(1);
   }
 
   template<class TransferT, class CommT>

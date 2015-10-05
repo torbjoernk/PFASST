@@ -11,7 +11,7 @@ using namespace std;
 
 using pfasst::quadrature::QuadratureType;
 
-using DataVectorTraits = pfasst::vector_encap_traits<double, double, 3>;
+using DataVectorTraits = pfasst::encap::vector_encap_traits<double, double, 3>;
 
 
 namespace pfasst

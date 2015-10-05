@@ -15,13 +15,14 @@ using namespace std;
 using namespace pfasst::quadrature;
 
 
-typedef ::testing::Types<IQuadrature<double>,
-                         GaussLegendre<double>,
-                         GaussLobatto<double>,
-                         GaussRadau<double>,
-                         ClenshawCurtis<double>,
-                         Uniform<double>
-                        > QuadratureTypes;
+using QuadratureTypes = ::testing::Types<
+                                            IQuadrature<double>
+                                          , GaussLegendre<double>
+                                          , GaussLobatto<double>
+                                          , GaussRadau<double>
+                                          , ClenshawCurtis<double>
+                                          , Uniform<double>
+                                        >;
 INSTANTIATE_TYPED_TEST_CASE_P(Quadrature, Concepts, QuadratureTypes);
 
 

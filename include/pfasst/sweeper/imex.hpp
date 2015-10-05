@@ -14,37 +14,35 @@ namespace pfasst
     : public Sweeper<SweeperTrait, Enabled>
   {
     public:
-      typedef          SweeperTrait                 sweeper_traits;
-      typedef typename sweeper_traits::encap_type   encap_type;
-      typedef typename sweeper_traits::time_type    time_type;
-      typedef typename sweeper_traits::spatial_type spatial_type;
+      using traits = SweeperTrait;
 
     protected:
-      Matrix<time_type> _q_delta_expl;
-      Matrix<time_type> _q_delta_impl;
+      Matrix<typename traits::time_t> _q_delta_expl;
+      Matrix<typename traits::time_t> _q_delta_impl;
 
       //! size = #nodes + 1
-      vector<shared_ptr<encap_type>> _q_integrals;
-      vector<shared_ptr<encap_type>> _expl_rhs;
-      vector<shared_ptr<encap_type>> _impl_rhs;
+      vector<shared_ptr<typename traits::encap_t>> _q_integrals;
+      vector<shared_ptr<typename traits::encap_t>> _expl_rhs;
+      vector<shared_ptr<typename traits::encap_t>> _impl_rhs;
 
       size_t _num_expl_f_evals;
       size_t _num_impl_f_evals;
       size_t _num_impl_solves;
 
-      virtual void integrate_end_state(const typename SweeperTrait::time_type& dt) override;
-      virtual void compute_residuals(const bool& only_last = false) override;
+      virtual void integrate_end_state(const typename SweeperTrait::time_t& dt) override;
+      virtual void compute_residuals(const bool& only_last) override;
+      virtual void compute_residuals() override;
 
-      virtual shared_ptr<typename SweeperTrait::encap_type> evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
-                                                                              const shared_ptr<typename SweeperTrait::encap_type> u);
-      virtual shared_ptr<typename SweeperTrait::encap_type> evaluate_rhs_impl(const typename SweeperTrait::time_type& t,
-                                                                              const shared_ptr<typename SweeperTrait::encap_type> u);
+      virtual shared_ptr<typename SweeperTrait::encap_t> evaluate_rhs_expl(const typename SweeperTrait::time_t& t,
+                                                                              const shared_ptr<typename SweeperTrait::encap_t> u);
+      virtual shared_ptr<typename SweeperTrait::encap_t> evaluate_rhs_impl(const typename SweeperTrait::time_t& t,
+                                                                              const shared_ptr<typename SweeperTrait::encap_t> u);
 
-      virtual void implicit_solve(shared_ptr<typename SweeperTrait::encap_type> f,
-                                  shared_ptr<typename SweeperTrait::encap_type> u,
-                                  const typename SweeperTrait::time_type& t,
-                                  const typename SweeperTrait::time_type& dt,
-                                  const shared_ptr<typename SweeperTrait::encap_type> rhs);
+      virtual void implicit_solve(shared_ptr<typename SweeperTrait::encap_t> f,
+                                  shared_ptr<typename SweeperTrait::encap_t> u,
+                                  const typename SweeperTrait::time_t& t,
+                                  const typename SweeperTrait::time_t& dt,
+                                  const shared_ptr<typename SweeperTrait::encap_t> rhs);
 
       virtual void compute_delta_matrices();
 
@@ -70,9 +68,11 @@ namespace pfasst
       virtual void post_sweep() override;
 
       virtual void post_step() override;
-      virtual void advance(const size_t& num_steps = 1) override;
-      virtual void reevaluate(const bool initial_only = false) override;
-      virtual vector<shared_ptr<typename SweeperTrait::encap_type>> integrate(const typename SweeperTrait::time_type& dt) override;
+      virtual void advance(const size_t& num_steps) override;
+      virtual void advance() override;
+      virtual void reevaluate(const bool initial_only) override;
+      virtual void reevaluate() override;
+      virtual vector<shared_ptr<typename SweeperTrait::encap_t>> integrate(const typename SweeperTrait::time_t& dt) override;
   };
 }  // ::pfasst
 

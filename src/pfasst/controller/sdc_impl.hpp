@@ -46,7 +46,7 @@ namespace pfasst
   void
   SDC<TransferT>::add_sweeper(shared_ptr<SweeperT> sweeper)
   {
-    static_assert(is_same<SweeperT, typename TransferT::traits::fine_sweeper_type>::value,
+    static_assert(is_same<SweeperT, typename TransferT::traits::fine_sweeper_t>::value,
                   "Sweeper must be a Fine Sweeper Type.");
 
     this->_sweeper = sweeper;
@@ -61,14 +61,14 @@ namespace pfasst
   }
 
   template<class TransferT>
-  const shared_ptr<typename TransferT::traits::fine_sweeper_type>
+  const shared_ptr<typename TransferT::traits::fine_sweeper_t>
   SDC<TransferT>::get_sweeper() const
   {
     return this->_sweeper;
   }
 
   template<class TransferT>
-  shared_ptr<typename TransferT::traits::fine_sweeper_type>
+  shared_ptr<typename TransferT::traits::fine_sweeper_t>
   SDC<TransferT>::get_sweeper()
   {
     return this->_sweeper;
@@ -152,6 +152,13 @@ namespace pfasst
     } else {
       return false;
     }
+  }
+
+  template<class TransferT>
+  bool
+  SDC<TransferT>::advance_time()
+  {
+    return this->advance_time(1);
   }
 
   template<class TransferT>

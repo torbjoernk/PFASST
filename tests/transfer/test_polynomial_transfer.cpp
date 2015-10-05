@@ -5,18 +5,16 @@ using pfasst::PolynomialTransfer;
 
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
-typedef pfasst::vector_encap_traits<double, double, 1> VectorEncapTrait;
-typedef pfasst::encap::Encapsulation<VectorEncapTrait> VectorEncapsulation;
+using encap_traits_t = pfasst::encap::vector_encap_traits<double, double, 1>;
+using encap_t = pfasst::encap::Encapsulation<encap_traits_t>;
 
-// #include "sweeper/mocks.hpp"
-// typedef SweeperMock<double, VectorEncapsulation> Sweeper;
 #include "pfasst/sweeper/sweeper.hpp"
-typedef pfasst::Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> Sweeper;
+using sweeper_t = pfasst::Sweeper<pfasst::sweeper_traits<encap_traits_t>>;
 
-typedef pfasst::transfer_traits<Sweeper, Sweeper, 2>              TransferTraits;
-typedef PolynomialTransfer<TransferTraits>                        TransferType;
+using transfer_traits_t = pfasst::transfer_traits<sweeper_t, sweeper_t, 2>;
+using transfer_t = PolynomialTransfer<transfer_traits_t>;
 
-typedef ::testing::Types<TransferType> PolynomialTransferTypes;
+using PolynomialTransferTypes = ::testing::Types<transfer_t>;
 INSTANTIATE_TYPED_TEST_CASE_P(PolynomialTransfer, Concepts, PolynomialTransferTypes);
 
 

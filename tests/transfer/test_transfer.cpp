@@ -8,14 +8,15 @@ using pfasst::Transfer;
 
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
-typedef pfasst::vector_encap_traits<double, double, 1> VectorEncapTrait;
+using encap_traits_t = pfasst::encap::vector_encap_traits<double, double, 1>;
+using encap_t = pfasst::encap::Encapsulation<encap_traits_t>;
 
-// #include "sweeper/mocks.hpp"
-// typedef SweeperMock<double, VectorEncapsulation> Sweeper;
 #include "pfasst/sweeper/sweeper.hpp"
-typedef pfasst::Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> Sweeper;
+using sweeper_t = pfasst::Sweeper<pfasst::sweeper_traits<encap_traits_t>>;
 
-typedef ::testing::Types<Transfer<pfasst::transfer_traits<Sweeper, Sweeper, 2>>> TransferTypes;
+using transfer_t = Transfer<pfasst::transfer_traits<sweeper_t, sweeper_t, 2>>;
+
+using TransferTypes = ::testing::Types<transfer_t>;
 INSTANTIATE_TYPED_TEST_CASE_P(Transfer, Concepts, TransferTypes);
 
 
@@ -23,14 +24,11 @@ class Interface
   : public ::testing::Test
 {
   protected:
-    typedef Transfer<pfasst::transfer_traits<Sweeper, Sweeper, 2>> transfer_type;
-    typedef pfasst::encap::VectorEncapsulation<double, double, 1>  encap_type;
-
-    transfer_type          transfer;
-    shared_ptr<Sweeper>    coarse_sweeper;
-    shared_ptr<Sweeper>    fine_sweeper;
-    shared_ptr<encap_type> coarse_encap;
-    shared_ptr<encap_type> fine_encap;
+    transfer_t            transfer;
+    shared_ptr<sweeper_t> coarse_sweeper;
+    shared_ptr<sweeper_t> fine_sweeper;
+    shared_ptr<encap_t>   coarse_encap;
+    shared_ptr<encap_t>   fine_encap;
 };
 
 TEST_F(Interface, no_implementation_of_interpolation_of_initial_value)

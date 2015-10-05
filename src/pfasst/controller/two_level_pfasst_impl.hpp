@@ -16,7 +16,7 @@ namespace pfasst
   {
     TwoLevelPfasst<TransferT, CommT>::init_loggers();
     this->set_logger_id("PFASST");
-    this->_prev_status = make_shared<Status<time_type>>();
+    this->_prev_status = make_shared<Status<time_t>>();
   }
 
   template<class TransferT, class CommT>
@@ -56,9 +56,9 @@ namespace pfasst
       throw logic_error("two processes required for Two-Level-PFASST");
     }
 
-    this->_prev_status = make_shared<Status<time_type>>();
+    this->_prev_status = make_shared<Status<time_t>>();
     this->_prev_status->clear();
-    this->_prev_status_temp = make_shared<Status<time_type>>();
+    this->_prev_status_temp = make_shared<Status<time_t>>();
     this->_prev_status_temp->clear();
   }
 
@@ -158,6 +158,13 @@ namespace pfasst
       ML_CLOG(INFO, this->get_logger_id(), "");
       return false;
     }
+  }
+
+  template<class TransferT, class CommT>
+  bool
+  TwoLevelPfasst<TransferT, CommT>::advance_time()
+  {
+    return this->advance_time(1);
   }
 
   template<class TransferT, class CommT>

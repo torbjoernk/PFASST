@@ -20,24 +20,14 @@ namespace pfasst
     : public Transfer<TransferTraits, Enabled>
   {
     public:
-      typedef          TransferTraits              traits;
-
-      typedef typename traits::coarse_encap_traits coarse_encap_traits;
-      typedef typename traits::coarse_encap_type   coarse_encap_type;
-      typedef typename traits::coarse_time_type    coarse_time_type;
-      typedef typename traits::coarse_spatial_type coarse_spatial_type;
-
-      typedef typename traits::fine_encap_traits   fine_encap_traits;
-      typedef typename traits::fine_encap_type     fine_encap_type;
-      typedef typename traits::fine_time_type      fine_time_type;
-      typedef typename traits::fine_spatial_type   fine_spatial_type;
+      using traits = TransferTraits;
 
     protected:
-      Matrix<fine_time_type> tmat;
-      Matrix<fine_time_type> fmat;
+      Matrix<typename traits::fine_time_t> tmat;
+      Matrix<typename traits::fine_time_t> fmat;
 
-      virtual void setup_tmat(const shared_ptr<quadrature::IQuadrature<typename TransferTraits::fine_time_type>> fine_quad,
-                              const shared_ptr<quadrature::IQuadrature<typename TransferTraits::coarse_time_type>> coarse_quad);
+      virtual void setup_tmat(const shared_ptr<quadrature::IQuadrature<typename TransferTraits::fine_time_t>> fine_quad,
+                              const shared_ptr<quadrature::IQuadrature<typename TransferTraits::coarse_time_t>> coarse_quad);
 
     public:
       PolynomialTransfer() = default;
@@ -47,25 +37,25 @@ namespace pfasst
       PolynomialTransfer<TransferTraits, Enabled>& operator=(const PolynomialTransfer<TransferTraits, Enabled>& other) = default;
       PolynomialTransfer<TransferTraits, Enabled>& operator=(PolynomialTransfer<TransferTraits, Enabled>&& other) = default;
 
-      virtual void interpolate_initial(const shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse,
-                                       shared_ptr<typename TransferTraits::fine_sweeper_type> fine);
-      virtual void interpolate(const shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse,
-                               shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
+      virtual void interpolate_initial(const shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse,
+                                       shared_ptr<typename TransferTraits::fine_sweeper_t> fine);
+      virtual void interpolate(const shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse,
+                               shared_ptr<typename TransferTraits::fine_sweeper_t> fine,
                                const bool initial = false);
-      virtual void interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
-                                    shared_ptr<typename TransferTraits::fine_encap_type> fine);
+      virtual void interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_t> coarse,
+                                    shared_ptr<typename TransferTraits::fine_encap_t> fine);
 
-      virtual void restrict_initial(const shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
-                                    shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse);
-      virtual void restrict(const shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
-                            shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse,
+      virtual void restrict_initial(const shared_ptr<typename TransferTraits::fine_sweeper_t> fine,
+                                    shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse);
+      virtual void restrict(const shared_ptr<typename TransferTraits::fine_sweeper_t> fine,
+                            shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse,
                             const bool initial = false);
-      virtual void restrict_data(const shared_ptr<typename TransferTraits::fine_encap_type> fine,
-                                 shared_ptr<typename TransferTraits::coarse_encap_type> coarse);
+      virtual void restrict_data(const shared_ptr<typename TransferTraits::fine_encap_t> fine,
+                                 shared_ptr<typename TransferTraits::coarse_encap_t> coarse);
 
-      virtual void fas(const typename TransferTraits::fine_time_type& dt,
-                       const shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
-                       shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse);
+      virtual void fas(const typename TransferTraits::fine_time_t& dt,
+                       const shared_ptr<typename TransferTraits::fine_sweeper_t> fine,
+                       shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse);
   };
 }  // ::pfasst
 

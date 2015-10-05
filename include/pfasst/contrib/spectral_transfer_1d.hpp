@@ -20,37 +20,27 @@ namespace pfasst
     >
     class SpectralTransfer<TransferTraits, typename enable_if<
                  is_same<
-                   typename TransferTraits::fine_encap_traits::dim_type,
+                   typename TransferTraits::fine_encap_traits::dim_t,
                    integral_constant<size_t, 1>
                  >::value
                >::type>
       : public PolynomialTransfer<TransferTraits>
     {
       public:
-        typedef TransferTraits traits;
-
-        typedef typename traits::coarse_encap_traits coarse_encap_traits;
-        typedef typename traits::coarse_encap_type coarse_encap_type;
-        typedef typename traits::coarse_time_type coarse_time_type;
-        typedef typename traits::coarse_spatial_type coarse_spatial_type;
-
-        typedef typename traits::fine_encap_traits fine_encap_traits;
-        typedef typename traits::fine_encap_type fine_encap_type;
-        typedef typename traits::fine_time_type fine_time_type;
-        typedef typename traits::fine_spatial_type fine_spatial_type;
+        using traits = TransferTraits;
 
       protected:
-        pfasst::contrib::FFT<fine_encap_type> fft;
+        pfasst::contrib::FFT<typename traits::fine_encap_t> fft;
 
-        using index_type = tuple<size_t>;
-        size_t translate_index(const index_type& index, const index_type& extends) const;
+        using index_t = tuple<size_t>;
+        size_t translate_index(const index_t& index, const index_t& extends) const;
 
       public:
-        virtual void interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
-                                      shared_ptr<typename TransferTraits::fine_encap_type> fine);
+        virtual void interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_t> coarse,
+                                      shared_ptr<typename TransferTraits::fine_encap_t> fine);
 
-        virtual void restrict_data(const shared_ptr<typename TransferTraits::fine_encap_type> fine,
-                                   shared_ptr<typename TransferTraits::coarse_encap_type> coarse);
+        virtual void restrict_data(const shared_ptr<typename TransferTraits::fine_encap_t> fine,
+                                   shared_ptr<typename TransferTraits::coarse_encap_t> coarse);
     };
   }  // ::pfasst::contrib
 }  // ::pfasst

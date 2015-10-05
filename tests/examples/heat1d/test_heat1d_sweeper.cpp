@@ -7,20 +7,17 @@ using namespace std;
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/vector.hpp>
 using pfasst::quadrature::QuadratureType;
-typedef pfasst::vector_encap_traits<double, double, 1>                        EncapTraits;
+using encap_traits_t = pfasst::encap::vector_encap_traits<double, double, 1>;
 
 #include "examples/heat1d/heat1d_sweeper.hpp"
-typedef pfasst::examples::heat1d::Heat1D<pfasst::sweeper_traits<EncapTraits>> SweeperType;
+using sweeper_t = pfasst::examples::heat1d::Heat1D<pfasst::sweeper_traits<encap_traits_t>>;
 
 
 class ProblemSetup
   : public ::testing::Test
 {
   protected:
-    typedef          SweeperType              sweeper_type;
-    typedef typename sweeper_type::encap_type encap_type;
-
-    shared_ptr<sweeper_type> sweeper;
+    shared_ptr<sweeper_t> sweeper;
 
     shared_ptr<pfasst::Status<double>> status = make_shared<pfasst::Status<double>>();
 
@@ -43,7 +40,7 @@ class ProblemSetup
 
     virtual void SetUp()
     {
-      sweeper = make_shared<sweeper_type>(8);
+      sweeper = make_shared<sweeper_t>(8);
       sweeper->status() = status;
     }
 };

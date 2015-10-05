@@ -139,7 +139,7 @@ void interpolate_data(FFT& fft, const shared_ptr<Vector>& coarse, shared_ptr<Vec
   }
 }
 
-void restrict_data(FFT& fft, const shared_ptr<Vector>& fine, shared_ptr<Vector> coarse)
+void restrict_data(const shared_ptr<Vector>& fine, shared_ptr<Vector> coarse)
 {
   const size_t coarse_ndofs = coarse->get_data().size();
   const size_t fine_ndofs = fine->get_data().size();
@@ -232,7 +232,7 @@ int main(int argc, char** argv) {
   assert(norm < 1e-15);
 
   auto coarse = make_shared<Vector>(dim_size * dim_size);
-  restrict_data(fft, fine_fun, coarse);
+  restrict_data(fine_fun, coarse);
   cout << "restricted fine:" << endl;
   print_vec_2d(coarse, make_pair(dim_size, dim_size));
   const auto norm_c = compute_diff(coarse, vec);

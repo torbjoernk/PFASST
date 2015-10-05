@@ -16,10 +16,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::Encapsulation(const size_t size)
       : _data(size)
     {
@@ -30,11 +27,8 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
-               >::type>::Encapsulation(const typename EncapsulationTrait::data_type& data)
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
+               >::type>::Encapsulation(const typename EncapsulationTrait::data_t& data)
       : Encapsulation<EncapsulationTrait>(data.size())
     {
       this->data() = data;
@@ -45,39 +39,30 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
-               >::type>::operator=(const typename EncapsulationTrait::data_type& data)
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
+               >::type>::operator=(const typename EncapsulationTrait::data_t& data)
     {
       this->data() = data;
       return *this;
     }
 
     template<class EncapsulationTrait>
-    typename EncapsulationTrait::data_type&
+    typename EncapsulationTrait::data_t&
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::data()
     {
       return this->_data;
     }
 
     template<class EncapsulationTrait>
-    const typename EncapsulationTrait::data_type&
+    const typename EncapsulationTrait::data_t&
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::get_data() const
     {
       return this->_data;
@@ -88,10 +73,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::get_total_num_dofs() const
     {
       return this->get_data().size();
@@ -102,10 +84,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::get_dimwise_num_dofs() const
     {
       array<int, EncapsulationTrait::DIM> dimwise_ndofs;
@@ -132,13 +111,10 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::zero()
     {
-      fill(this->data().begin(), this->data().end(), typename EncapsulationTrait::spatial_type(0.0));
+      fill(this->data().begin(), this->data().end(), typename EncapsulationTrait::spatial_t(0.0));
     }
 
     template<class EncapsulationTrait>
@@ -146,35 +122,29 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
-               >::type>::scaled_add(const typename EncapsulationTrait::time_type& a,
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
+               >::type>::scaled_add(const typename EncapsulationTrait::time_t& a,
                                    const shared_ptr<Encapsulation<EncapsulationTrait>> y)
     {
       assert(this->get_data().size() == y->data().size());
 
       transform(this->get_data().cbegin(), this->get_data().cend(), y->data().cbegin(),
                 this->data().begin(),
-                [a](const typename EncapsulationTrait::spatial_type& xi,
-                    const typename EncapsulationTrait::spatial_type& yi) { return xi + a * yi; });
+                [a](const typename EncapsulationTrait::spatial_t& xi,
+                    const typename EncapsulationTrait::spatial_t& yi) { return xi + a * yi; });
     }
 
     template<class EncapsulationTrait>
-    typename EncapsulationTrait::spatial_type
+    typename EncapsulationTrait::spatial_t
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::norm0() const
     {
       return abs(*(max_element(this->get_data().cbegin(), this->get_data().cend(),
-                               [](const typename EncapsulationTrait::spatial_type& a,
-                                  const typename EncapsulationTrait::spatial_type& b)
+                               [](const typename EncapsulationTrait::spatial_t& a,
+                                  const typename EncapsulationTrait::spatial_t& b)
                                  { return abs(a) < abs(b); })));
     }
 
@@ -184,10 +154,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::probe(shared_ptr<CommT> comm, const int src_rank, const int tag)
     {
       return comm->probe(src_rank, tag);
@@ -199,10 +166,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::send(shared_ptr<CommT> comm, const int dest_rank,
                               const int tag, const bool blocking)
     {
@@ -220,10 +184,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::recv(shared_ptr<CommT> comm, const int src_rank,
                               const int tag, const bool blocking)
     {
@@ -241,10 +202,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::bcast(shared_ptr<CommT> comm, const int root_rank)
     {
       comm->bcast(this->data().data(), this->get_data().size(), root_rank);
@@ -255,10 +213,7 @@ namespace pfasst
     Encapsulation<
       EncapsulationTrait, 
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::log(el::base::type::ostream_t& os) const
     {
       os << "Vector" << pfasst::join(this->get_data(), ", ");
@@ -269,10 +224,7 @@ namespace pfasst
     EncapsulationFactory<
       EncapsulationTrait,
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::EncapsulationFactory(const size_t size)
       : _size(size)
     {}
@@ -282,10 +234,7 @@ namespace pfasst
     EncapsulationFactory<
       EncapsulationTrait,
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::create() const
     {
       return make_shared<Encapsulation<EncapsulationTrait>>(this->size());
@@ -296,10 +245,7 @@ namespace pfasst
     EncapsulationFactory<
       EncapsulationTrait,
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::set_size(const size_t& size)
     {
       this->_size = size;
@@ -310,10 +256,7 @@ namespace pfasst
     EncapsulationFactory<
       EncapsulationTrait,
       typename enable_if<
-                 is_same<
-                   vector<typename EncapsulationTrait::spatial_type>,
-                   typename EncapsulationTrait::data_type
-                 >::value
+                 is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                >::type>::size() const
     {
       return this->_size;

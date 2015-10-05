@@ -19,17 +19,17 @@ namespace pfasst
     : public enable_shared_from_this<Controller<TransferT, CommT>>
   {
     public:
-      typedef          TransferT                             transfer_type;
-      typedef          CommT                                 comm_type;
-      typedef typename transfer_type::traits::fine_time_type time_type;
+      using transfer_t = TransferT;
+      using comm_t = CommT;
+      using time_t = typename transfer_t::traits::fine_time_t;
 
     protected:
-      shared_ptr<comm_type>          _comm;
+      shared_ptr<comm_t>          _comm;
 
-      shared_ptr<transfer_type>      _transfer;
-      shared_ptr<Status<time_type>>  _status;
-      bool                           _ready;
-      string                         _logger_id;
+      shared_ptr<transfer_t>      _transfer;
+      shared_ptr<Status<time_t>>  _status;
+      bool                        _ready;
+      string                      _logger_id;
 
       virtual void compute_num_steps();
       virtual bool& ready();
@@ -45,8 +45,8 @@ namespace pfasst
       virtual       shared_ptr<CommT>& communicator();
       virtual const shared_ptr<CommT>  get_communicator() const;
 
-      virtual       shared_ptr<Status<typename TransferT::traits::fine_time_type>>& status();
-      virtual const shared_ptr<Status<typename TransferT::traits::fine_time_type>>  get_status() const;
+      virtual       shared_ptr<Status<typename TransferT::traits::fine_time_t>>& status();
+      virtual const shared_ptr<Status<typename TransferT::traits::fine_time_t>>  get_status() const;
 
       virtual size_t get_num_levels() const;
       virtual bool   is_ready() const;
@@ -69,7 +69,8 @@ namespace pfasst
       virtual void run();
       virtual void post_run();
 
-      virtual bool advance_time(const size_t& num_steps = 1);
+      virtual bool advance_time(const size_t& num_steps);
+      virtual bool advance_time();
       virtual bool advance_iteration();
   };
 }  // ::pfasst

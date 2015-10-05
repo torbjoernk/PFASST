@@ -23,20 +23,10 @@ namespace pfasst
       : public PolynomialTransfer<TransferTraits>
     {
       public:
-        typedef TransferTraits traits;
-
-        typedef typename traits::coarse_encap_traits coarse_encap_traits;
-        typedef typename traits::coarse_encap_type coarse_encap_type;
-        typedef typename traits::coarse_time_type coarse_time_type;
-        typedef typename traits::coarse_spatial_type coarse_spatial_type;
-
-        typedef typename traits::fine_encap_traits fine_encap_traits;
-        typedef typename traits::fine_encap_type fine_encap_type;
-        typedef typename traits::fine_time_type fine_time_type;
-        typedef typename traits::fine_spatial_type fine_spatial_type;
+        using traits = TransferTraits;
 
       protected:
-        pfasst::contrib::FFT<fine_encap_type> fft;
+        pfasst::contrib::FFT<typename traits::fine_encap_t> fft;
 
       public:
         SpectralTransfer() = default;
@@ -46,11 +36,11 @@ namespace pfasst
         SpectralTransfer<TransferTraits, Enabled>& operator=(const SpectralTransfer<TransferTraits, Enabled> &other) = default;
         SpectralTransfer<TransferTraits, Enabled>& operator=(SpectralTransfer<TransferTraits, Enabled> &&other) = default;
 
-        virtual void interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
-                                      shared_ptr<typename TransferTraits::fine_encap_type> fine);
+        virtual void interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_t> coarse,
+                                      shared_ptr<typename TransferTraits::fine_encap_t> fine);
 
-        virtual void restrict_data(const shared_ptr<typename TransferTraits::fine_encap_type> fine,
-                                   shared_ptr<typename TransferTraits::coarse_encap_type> coarse);
+        virtual void restrict_data(const shared_ptr<typename TransferTraits::fine_encap_t> fine,
+                                   shared_ptr<typename TransferTraits::coarse_encap_t> coarse);
     };
   }  // ::pfasst::contrib
 }  // ::pfasst

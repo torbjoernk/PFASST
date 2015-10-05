@@ -12,10 +12,10 @@ namespace pfasst
   >
   struct sweeper_traits
   {
-    typedef          EncapsulationTraits                       encap_traits;
-    typedef          encap::Encapsulation<EncapsulationTraits> encap_type;
-    typedef typename encap_traits::time_type                   time_type;
-    typedef typename encap_traits::spatial_type                spatial_type;
+    using encap_traits = EncapsulationTraits;
+    using encap_t = encap::Encapsulation<EncapsulationTraits>;
+    using time_t = typename encap_traits::time_t;
+    using spatial_t = typename encap_traits::spatial_t;
   };
 }  // ::pfasst
 

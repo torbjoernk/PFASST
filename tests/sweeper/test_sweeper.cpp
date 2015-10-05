@@ -8,14 +8,16 @@ using namespace std;
 using pfasst::Sweeper;
 
 #include <pfasst/encap/vector.hpp>
-typedef pfasst::vector_encap_traits<double, double, 1> VectorEncapTrait;
-typedef pfasst::encap::Encapsulation<VectorEncapTrait> VectorEncapsulation;
+using encap_traits_t = pfasst::encap::vector_encap_traits<double, double, 1>;
+using encap_t = pfasst::encap::Encapsulation<encap_traits_t>;
+using sweeper_t = Sweeper<pfasst::sweeper_traits<encap_traits_t>>;
+static_assert(is_same<encap_t, typename sweeper_t::traits::encap_t>::value, "");
 
 #include "quadrature/mocks.hpp"
 #include "controller/mocks.hpp"
 
 
-typedef ::testing::Types<Sweeper<pfasst::sweeper_traits<VectorEncapTrait>>> SweeperTypes;
+using SweeperTypes = ::testing::Types<sweeper_t>;
 INSTANTIATE_TYPED_TEST_CASE_P(Sweeper, Concepts, SweeperTypes);
 
 
@@ -23,17 +25,15 @@ class Setup
   : public ::testing::Test
 {
   protected:
-    typedef          Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> sweeper_type;
-    typedef typename sweeper_type::encap_type                          encap_type;
-
-    sweeper_type sweeper;
-
-    vector<double> nodes{0.0, 0.5, 1.0};
-    shared_ptr<NiceMock<QuadratureMock<double>>> quadrature = make_shared<NiceMock<QuadratureMock<double>>>();
-    shared_ptr<NiceMock<StatusMock<double>>>     status = make_shared<NiceMock<StatusMock<double>>>();
+    sweeper_t                                    sweeper;
+    vector<double>                               nodes{0.0, 0.5, 1.0};
+    shared_ptr<NiceMock<QuadratureMock<double>>> quadrature;
+    shared_ptr<NiceMock<StatusMock<double>>>     status;
 
     virtual void SetUp()
     {
+      this->status = make_shared<NiceMock<StatusMock<double>>>();
+      this->quadrature = make_shared<NiceMock<QuadratureMock<double>>>();
       ON_CALL(*(quadrature.get()), get_num_nodes()).WillByDefault(Return(nodes.size()));
       ON_CALL(*(quadrature.get()), get_nodes()).WillByDefault(ReturnRef(nodes));
     }
@@ -102,18 +102,17 @@ class DataAccess
   : public ::testing::Test
 {
   protected:
-    typedef          Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> sweeper_type;
-    typedef typename sweeper_type::encap_type                          encap_type;
-
-    sweeper_type sweeper;
-
-    vector<double> nodes{0.0, 0.5, 1.0};
-    shared_ptr<NiceMock<QuadratureMock<double>>> quadrature = make_shared<NiceMock<QuadratureMock<double>>>();
-    shared_ptr<encap_type>                       encap = make_shared<encap_type>(vector<double>{1.0, 2.0, 3.0});
-    shared_ptr<NiceMock<StatusMock<double>>>     status = make_shared<NiceMock<StatusMock<double>>>();
+    sweeper_t                                    sweeper;
+    vector<double>                               nodes{0.0, 0.5, 1.0};
+    shared_ptr<NiceMock<QuadratureMock<double>>> quadrature;
+    shared_ptr<encap_t>                          encap;
+    shared_ptr<NiceMock<StatusMock<double>>>     status;
 
     virtual void SetUp()
     {
+      this->quadrature = make_shared<NiceMock<QuadratureMock<double>>>();
+      this->encap = make_shared<encap_t>(vector<double>{1.0, 2.0, 3.0});
+      this->status = make_shared<NiceMock<StatusMock<double>>>();
       sweeper.encap_factory()->set_size(3);
       ON_CALL(*(quadrature.get()), get_num_nodes()).WillByDefault(Return(nodes.size()));
       ON_CALL(*(quadrature.get()), get_nodes()).WillByDefault(ReturnRef(nodes));
@@ -134,7 +133,7 @@ TEST_F(DataAccess, initial_state_for_modification)
 
 TEST_F(DataAccess, tau_for_modification)
 {
-  sweeper.tau() = vector<shared_ptr<encap_type>>{encap, encap, encap};
+  sweeper.tau() = vector<shared_ptr<encap_t>>{encap, encap, encap};
   EXPECT_THAT(sweeper.get_tau(), Each(Eq(encap)));
 }
 
@@ -168,14 +167,12 @@ class Interface
   : public ::testing::Test
 {
   protected:
-    typedef          Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> sweeper_type;
-    typedef typename sweeper_type::encap_type                          encap_type;
-
-    sweeper_type sweeper;
-    shared_ptr<NiceMock<StatusMock<double>>> status = make_shared<NiceMock<StatusMock<double>>>();
+    sweeper_t                                sweeper;
+    shared_ptr<NiceMock<StatusMock<double>>> status;
 
     virtual void SetUp()
     {
+      this->status = make_shared<NiceMock<StatusMock<double>>>();
       sweeper.status() = status;
     }
 };
@@ -204,19 +201,17 @@ class Logic
   : public ::testing::Test
 {
   protected:
-    typedef          Sweeper<pfasst::sweeper_traits<VectorEncapTrait>> sweeper_type;
-    typedef typename sweeper_type::encap_type                          encap_type;
-
-    sweeper_type sweeper;
-
-    vector<double> nodes{0.0, 0.5, 1.0};
-    shared_ptr<NiceMock<QuadratureMock<double>>> quadrature = make_shared<NiceMock<QuadratureMock<double>>>();
-    shared_ptr<NiceMock<StatusMock<double>>> status = make_shared<NiceMock<StatusMock<double>>>();
-
-    shared_ptr<encap_type> encap = make_shared<encap_type>(vector<double>{1.0, 2.0, 3.0});
+    sweeper_t                                    sweeper;
+    vector<double>                               nodes{0.0, 0.5, 1.0};
+    shared_ptr<NiceMock<QuadratureMock<double>>> quadrature;
+    shared_ptr<NiceMock<StatusMock<double>>>     status;
+    shared_ptr<encap_t>                          encap;
 
     virtual void SetUp()
     {
+      this->quadrature = make_shared<NiceMock<QuadratureMock<double>>>();
+      this->status = make_shared<NiceMock<StatusMock<double>>>();
+      this->encap = make_shared<encap_t>(vector<double>{1.0, 2.0, 3.0});
       sweeper.encap_factory()->set_size(3);
       ON_CALL(*(quadrature.get()), get_num_nodes()).WillByDefault(Return(nodes.size()));
       ON_CALL(*(quadrature.get()), get_nodes()).WillByDefault(ReturnRef(nodes));

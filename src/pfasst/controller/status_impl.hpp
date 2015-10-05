@@ -75,7 +75,7 @@ namespace pfasst
   void
   Status<precision>::clear()
   {
-    this->_detail = StatusDetail<precision>();
+    this->_detail = StatusDetail<precision_t>();
   }
 
   template<typename precision>

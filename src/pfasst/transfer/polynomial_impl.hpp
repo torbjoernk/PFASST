@@ -15,8 +15,8 @@ namespace pfasst
 {
   template<class TransferTraits, typename Enabled>
   void
-  PolynomialTransfer<TransferTraits, Enabled>::interpolate_initial(const shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse,
-                                                                   shared_ptr<typename TransferTraits::fine_sweeper_type> fine)
+  PolynomialTransfer<TransferTraits, Enabled>::interpolate_initial(const shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse,
+                                                                   shared_ptr<typename TransferTraits::fine_sweeper_t> fine)
   {
     ML_CVLOG(1, "TRANS", "interpolate initial value only");
 
@@ -43,8 +43,8 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  PolynomialTransfer<TransferTraits, Enabled>::interpolate(const shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse,
-                                                           shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
+  PolynomialTransfer<TransferTraits, Enabled>::interpolate(const shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse,
+                                                           shared_ptr<typename TransferTraits::fine_sweeper_t> fine,
                                                            const bool initial)
   {
     ML_CVLOG(1, "TRANS", "interpolate");
@@ -71,7 +71,7 @@ namespace pfasst
     auto& fine_factory = fine->get_encap_factory();
 
     // step 1: compute coarse level correction
-    vector<shared_ptr<fine_encap_type>> fine_deltas(num_coarse_nodes);
+    vector<shared_ptr<typename traits::fine_encap_t>> fine_deltas(num_coarse_nodes);
     generate(fine_deltas.begin(), fine_deltas.end(),
              [&fine_factory]() { return fine_factory.create(); });
 
@@ -107,8 +107,8 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  PolynomialTransfer<TransferTraits, Enabled>::interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
-                                                                shared_ptr<typename TransferTraits::fine_encap_type> fine)
+  PolynomialTransfer<TransferTraits, Enabled>::interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_t> coarse,
+                                                                shared_ptr<typename TransferTraits::fine_encap_t> fine)
   {
     UNUSED(coarse); UNUSED(fine);
     throw runtime_error("interpolation for generic Encapsulations");
@@ -116,8 +116,8 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  PolynomialTransfer<TransferTraits, Enabled>::restrict_initial(const shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
-                                                                shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse)
+  PolynomialTransfer<TransferTraits, Enabled>::restrict_initial(const shared_ptr<typename TransferTraits::fine_sweeper_t> fine,
+                                                                shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse)
   {
     ML_CVLOG(1, "TRANS", "restrict initial value only");
 
@@ -126,8 +126,8 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  PolynomialTransfer<TransferTraits, Enabled>::restrict(const shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
-                                                        shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse,
+  PolynomialTransfer<TransferTraits, Enabled>::restrict(const shared_ptr<typename TransferTraits::fine_sweeper_t> fine,
+                                                        shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse,
                                                         const bool initial)
   {
     ML_CVLOG(1, "TRANS", "restrict");
@@ -164,8 +164,8 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  PolynomialTransfer<TransferTraits, Enabled>::restrict_data(const shared_ptr<typename TransferTraits::fine_encap_type> fine,
-                                                             shared_ptr<typename TransferTraits::coarse_encap_type> coarse)
+  PolynomialTransfer<TransferTraits, Enabled>::restrict_data(const shared_ptr<typename TransferTraits::fine_encap_t> fine,
+                                                             shared_ptr<typename TransferTraits::coarse_encap_t> coarse)
   {
     UNUSED(coarse); UNUSED(fine);
     throw runtime_error("restriction for generic Encapsulations");
@@ -173,9 +173,9 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  PolynomialTransfer<TransferTraits, Enabled>::fas(const typename TransferTraits::fine_time_type& dt,
-                                                   const shared_ptr<typename TransferTraits::fine_sweeper_type> fine,
-                                                   shared_ptr<typename TransferTraits::coarse_sweeper_type> coarse)
+  PolynomialTransfer<TransferTraits, Enabled>::fas(const typename TransferTraits::fine_time_t& dt,
+                                                   const shared_ptr<typename TransferTraits::fine_sweeper_t> fine,
+                                                   shared_ptr<typename TransferTraits::coarse_sweeper_t> coarse)
   {
     ML_CVLOG(1, "TRANS", "compute FAS correction");
 
@@ -195,7 +195,7 @@ namespace pfasst
 
     auto& coarse_factory = coarse->get_encap_factory();
 
-    vector<shared_ptr<coarse_encap_type>> fas(num_coarse_nodes + 1);
+    vector<shared_ptr<typename traits::coarse_encap_t>> fas(num_coarse_nodes + 1);
     generate(fas.begin(), fas.end(), [&coarse_factory]() { return coarse_factory.create(); });
 
     const auto coarse_integral = coarse->integrate(dt);
@@ -211,8 +211,8 @@ namespace pfasst
 
   template<class TransferTraits, typename Enabled>
   void
-  PolynomialTransfer<TransferTraits, Enabled>::setup_tmat(const shared_ptr<quadrature::IQuadrature<typename TransferTraits::fine_time_type>> fine_quad,
-                                                          const shared_ptr<quadrature::IQuadrature<typename TransferTraits::coarse_time_type>> coarse_quad)
+  PolynomialTransfer<TransferTraits, Enabled>::setup_tmat(const shared_ptr<quadrature::IQuadrature<typename TransferTraits::fine_time_t>> fine_quad,
+                                                          const shared_ptr<quadrature::IQuadrature<typename TransferTraits::coarse_time_t>> coarse_quad)
   {
     if (this->tmat.rows() == 0) {
       auto coarse_nodes = coarse_quad->get_nodes();
@@ -224,7 +224,7 @@ namespace pfasst
       ML_CLOG_IF(!equal(coarse_nodes.cbegin(), coarse_nodes.cend(), fine_nodes.cbegin()),
               WARNING, "TRANS", "interpolation for different sets of nodes not tested.");
 
-      this->tmat = quadrature::compute_interp<typename TransferTraits::fine_time_type>(coarse_nodes,
+      this->tmat = quadrature::compute_interp<typename TransferTraits::fine_time_t>(coarse_nodes,
                                                                                        fine_nodes);
     }
   }

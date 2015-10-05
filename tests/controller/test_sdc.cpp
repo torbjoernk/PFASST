@@ -1,5 +1,8 @@
 #include "fixtures/test_helpers.hpp"
 
+#include <vector>
+using namespace std;
+
 #include <pfasst/controller/sdc.hpp>
 using pfasst::SDC;
 
@@ -14,15 +17,15 @@ using pfasst::SDC;
 #include "sweeper/mocks.hpp"
 #include "transfer/mocks.hpp"
 
-typedef pfasst::vector_encap_traits<double, double, 1>                  VectorEncapTrait;
-typedef pfasst::encap::Encapsulation<VectorEncapTrait>                  VectorEncapsulation;
-typedef NiceMock<SweeperMock<pfasst::sweeper_traits<VectorEncapTrait>>> SweeperType;
-typedef pfasst::transfer_traits<SweeperType, SweeperType, 1>            TransferTraits;
-typedef NiceMock<TransferMock<TransferTraits>>                          TransferType;
-typedef NiceMock<QuadratureMock<double>>                                QuadType;
+using encap_traits_t = pfasst::encap::vector_encap_traits<double, double, 1>;
+using encap_t = pfasst::encap::Encapsulation<encap_traits_t>;
+using sweeper_t = NiceMock<SweeperMock<pfasst::sweeper_traits<encap_traits_t>>>;
+using transfer_traits_t = pfasst::transfer_traits<sweeper_t, sweeper_t, 1>;
+using transfer_t = NiceMock<TransferMock<transfer_traits_t>>;
+using quadrature_t = NiceMock<QuadratureMock<double>>;
 
 
-typedef ::testing::Types<SDC<TransferType>> SDCTypes;
+using SDCTypes = ::testing::Types<SDC<transfer_t>>;
 INSTANTIATE_TYPED_TEST_CASE_P(SDC, Concepts, SDCTypes);
 
 
@@ -30,13 +33,12 @@ class Interface
   : public ::testing::Test
 {
   protected:
-    shared_ptr<SDC<TransferType>> controller;
-
+    shared_ptr<SDC<transfer_t>> controller;
     shared_ptr<pfasst::Status<double>> status;
 
     virtual void SetUp()
     {
-      this->controller = make_shared<SDC<TransferType>>();
+      this->controller = make_shared<SDC<transfer_t>>();
       this->status = make_shared<pfasst::Status<double>>();
     }
 };
@@ -64,27 +66,28 @@ class Setup
   : public ::testing::Test
 {
   protected:
-    shared_ptr<SDC<TransferType>> controller;
+    shared_ptr<SDC<transfer_t>> controller;
 
-    vector<double> nodes{0.0, 0.5, 1.0};
+    vector<double>                     nodes{0.0, 0.5, 1.0};
     shared_ptr<pfasst::Status<double>> status;
-    shared_ptr<SweeperType> sweeper;
-    shared_ptr<TransferType> transfer;
-    shared_ptr<QuadType> quad;
-    shared_ptr<VectorEncapsulation> encap = make_shared<VectorEncapsulation>(vector<double>{0.0, 0.0});
+    shared_ptr<sweeper_t>              sweeper;
+    shared_ptr<transfer_t>             transfer;
+    shared_ptr<quadrature_t>           quad;
+    shared_ptr<encap_t>                encap;
 
     virtual void SetUp()
     {
-      this->controller = make_shared<SDC<TransferType>>();
+      this->encap = make_shared<encap_t>(vector<double>{0.0, 0.0});
+      this->controller = make_shared<SDC<transfer_t>>();
       this->status = make_shared<pfasst::Status<double>>();
       this->controller->status() = status;
 
-      this->quad = make_shared<QuadType>();
+      this->quad = make_shared<quadrature_t>();
       ON_CALL(*(this->quad.get()), right_is_node()).WillByDefault(Return(true));
       ON_CALL(*(this->quad.get()), get_nodes()).WillByDefault(ReturnRef(this->nodes));
       ON_CALL(*(this->quad.get()), get_num_nodes()).WillByDefault(Return(3));
 
-      this->sweeper = make_shared<SweeperType>();
+      this->sweeper = make_shared<sweeper_t>();
       ON_CALL(*(this->sweeper.get()), get_quadrature()).WillByDefault(Return(this->quad));
       ON_CALL(*(this->sweeper.get()), status()).WillByDefault(ReturnRef(this->status));
       ON_CALL(*(this->sweeper.get()), get_status()).WillByDefault(Return(this->status));
@@ -138,25 +141,25 @@ class Logic
   : public ::testing::Test
 {
   protected:
-    shared_ptr<SDC<TransferType>> controller;
-
-    vector<double> nodes{0.0, 0.5, 1.0};
+    shared_ptr<SDC<transfer_t>>        controller;
+    vector<double>                     nodes{0.0, 0.5, 1.0};
     shared_ptr<pfasst::Status<double>> status;
-    shared_ptr<SweeperType> sweeper;
-    shared_ptr<QuadType> quad;
-    shared_ptr<VectorEncapsulation> encap = make_shared<VectorEncapsulation>(vector<double>{0.0, 0.0});
+    shared_ptr<sweeper_t>              sweeper;
+    shared_ptr<quadrature_t>           quad;
+    shared_ptr<encap_t>                encap;
 
     virtual void SetUp()
     {
-      this->controller = make_shared<SDC<TransferType>>();
+      this->encap = make_shared<encap_t>(vector<double>{0.0, 0.0});
+      this->controller = make_shared<SDC<transfer_t>>();
       this->status = make_shared<pfasst::Status<double>>();
       this->controller->status() = status;
-      this->quad = make_shared<QuadType>();
+      this->quad = make_shared<quadrature_t>();
       ON_CALL(*(this->quad.get()), right_is_node()).WillByDefault(Return(true));
       ON_CALL(*(this->quad.get()), get_nodes()).WillByDefault(ReturnRef(this->nodes));
       ON_CALL(*(this->quad.get()), get_num_nodes()).WillByDefault(Return(3));
 
-      this->sweeper = make_shared<SweeperType>();
+      this->sweeper = make_shared<sweeper_t>();
       ON_CALL(*(this->sweeper.get()), get_quadrature()).WillByDefault(Return(this->quad));
       ON_CALL(*(this->sweeper.get()), status()).WillByDefault(ReturnRef(this->status));
       ON_CALL(*(this->sweeper.get()), get_status()).WillByDefault(Return(this->status));

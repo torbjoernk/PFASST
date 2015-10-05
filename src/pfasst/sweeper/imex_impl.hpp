@@ -31,15 +31,15 @@ namespace pfasst
 
     this->_q_integrals.resize(num_nodes + 1);
     generate(this->_q_integrals.begin(), this->_q_integrals.end(),
-             bind(&encap_type::factory_type::create, this->encap_factory()));
+             bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
     this->_expl_rhs.resize(num_nodes + 1);
     generate(this->_expl_rhs.begin(), this->_expl_rhs.end(),
-             bind(&encap_type::factory_type::create, this->encap_factory()));
+             bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
     this->_impl_rhs.resize(num_nodes + 1);
     generate(this->_impl_rhs.begin(), this->_impl_rhs.end(),
-             bind(&encap_type::factory_type::create, this->encap_factory()));
+             bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
     this->compute_delta_matrices();
   }
@@ -76,12 +76,12 @@ namespace pfasst
     ML_CLOG_IF(this->get_quadrature()->left_is_node(), WARNING, this->get_logger_id(),
       "IMEX Sweeper for quadrature nodes containing t_0 not implemented and tested.");
 
-    const time_type t = this->get_status()->get_time();
-    const time_type dt = this->get_status()->get_dt();
+    const typename traits::time_t t = this->get_status()->get_time();
+    const typename traits::time_t dt = this->get_status()->get_dt();
 
     assert(this->get_quadrature() != nullptr);
     auto nodes = this->get_quadrature()->get_nodes();
-    nodes.insert(nodes.begin(), time_type(0.0));
+    nodes.insert(nodes.begin(), typename traits::time_t(0.0));
     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
 
     this->_expl_rhs.front() = this->evaluate_rhs_expl(t, this->get_states().front());
@@ -89,14 +89,14 @@ namespace pfasst
     ML_CLOG(INFO, this->get_logger_id(), LOG_FIXED << "Predicting from t=" << t << " over " << num_nodes << " nodes"
                           << " to t=" << (t + dt) << " (dt=" << dt << ")");
 
-    time_type tm = t;
+    typename traits::time_t tm = t;
     for (size_t m = 0; m < num_nodes; ++m) {
       ML_CVLOG(1, this->get_logger_id(), LOG_FIXED << "propagating from t["<<m<<"]=" << dt << " * " << nodes[m]
                           << " to t["<<(m+1)<<"]=" << dt << " * " << nodes[m+1]);
 //       ML_CVLOG(2, this->get_logger_id(), LOG_FLOAT << "  u["<<m<<"] = " << to_string(this->get_states()[m]));
 
       // compute right hand side for implicit solve (i.e. the explicit part of the propagation)
-      shared_ptr<encap_type> rhs = this->get_encap_factory().create();
+      shared_ptr<typename traits::encap_t> rhs = this->get_encap_factory().create();
       rhs->data() = this->get_states()[m]->get_data();
 //       ML_CVLOG(2, this->get_logger_id(), "  rhs = u["<<m<<"]                    = " << to_string(rhs));
       rhs->scaled_add(dt * this->_q_delta_expl(m + 1, m), this->_expl_rhs[m]);
@@ -141,10 +141,10 @@ namespace pfasst
     ML_CLOG_IF(this->get_quadrature()->left_is_node(), WARNING, this->get_logger_id(),
       "IMEX Sweeper for quadrature nodes containing t_0 not implemented and tested.");
 
-    const time_type dt = this->get_status()->get_dt();
+    const typename traits::time_t dt = this->get_status()->get_dt();
     const auto q_mat = this->get_quadrature()->get_q_mat();
     auto nodes = this->get_quadrature()->get_nodes();
-    nodes.insert(nodes.begin(), time_type(0.0));
+    nodes.insert(nodes.begin(), typename traits::time_t(0.0));
     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
 
 //     ML_CVLOG(2, this->get_logger_id(), "initial values for sweeping");
@@ -201,10 +201,10 @@ namespace pfasst
     ML_CLOG_IF(this->get_quadrature()->left_is_node(), WARNING, this->get_logger_id(),
       "IMEX Sweeper for quadrature nodes containing t_0 not implemented and tested.");
 
-    const time_type t = this->get_status()->get_time();
-    const time_type dt = this->get_status()->get_dt();
+    const typename traits::time_t t = this->get_status()->get_time();
+    const typename traits::time_t dt = this->get_status()->get_dt();
     auto nodes = this->get_quadrature()->get_nodes();
-    nodes.insert(nodes.begin(), time_type(0.0));
+    nodes.insert(nodes.begin(), typename traits::time_t(0.0));
     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
 
     ML_CLOG(INFO, this->get_logger_id(), LOG_FIXED << "Sweeping from t=" << t << " over " << num_nodes
@@ -212,7 +212,7 @@ namespace pfasst
 
     this->_expl_rhs.front() = this->evaluate_rhs_expl(t, this->get_states().front());
 
-    time_type tm = t;
+    typename traits::time_t tm = t;
     // note: m=0 is initial value and not a quadrature node
     for (size_t m = 0; m < num_nodes; ++m) {
       ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "propagating from t["<<m<<"]=" << (t + (dt * nodes[m]))
@@ -220,7 +220,7 @@ namespace pfasst
 //       ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "  u["<<m<<"] = " << to_string(this->get_states()[m]));
 
       // compute right hand side for implicit solve (i.e. the explicit part of the propagation)
-      shared_ptr<encap_type> rhs = this->get_encap_factory().create();
+      shared_ptr<typename traits::encap_t> rhs = this->get_encap_factory().create();
       // rhs = u_0
       rhs->data() = this->get_states().front()->get_data();
 //       ML_CVLOG(6, this->get_logger_id(), "  rhs = u[0]                    = " << to_string(rhs));
@@ -299,12 +299,19 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
+  IMEX<SweeperTrait, Enabled>::advance()
+  {
+    this->advance(1);
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  void
   IMEX<SweeperTrait, Enabled>::reevaluate(const bool initial_only)
   {
     assert(this->get_status() != nullptr);
     assert(this->get_quadrature() != nullptr);
 
-    const time_type t0 = this->get_status()->get_time();
+    const typename traits::time_t t0 = this->get_status()->get_time();
 
     if (initial_only) {
       assert(this->_expl_rhs.front() != nullptr && this->_impl_rhs.front() != nullptr);
@@ -313,12 +320,12 @@ namespace pfasst
       this->_impl_rhs.front() = this->evaluate_rhs_impl(t0, this->get_initial_state());
 
     } else {
-      const time_type dt = this->get_status()->get_dt();
+      const typename traits::time_t dt = this->get_status()->get_dt();
       auto nodes = this->get_quadrature()->get_nodes();
       nodes.insert(nodes.begin(), 0.0);
 
       for (size_t m = 0; m < this->get_quadrature()->get_num_nodes() + 1; ++m) {
-        const time_type t = t0 + dt * nodes[m];
+        const typename traits::time_t t = t0 + dt * nodes[m];
         assert(this->_expl_rhs[m] != nullptr && this->_impl_rhs[m] != nullptr);
 
         this->_expl_rhs[m] = this->evaluate_rhs_expl(t, this->get_states()[m]);
@@ -328,8 +335,15 @@ namespace pfasst
   }
 
   template<class SweeperTrait, typename Enabled>
-  vector<shared_ptr<typename SweeperTrait::encap_type>>
-  IMEX<SweeperTrait, Enabled>::integrate(const typename SweeperTrait::time_type& dt)
+  void
+  IMEX<SweeperTrait, Enabled>::reevaluate()
+  {
+    this->reevaluate(false);
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  vector<shared_ptr<typename SweeperTrait::encap_t>>
+  IMEX<SweeperTrait, Enabled>::integrate(const typename SweeperTrait::time_t& dt)
   {
     auto const q_mat = this->get_quadrature()->get_q_mat();
 
@@ -342,7 +356,7 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
-  IMEX<SweeperTrait, Enabled>::integrate_end_state(const typename SweeperTrait::time_type& dt)
+  IMEX<SweeperTrait, Enabled>::integrate_end_state(const typename SweeperTrait::time_t& dt)
   {
     try {
       Sweeper<SweeperTrait, Enabled>::integrate_end_state(dt);
@@ -367,7 +381,7 @@ namespace pfasst
     assert(this->get_quadrature() != nullptr);
     assert(this->get_initial_state() != nullptr);
 
-    const time_type dt = this->get_status()->get_dt();
+    const typename traits::time_t dt = this->get_status()->get_dt();
     const size_t num_nodes = this->get_quadrature()->get_num_nodes() + 1;
 
     if (only_last) {
@@ -410,18 +424,25 @@ namespace pfasst
   }
 
   template<class SweeperTrait, typename Enabled>
-  shared_ptr<typename SweeperTrait::encap_type>
-  IMEX<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_type& t,
-                                                 const shared_ptr<typename SweeperTrait::encap_type> u)
+  void
+  IMEX<SweeperTrait, Enabled>::compute_residuals()
+  {
+    this->compute_residuals(false);
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  shared_ptr<typename SweeperTrait::encap_t>
+  IMEX<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_t& t,
+                                                 const shared_ptr<typename SweeperTrait::encap_t> u)
   {
     UNUSED(t); UNUSED(u);
     throw runtime_error("evaluation of explicit part of right-hand-side");
   }
 
   template<class SweeperTrait, typename Enabled>
-  shared_ptr<typename SweeperTrait::encap_type>
-  IMEX<SweeperTrait, Enabled>::evaluate_rhs_impl(const typename SweeperTrait::time_type& t,
-                                                 const shared_ptr<typename SweeperTrait::encap_type> u)
+  shared_ptr<typename SweeperTrait::encap_t>
+  IMEX<SweeperTrait, Enabled>::evaluate_rhs_impl(const typename SweeperTrait::time_t& t,
+                                                 const shared_ptr<typename SweeperTrait::encap_t> u)
   {
     UNUSED(t); UNUSED(u);
     throw runtime_error("evaluation of implicit part of right-hand-side");
@@ -429,11 +450,11 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
-  IMEX<SweeperTrait, Enabled>::implicit_solve(shared_ptr<typename SweeperTrait::encap_type> f,
-                                              shared_ptr<typename SweeperTrait::encap_type> u,
-                                              const typename SweeperTrait::time_type& t,
-                                              const typename SweeperTrait::time_type& dt,
-                                              const shared_ptr<typename SweeperTrait::encap_type> rhs)
+  IMEX<SweeperTrait, Enabled>::implicit_solve(shared_ptr<typename SweeperTrait::encap_t> f,
+                                              shared_ptr<typename SweeperTrait::encap_t> u,
+                                              const typename SweeperTrait::time_t& t,
+                                              const typename SweeperTrait::time_t& dt,
+                                              const shared_ptr<typename SweeperTrait::encap_t> rhs)
   {
     UNUSED(f); UNUSED(u); UNUSED(t); UNUSED(dt); UNUSED(dt); UNUSED(rhs);
     throw runtime_error("spatial solver");
@@ -450,13 +471,13 @@ namespace pfasst
       ML_CLOG(ERROR, this->get_logger_id(), "Don't know how to compute delta matrices for quadrature containing left time point.");
       throw runtime_error("IMEX with quadrature containing left time point");
     } else {
-      nodes.insert(nodes.begin(), time_type(0.0));
+      nodes.insert(nodes.begin(), typename traits::time_t(0.0));
     }
 
     ML_CVLOG(4, this->get_logger_id(), "computing Q_delta matrices for IMEX scheme");
 
-    this->_q_delta_expl = Matrix<time_type>::Zero(num_nodes + 1, num_nodes + 1);
-    this->_q_delta_impl = Matrix<time_type>::Zero(num_nodes + 1, num_nodes + 1);
+    this->_q_delta_expl = Matrix<typename traits::time_t>::Zero(num_nodes + 1, num_nodes + 1);
+    this->_q_delta_impl = Matrix<typename traits::time_t>::Zero(num_nodes + 1, num_nodes + 1);
 
     for (size_t m = 1; m < num_nodes + 1; ++m) {
       for (size_t n = m; n < num_nodes + 1; ++n) {

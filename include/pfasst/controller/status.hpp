@@ -182,7 +182,7 @@ namespace pfasst
                   "precision type must be arithmetic");
 
     public:
-      typedef precision precision_type;
+      using precision_t = precision;
 
 #ifdef WITH_MPI
       static inline void create_mpi_datatype();
