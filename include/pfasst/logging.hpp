@@ -533,5 +533,34 @@ string to_string(const shared_ptr<T>& sp)
   return out.str();
 }
 
+template<class Tuple, size_t N>
+struct TuplePrinter {
+  static string print(const Tuple& t) 
+  {
+    stringstream s;
+    s << TuplePrinter<Tuple, N-1>::print(t);
+    s << ", " << get<N-1>(t);
+    return s.str();
+  }
+};
+
+template<class Tuple>
+struct TuplePrinter<Tuple, 1>{
+  static string print(const Tuple& t) 
+  {
+    stringstream s;
+    s << get<0>(t);
+    return s.str();
+  }
+};
+
+template<class... Args>
+string to_string(const tuple<Args...>& t) 
+{
+  stringstream s;
+  s << "(" << TuplePrinter<decltype(t), sizeof...(Args)>::print(t) << ")";
+  return s.str();
+}
+
 
 #endif  // _PFASST__LOGGING_HPP_

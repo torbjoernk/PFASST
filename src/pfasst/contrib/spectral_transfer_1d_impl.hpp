@@ -15,6 +15,21 @@ namespace pfasst
   namespace contrib
   {
     template<class TransferTraits>
+    size_t
+    SpectralTransfer<
+      TransferTraits,
+      typename enable_if<
+                 is_same<
+                   typename TransferTraits::fine_encap_traits::dim_type,
+                   integral_constant<size_t, 1>
+                 >::value
+               >::type>::translate_index(const index_type& index, const index_type& extends) const
+    {
+      UNUSED(extends);
+      return get<0>(index);
+    }
+
+    template<class TransferTraits>
     void
     SpectralTransfer<
       TransferTraits,

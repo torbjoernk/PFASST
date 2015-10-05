@@ -79,6 +79,7 @@ void interpolate_data(FFT& fft, const shared_ptr<Vector>& coarse, shared_ptr<Vec
     fine->data() = coarse->get_data();
 
   } else {
+    assert(coarse_ndofs % 2 == 0 && fine_ndofs % 2 == 0);
     const size_t coarse_dim_dofs = sqrt(coarse_ndofs);
     const size_t fine_dim_dofs   = sqrt(fine_ndofs);
 
@@ -96,45 +97,39 @@ void interpolate_data(FFT& fft, const shared_ptr<Vector>& coarse, shared_ptr<Vec
     // FFTW is not normalized
     double c = 1.0 / (double)coarse_ndofs;
 
+    // a few utility functions
+    auto is_in_first_half = [&](const size_t i) {
+      return (i < coarse_dim_dofs / 2);
+    };
+    auto get_fine_dim_back_index = [&](const size_t ci) {
+      return fine_dim_dofs - (fine_dim_dofs / 4) + ci - coarse_dim_dofs / 2;
+    };
+    auto get_fine_dim_index = [&](const size_t ci) {
+      return is_in_first_half(ci) ? ci : get_fine_dim_back_index(ci);
+    };
+    auto get_coarse_index = [&](const size_t yi, const size_t xi) {
+      return yi * coarse_dim_dofs + xi;
+    };
+    auto get_fine_index = [&](const size_t yi, const size_t xi) {
+      return yi * fine_dim_dofs + xi;
+    };
+
     for (size_t yi = 0; yi < coarse_dim_dofs; ++yi) {
       // y is second dim (i.e. columns)
+      const size_t fine_yi = get_fine_dim_index(yi);
+
       for (size_t xi = 0; xi < coarse_dim_dofs; ++xi) {
         // x is first dim (i.e. rows)
-        const size_t coarse_index = yi * coarse_dim_dofs + xi;
+        const size_t fine_xi = get_fine_dim_index(xi);
+
+        const size_t coarse_index = get_coarse_index(yi, xi);
+        if (coarse_index >= coarse_ndofs ) cout << "coarse index too large: " << coarse_index << " >= " << coarse_ndofs << endl;
         assert(coarse_index < coarse_ndofs);
+        const size_t fine_index = get_fine_index(fine_yi, fine_xi);
+        if (fine_index >= fine_ndofs) cout << "fine index too large: " << fine_index << " >= " << fine_ndofs << endl;
+        assert(fine_index < fine_ndofs);
 
-        if (yi < coarse_dim_dofs / 2 && xi < coarse_dim_dofs / 2) {
-          // positive frequencies (in top-left corner)
-          const size_t fine_index = yi * fine_dim_dofs + xi;
-          assert(fine_index < fine_ndofs);
-          fine_z[fine_index] = c * coarse_z[coarse_index];
-
-        } else if (yi < coarse_dim_dofs / 2 && xi >= coarse_dim_dofs / 2) {
-          // x-negative, y-positive frequencies (in top-right corner)
-          const size_t fine_tail_col = fine_dim_dofs - (fine_dim_dofs / 4) + xi - coarse_dim_dofs / 2;
-          const size_t fine_index = yi * fine_dim_dofs + fine_tail_col;
-          assert(fine_index < fine_ndofs);
-          fine_z[fine_index] = c * coarse_z[coarse_index];
-
-        } else if (yi >= coarse_dim_dofs / 2 && xi < coarse_dim_dofs / 2) {
-          // x-positive, y-negative frequencies (in bottom-left corner)
-          const size_t fine_tail_row = fine_dim_dofs - (fine_dim_dofs / 4) + yi - coarse_dim_dofs / 2;
-          const size_t fine_index = fine_tail_row * fine_dim_dofs + xi;
-          assert(fine_index < fine_ndofs);
-          fine_z[fine_index] = c * coarse_z[coarse_index];
-
-        } else if (yi >= coarse_dim_dofs / 2 && xi >= coarse_dim_dofs / 2) {
-          // negative frequencies (bottom-right corner)
-          const size_t fine_tail_row = fine_dim_dofs - (fine_dim_dofs / 4) + yi - coarse_dim_dofs / 2;
-          const size_t fine_tail_col = fine_dim_dofs - (fine_dim_dofs / 4) + xi - coarse_dim_dofs / 2;
-          const size_t fine_index = fine_tail_row * fine_dim_dofs + fine_tail_col;
-          assert(fine_index < fine_ndofs);
-          fine_z[fine_index] = c * coarse_z[coarse_index];
-
-        } else {
-          // fine center null-plus
-          continue;
-        }
+        fine_z[fine_index] = c * coarse_z[coarse_index];
       }
     }
 

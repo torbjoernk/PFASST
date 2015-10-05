@@ -42,6 +42,9 @@ namespace pfasst
       protected:
         pfasst::contrib::FFT<fine_encap_type> fft;
 
+        using index_type = tuple<size_t>;
+        size_t translate_index(const index_type& index, const index_type& extends) const;
+
       public:
         virtual void interpolate_data(const shared_ptr<typename TransferTraits::coarse_encap_type> coarse,
                                       shared_ptr<typename TransferTraits::fine_encap_type> fine);

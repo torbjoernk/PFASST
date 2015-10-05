@@ -8,10 +8,13 @@
 
 #include <leathers/push>
 #include <leathers/all>
-#include <Eigen/Dense>
+#include <Eigen/Core>
 #include <leathers/pop>
 template<typename precision>
 using Matrix = Eigen::Matrix<precision, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
+
+template<typename precision>
+using EigenVector = Eigen::Matrix<precision, Eigen::Dynamic, 1>;
 
 template<typename precision>
 using Index = typename Matrix<precision>::Index;
