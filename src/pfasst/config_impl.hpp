@@ -64,6 +64,17 @@ namespace pfasst
                                   (option.c_str(), po::value<T>(), help.c_str());
     }
 
+    template<typename T>
+    void options::update_value(const string& name, const T& value)
+    {
+      auto& config_map = get_instance().get_variables_map();
+      if (config_map.count(name) == 0) {
+        // abs_res_tol not there
+        config_map.emplace(make_pair(name, boost::program_options::variable_value()));
+      }
+      config_map.at(name).value() = boost::any{value};
+    }
+
     /**
      * @todo Make config::options::init() fail when called twice.
      */
