@@ -17,7 +17,7 @@ class ProblemSetup
   : public ::testing::Test
 {
   protected:
-    shared_ptr<sweeper_t> sweeper;
+    sweeper_t sweeper{8};
 
     shared_ptr<pfasst::Status<double>> status = make_shared<pfasst::Status<double>>();
 
@@ -40,21 +40,23 @@ class ProblemSetup
 
     virtual void SetUp()
     {
-      sweeper = make_shared<sweeper_t>(8);
-      sweeper->status() = status;
+      ConfigModder config;
+      config.update<double>("nu", 0.02);
+      sweeper.set_options();
+      sweeper.status() = status;
     }
 };
 
 TEST_F(ProblemSetup, computes_exact_solution_at_t0)
 {
-  auto exact = sweeper->exact(0.0);
+  auto exact = sweeper.exact(0.0);
 
   EXPECT_THAT(exact->get_data(), Pointwise(DoubleNear(), exact_t0));
 }
 
 TEST_F(ProblemSetup, computes_exact_solution_at_t01)
 {
-  auto exact = sweeper->exact(0.01);
+  auto exact = sweeper.exact(0.01);
 
   EXPECT_THAT(exact->get_data(), Pointwise(DoubleNear(), exact_t001));
 }
