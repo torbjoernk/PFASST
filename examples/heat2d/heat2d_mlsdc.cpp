@@ -9,18 +9,8 @@ using namespace std;
 
 #include "heat2d_sweeper.hpp"
 
-using pfasst::encap::VectorEncapsulation;
-using pfasst::quadrature::quadrature_factory;
-using pfasst::quadrature::QuadratureType;
-using pfasst::contrib::SpectralTransfer;
-using pfasst::TwoLevelMLSDC;
-
-using pfasst::examples::heat2d::Heat2D;
-
-typedef VectorEncapsulation<double, double, 2>                     EncapType;
-typedef Heat2D<pfasst::sweeper_traits<typename EncapType::traits>> SweeperType;
-typedef pfasst::transfer_traits<SweeperType, SweeperType, 2>       TransferTraits;
-typedef SpectralTransfer<TransferTraits>                           TransferType;
+using encap_traits_t = pfasst::encap::vector_encap_traits<double, double, 2>;
+// using encap_traits_t = pfasst::eigen3_encap_traits<double, double, 2>;
 
 
 namespace pfasst
@@ -29,48 +19,65 @@ namespace pfasst
   {
     namespace heat2d
     {
-      void run_mlsdc(const size_t& ndofs, const size_t& coarse_factor, const size_t& nnodes,
-                     const QuadratureType& quad_type, const double& t_0, const double& dt,
-                     const double& t_end, const size_t& niter)
-      {
-        TwoLevelMLSDC<TransferType> mlsdc;
+      using pfasst::transfer_traits;
+      using pfasst::contrib::SpectralTransfer;
+      using pfasst::TwoLevelMLSDC;
+      using pfasst::quadrature::QuadratureType;
 
-        auto coarse = make_shared<SweeperType>(ndofs / coarse_factor);
+      using sweeper_t = Heat2D<pfasst::sweeper_traits<encap_traits_t>>;
+      using transfer_traits_t = pfasst::transfer_traits<sweeper_t, sweeper_t, 2>;
+      using transfer_t = SpectralTransfer<transfer_traits_t>;
+      using heat2d_mlsdc_t = TwoLevelMLSDC<transfer_t>;
+
+      shared_ptr<heat2d_mlsdc_t> run_mlsdc(const size_t ndofs, const size_t coarse_factor,
+                                           const size_t nnodes, const QuadratureType& quad_type,
+                                           const double& t_0, const double& dt, const double& t_end,
+                                           const size_t niter)
+      {
+        auto mlsdc = make_shared<heat2d_mlsdc_t>();
+
+        using pfasst::quadrature::quadrature_factory;
+
+        auto coarse = make_shared<sweeper_t>(ndofs / coarse_factor);
         coarse->quadrature() = quadrature_factory<double>(nnodes, quad_type);
-        auto fine = make_shared<SweeperType>(ndofs);
+        auto fine = make_shared<sweeper_t>(ndofs);
         fine->quadrature() = quadrature_factory<double>(nnodes, quad_type);
 
-        auto transfer = make_shared<TransferType>();
+        auto transfer = make_shared<transfer_t>();
 
-        mlsdc.add_sweeper(coarse, true);
-        mlsdc.add_sweeper(fine, false);
-        mlsdc.add_transfer(transfer);
-        mlsdc.set_options();
+        mlsdc->add_sweeper(coarse, true);
+        mlsdc->add_sweeper(fine, false);
+        mlsdc->add_transfer(transfer);
+        mlsdc->set_options();
 
-        mlsdc.status()->time() = t_0;
-        mlsdc.status()->dt() = dt;
-        mlsdc.status()->t_end() = t_end;
-        mlsdc.status()->max_iterations() = niter;
+        mlsdc->status()->time() = t_0;
+        mlsdc->status()->dt() = dt;
+        mlsdc->status()->t_end() = t_end;
+        mlsdc->status()->max_iterations() = niter;
 
-        mlsdc.setup();
+        mlsdc->setup();
 
-        coarse->initial_state() = coarse->exact(mlsdc.get_status()->get_time());
-        fine->initial_state() = fine->exact(mlsdc.get_status()->get_time());
+        coarse->initial_state() = coarse->exact(mlsdc->get_status()->get_time());
+        fine->initial_state() = fine->exact(mlsdc->get_status()->get_time());
 
-        mlsdc.run();
-        mlsdc.post_run();
+        mlsdc->run();
+        mlsdc->post_run();
+
+        return mlsdc;
       }
     }  // ::pfasst::examples::heat2d
   } // ::pfasst::examples
 }  // ::pfasst
 
 
+#ifndef PFASST_UNIT_TESTING
 int main(int argc, char** argv)
 {
   using pfasst::config::get_value;
   using pfasst::quadrature::QuadratureType;
+  using sweeper_t = pfasst::examples::heat2d::Heat2D<pfasst::sweeper_traits<encap_traits_t>>;
 
-  pfasst::init(argc, argv, SweeperType::init_opts);
+  pfasst::init(argc, argv, sweeper_t::init_opts);
 
   const size_t ndofs = get_value<size_t>("num_dofs", 8);
   const size_t coarse_factor = get_value<size_t>("coarse_factor", 2);
@@ -97,3 +104,4 @@ int main(int argc, char** argv)
 
   pfasst::examples::heat2d::run_mlsdc(ndofs, coarse_factor, nnodes, quad_type, t_0, dt, t_end, niter);
 }
+#endif 

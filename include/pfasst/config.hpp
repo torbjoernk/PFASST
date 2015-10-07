@@ -137,6 +137,11 @@ namespace pfasst
         static void add_option(const string& group, const string& option, const string& help);
         //! @}
 
+        //! @{
+        template<typename T>
+        static void update_value(const string& name, const T& value);
+        //! @}
+
         /**
          * Initialize program options.
          *
@@ -144,6 +149,11 @@ namespace pfasst
          */
         void init();
     };
+
+    inline bool has_value(const string& name)
+    {
+      return options::get_instance().get_variables_map().count(name) > 0;
+    }
 
     /**
      * get value of specific type @p T
@@ -173,8 +183,9 @@ namespace pfasst
     template<typename T>
     inline T get_value(const string& name, const T& default_val)
     {
-      return options::get_instance().get_variables_map().count(name)
-              ? options::get_instance().get_variables_map()[name].as<T>() : default_val;
+      return pfasst::config::has_value(name)
+               ? options::get_instance().get_variables_map()[name].as<T>()
+               : default_val;
     }
 
     /**
@@ -272,12 +283,12 @@ namespace pfasst
       po::store(parsed, options::get_instance().get_variables_map());
       po::notify(options::get_instance().get_variables_map());
 
-      if (options::get_instance().get_variables_map().count("input")) {
+      if (pfasst::config::has_value("input")) {
         string input_file = config::get_value<string>("input");
         read_config_file(input_file);
       }
 
-      if (options::get_instance().get_variables_map().count("help")) {
+      if (pfasst::config::has_value("help")) {
         if (get_rank() == 0) {
           cout << print_help() << endl;
         }

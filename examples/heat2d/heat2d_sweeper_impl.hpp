@@ -28,31 +28,34 @@ namespace pfasst
       void
       Heat2D<SweeperTrait, Enabled>::init_opts()
       {
-        config::options::add_option<size_t>("Heat 2D", "num_dofs", "number spatial degrees of freedom per dimension on fine level");
-        config::options::add_option<size_t>("Heat 2D", "coarse_factor", "coarsening factor");
-        config::options::add_option<typename traits::spatial_t>("Heat 2D", "nu", "thermal diffusivity");
+        config::options::add_option<size_t>("Heat 2D", "num_dofs",
+                                            "number spatial degrees of freedom per dimension on fine level");
+        config::options::add_option<size_t>("Heat 2D", "coarse_factor",
+                                            "coarsening factor");
+        config::options::add_option<spatial_t>("Heat 2D", "nu",
+                                               "thermal diffusivity");
       }
 
       template<class SweeperTrait, typename Enabled>
-      Heat2D<SweeperTrait, Enabled>::Heat2D(const size_t& ndofs, const typename SweeperTrait::spatial_t& nu)
+      Heat2D<SweeperTrait, Enabled>::Heat2D(const size_t ndofs)
         :   IMEX<SweeperTrait, Enabled>()
-          , _t0(0.0)
-          , _nu(nu)
           , _lap(ndofs)
       {
         this->encap_factory()->set_size(ndofs * ndofs);
 
-        for (size_t yi = 0; yi < ndofs; ++yi) {
-          this->_lap[yi] = vector<typename traits::spatial_t>(ndofs);
+        auto compute_kdi = [&ndofs](const size_t di) {
+          return two_pi<spatial_t>() * ((di <= ndofs / 2) ? spatial_t(di) : spatial_t(di) - spatial_t(ndofs));
+        };
 
-          const typename traits::spatial_t kyi = two_pi<typename traits::spatial_t>()
-                                   * ((yi <= ndofs / 2) ? typename traits::spatial_t(yi) : typename traits::spatial_t(yi) - typename traits::spatial_t(ndofs));
-          const typename traits::spatial_t kyi_sqt = pfasst::almost_zero(pow(kyi, 2)) ? 0.0 : -pow(kyi, 2);
+        for (size_t yi = 0; yi < ndofs; ++yi) {
+          this->_lap[yi] = vector<spatial_t>(ndofs);
+
+          const spatial_t kyi = compute_kdi(yi);
+          const spatial_t kyi_sqt = pfasst::almost_zero(pow(kyi, 2)) ? 0.0 : -pow(kyi, 2);
 
           for (size_t xi = 0; xi < ndofs; ++xi) {
-            const typename traits::spatial_t kxi = two_pi<typename traits::spatial_t>()
-                                     * ((xi <= ndofs / 2) ? typename traits::spatial_t(xi) : typename traits::spatial_t(xi) - typename traits::spatial_t(ndofs));
-            const typename traits::spatial_t kxi_sqt = pfasst::almost_zero(pow(kxi, 2)) ? 0.0 : -pow(kxi, 2);
+            const spatial_t kxi = compute_kdi(xi);
+            const spatial_t kxi_sqt = pfasst::almost_zero(pow(kxi, 2)) ? 0.0 : -pow(kxi, 2);
 
             this->_lap[yi][xi] = kyi_sqt + kxi_sqt;
           }
@@ -65,7 +68,7 @@ namespace pfasst
       {
         IMEX<SweeperTrait, Enabled>::set_options();
 
-        this->_nu = config::get_value<typename traits::spatial_t>("nu", 0.2);
+        this->_nu = config::get_value<spatial_t>("nu", this->_nu);
       }
 
       template<class SweeperTrait, typename Enabled>
@@ -75,17 +78,20 @@ namespace pfasst
         auto result = this->get_encap_factory().create();
 
         const size_t dofs_p_dim = sqrt(this->get_num_dofs());
-        const typename traits::spatial_t dx = 1.0 / typename traits::spatial_t(dofs_p_dim);
-        const typename traits::spatial_t dy = 1.0 / typename traits::spatial_t(dofs_p_dim);
+        const spatial_t dx = 1.0 / spatial_t(dofs_p_dim);
+        const spatial_t dy = 1.0 / spatial_t(dofs_p_dim);
+
+        auto lin_index = [&dofs_p_dim](const size_t yi, const size_t xi) {
+          return linearized_index(make_tuple(yi, xi), dofs_p_dim);
+        };
 
         for (size_t yi = 0; yi < dofs_p_dim; ++yi) {
           for (size_t xi = 0; xi < dofs_p_dim; ++xi) {
-            result->data()[yi * dofs_p_dim + xi] = (sin(two_pi<typename traits::spatial_t>() * yi * dy) + sin(two_pi<typename traits::spatial_t>() * xi * dx)) * exp(-t * 4 * pi_sqr<typename traits::spatial_t>() * this->_nu);
+            result->data()[lin_index(yi, xi)] = (sin(two_pi<spatial_t>() * yi * dy)
+                                                 + sin(two_pi<spatial_t>() * xi * dx))
+                                                * exp(-t * 4 * pi_sqr<spatial_t>() * this->_nu);
           }
         }
-
-        ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "EXACT t=" << t// << ": " << LOG_FLOAT << to_string(result)
-        );
 
         return result;
       }
@@ -125,20 +131,26 @@ namespace pfasst
           const auto num_nodes = this->get_quadrature()->get_num_nodes();
           nodes.insert(nodes.begin(), typename traits::time_t(0.0));
 
-          ML_CVLOG(1, this->get_logger_id(), "Observables after " << ((this->get_status()->get_iteration() == 0) ? string("prediction") : string("iteration ") + to_string(this->get_status()->get_iteration())));
+          ML_CVLOG(1, this->get_logger_id(),
+                   "Observables after "
+                   << ((this->get_status()->get_iteration() == 0)
+                          ? string("prediction")
+                          : string("iteration ") + to_string(this->get_status()->get_iteration())));
           for (size_t m = 0; m < num_nodes; ++m) {
-            ML_CVLOG(1, this->get_logger_id(), "  t["<<m<<"]=" << LOG_FIXED << (t + dt * nodes[m])
-                                            << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[m]
-                                            << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[m]
-  //                                           << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[m])
-  //                                           << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[m])
+            ML_CVLOG(1, this->get_logger_id(),
+                     "  t["<<m<<"]=" << LOG_FIXED << (t + dt * nodes[m])
+                     << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[m]
+                     << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[m]
+//                      << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[m])
+//                      << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[m])
                     );
           }
-          ML_CLOG(INFO, this->get_logger_id(), "  t["<<num_nodes<<"]=" << LOG_FIXED << (t + dt * nodes[num_nodes])
-                                            << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[num_nodes]
-                                            << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[num_nodes]
-  //                                           << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[num_nodes])
-  //                                           << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[num_nodes])
+          ML_CLOG(INFO, this->get_logger_id(),
+                  "  t["<<num_nodes<<"]=" << LOG_FIXED << (t + dt * nodes[num_nodes])
+                  << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[num_nodes]
+                  << "      |rel residual| = " << LOG_FLOAT << this->_rel_res_norms[num_nodes]
+//                   << "      |abs error| = " << LOG_FLOAT << encap::norm0(error[num_nodes])
+//                   << "      |rel error| = " << LOG_FLOAT << encap::norm0(rel_error[num_nodes])
                  );
         }
         return converged;
@@ -181,9 +193,6 @@ namespace pfasst
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           const typename traits::time_t ds = dt * (nodes[m] - nodes[0]);
           error[m] = pfasst::encap::axpy(-1.0, this->exact(t + ds), this->get_states()[m]);
-          ML_CVLOG(3, this->get_logger_id(), LOG_FIXED << "error t=" << (t + ds)// << ": "
-//                                           << LOG_FLOAT << to_string(error[m])
-                  );
         }
 
         return error;
@@ -220,24 +229,12 @@ namespace pfasst
       {
         UNUSED(u);
         ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "evaluating EXPLICIT part at t=" << t);
-//         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
 
         auto result = this->get_encap_factory().create();
-
-        // taken form pySDC
-        //   # xvalues = np.array([(i+1)*self.dx for i in range(self.nvars)])
-        //   fexpl.values = np.zeros(self.nvars)  # -np.sin(np.pi * xvalues) * (np.sin(t) - self.nu * np.pi**2 * np.cos(t))
-//         const spatial_t PI = pi<spatial_t>();
-//         const spatial_t PIsqr = pi_sqr<spatial_t>();
-//         const spatial_t dx = 1.0 / (spatial_t(this->get_num_dofs()) + 1);
-//         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
-//           result->data()[i] = -1.0 * sin(PI * (i + 1) * dx) * (sin(t) - this->_nu * PIsqr * cos(t));
-//         }
         result->zero();
 
         this->_num_expl_f_evals++;
 
-//         ML_CVLOG(5, this->get_logger_id(), "\t  -> " << to_string(result));
         return result;
       }
 
@@ -247,16 +244,19 @@ namespace pfasst
                                                        const shared_ptr<typename SweeperTrait::encap_t> u)
       {
         ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "evaluating IMPLICIT part at t=" << t);
-//         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
 
-        const typename traits::spatial_t c = this->_nu / typename traits::spatial_t(this->get_num_dofs());
+        const spatial_t c = this->_nu / spatial_t(this->get_num_dofs());
         const size_t dofs_p_dim = sqrt(this->get_num_dofs());
+
+        auto lin_index = [&dofs_p_dim](const size_t yi, const size_t xi) {
+          return linearized_index(make_tuple(yi, xi), dofs_p_dim);
+        };
 
         auto* z = this->_fft.forward(u);
 
         for (size_t yi = 0; yi < dofs_p_dim; ++yi) {
           for (size_t xi = 0; xi < dofs_p_dim; ++xi) {
-            z[yi * dofs_p_dim + xi] *= c * this->_lap[yi][xi];
+            z[lin_index(yi, xi)] *= c * this->_lap[yi][xi];
           }
         }
 
@@ -265,7 +265,6 @@ namespace pfasst
 
         this->_num_impl_f_evals++;
 
-//         ML_CVLOG(5, this->get_logger_id(), "\t  -> " << to_string(result));
         return result;
       }
 
@@ -277,19 +276,21 @@ namespace pfasst
                                                     const typename SweeperTrait::time_t& dt,
                                                     const shared_ptr<typename SweeperTrait::encap_t> rhs)
       {
-        ML_CVLOG(4, this->get_logger_id(), LOG_FIXED << "IMPLICIT spatial SOLVE at t=" << t << " with dt=" << dt);
-//         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tf:   " << to_string(f));
-//         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\tu:   " << to_string(u));
-//         ML_CVLOG(5, this->get_logger_id(), LOG_FLOAT << "\trhs: " << to_string(rhs));
+        ML_CVLOG(4, this->get_logger_id(),
+                 LOG_FIXED << "IMPLICIT spatial SOLVE at t=" << t << " with dt=" << dt);
 
         const typename traits::spatial_t c = this->_nu * dt;
         const size_t dofs_p_dim = sqrt(this->get_num_dofs());
+
+        auto lin_index = [&dofs_p_dim](const size_t yi, const size_t xi) {
+          return linearized_index(make_tuple(yi, xi), dofs_p_dim);
+        };
 
         auto* z = this->_fft.forward(rhs);
 
         for (size_t yi = 0; yi < dofs_p_dim; ++yi) {
           for (size_t xi = 0; xi < dofs_p_dim; ++xi) {
-            z[yi * dofs_p_dim + xi] /= (1.0 - c * this->_lap[yi][xi]) * typename traits::spatial_t(this->get_num_dofs());
+            z[lin_index(yi, xi)] /= (1.0 - c * this->_lap[yi][xi]) * spatial_t(this->get_num_dofs());
           }
         }
 
@@ -297,15 +298,11 @@ namespace pfasst
 
         for (size_t yi = 0; yi < dofs_p_dim; ++yi) {
           for (size_t xi = 0; xi < dofs_p_dim; ++xi) {
-            f->data()[yi * dofs_p_dim + xi] = (u->get_data()[yi * dofs_p_dim + xi] - rhs->get_data()[yi * dofs_p_dim + xi]) / dt;
+            f->data()[lin_index(yi, xi)] = (u->get_data()[lin_index(yi, xi)] - rhs->get_data()[lin_index(yi, xi)]) / dt;
           }
         }
 
         this->_num_impl_solves++;
-
-//         ML_CVLOG(5, this->get_logger_id(), "\t->");
-//         ML_CVLOG(5, this->get_logger_id(), "\t  f: " << to_string(f));
-//         ML_CVLOG(5, this->get_logger_id(), "\t  u: " << to_string(u));
       }
     }  // ::pfasst::examples::heat1d
   }  // ::pfasst::examples

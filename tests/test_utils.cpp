@@ -69,4 +69,31 @@ INSTANTIATE_TEST_CASE_P(IndexManipulation3DTests,
                        );
 
 
+class ConfigModderTest
+  : public ::testing::Test
+{};
+
+TEST_F(ConfigModderTest, makes_backup_of_initial_config)
+{
+  ASSERT_FALSE(pfasst::config::has_value("num_iters"));
+  {
+    ConfigModder config_backup;
+    pfasst::config::options::update_value<size_t>("num_iters", 3);
+    EXPECT_THAT(pfasst::config::get_value<size_t>("num_iters"), Eq(3));
+  }
+  EXPECT_FALSE(pfasst::config::has_value("num_iters"));
+}
+
+TEST_F(ConfigModderTest, provides_temporary_config_updated)
+{
+  ASSERT_FALSE(pfasst::config::has_value("num_iters"));
+  {
+    ConfigModder config_backup;
+    config_backup.update<size_t>("num_iters", 3);
+    EXPECT_THAT(pfasst::config::get_value<size_t>("num_iters"), Eq(3));
+  }
+  EXPECT_FALSE(pfasst::config::has_value("num_iters"));
+}
+
+
 TEST_MAIN()
