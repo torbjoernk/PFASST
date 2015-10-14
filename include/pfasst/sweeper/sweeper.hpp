@@ -61,6 +61,8 @@ namespace pfasst
       virtual shared_ptr<typename SweeperTrait::encap_t>&         end_state();
       virtual vector<shared_ptr<typename SweeperTrait::encap_t>>& residuals();
 
+      virtual void initialize();
+
     public:
       explicit Sweeper();
       Sweeper(const Sweeper<SweeperTrait, Enabled>& other) = default;
@@ -97,6 +99,7 @@ namespace pfasst
       virtual void set_rel_residual_tol(const typename SweeperTrait::spatial_t& rel_res_tol);
 
       virtual void setup();
+      virtual void reset();
 
       virtual void pre_predict();
       virtual void predict();

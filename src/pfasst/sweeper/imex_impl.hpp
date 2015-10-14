@@ -19,12 +19,9 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
-  IMEX<SweeperTrait, Enabled>::setup()
+  IMEX<SweeperTrait, Enabled>::initialize()
   {
-    pfasst::Sweeper<SweeperTrait, Enabled>::setup();
-
-    ML_CLOG_IF(this->get_quadrature()->left_is_node(), WARNING, this->get_logger_id(),
-      "IMEX Sweeper for quadrature nodes containing t_0 not implemented and tested.");
+    pfasst::Sweeper<SweeperTrait, Enabled>::initialize();
 
     const auto num_nodes = this->get_quadrature()->get_num_nodes();
     assert(this->get_states().size() == num_nodes + 1);
@@ -42,6 +39,18 @@ namespace pfasst
              bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
     this->compute_delta_matrices();
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  void
+  IMEX<SweeperTrait, Enabled>::setup()
+  {
+    pfasst::Sweeper<SweeperTrait, Enabled>::setup();
+
+    ML_CLOG_IF(this->get_quadrature()->left_is_node(), WARNING, this->get_logger_id(),
+      "IMEX Sweeper for quadrature nodes containing t_0 not implemented and tested.");
+
+    this->initialize();
   }
 
   template<class SweeperTrait, typename Enabled>

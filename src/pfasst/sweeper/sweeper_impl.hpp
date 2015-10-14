@@ -202,25 +202,8 @@ namespace pfasst
 
   template<class SweeperTrait, typename Enabled>
   void
-  Sweeper<SweeperTrait, Enabled>::setup()
+  Sweeper<SweeperTrait, Enabled>::initialize()
   {
-    if (this->get_status() == nullptr) {
-      throw runtime_error("Status not yet set.");
-    }
-    ML_CVLOG(1, this->get_logger_id(), "setting up with t0=" << LOG_FIXED << this->get_status()->get_time()
-              << ", dt=" << LOG_FIXED << this->get_status()->get_dt()
-              << ", t_end=" << LOG_FIXED << this->get_status()->get_t_end()
-              << ", max_iter=" << LOG_FIXED << this->get_status()->get_max_iterations());
-
-    if (this->get_quadrature() == nullptr) {
-      throw runtime_error("Quadrature not yet set.");
-    }
-    ML_CLOG(INFO, this->get_logger_id(), "using as quadrature: " << this->get_quadrature()->print_summary()
-                                      << " and an expected error of " << LOG_FLOAT << this->get_quadrature()->expected_error());
-
-    // TODO: remove
-    /* assert(this->get_encap_factory() != nullptr); */
-
     const auto nodes = this->get_quadrature()->get_nodes();
     const auto num_nodes = this->get_quadrature()->get_num_nodes();
 
@@ -238,6 +221,38 @@ namespace pfasst
 
     this->residuals().resize(num_nodes + 1);
     generate(this->residuals().begin(), this->residuals().end(), [&factory](){ return factory.create(); });
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  void
+  Sweeper<SweeperTrait, Enabled>::setup()
+  {
+    if (this->get_status() == nullptr) {
+      throw runtime_error("Status not yet set.");
+    }
+    ML_CVLOG(1, this->get_logger_id(), "setting up with t0=" << LOG_FIXED << this->get_status()->get_time()
+              << ", dt=" << LOG_FIXED << this->get_status()->get_dt()
+              << ", t_end=" << LOG_FIXED << this->get_status()->get_t_end()
+              << ", max_iter=" << LOG_FIXED << this->get_status()->get_max_iterations());
+
+    if (this->get_quadrature() == nullptr) {
+      throw runtime_error("Quadrature not yet set.");
+    }
+    ML_CLOG(INFO, this->get_logger_id(), "using as quadrature: " << this->get_quadrature()->print_summary()
+                                      << " and an expected error of " << LOG_FLOAT << this->get_quadrature()->expected_error());
+
+    this->initialize();
+  }
+
+  template<class SweeperTrait, typename Enabled>
+  void
+  Sweeper<SweeperTrait, Enabled>::reset()
+  {
+    ML_CLOG(WARNING, this->get_logger_id(),
+            "Resetting to emulate recovering from faulty process.");
+
+    this->status()->reset();
+    this->initialize();
   }
 
   template<class SweeperTrait, typename Enabled>
