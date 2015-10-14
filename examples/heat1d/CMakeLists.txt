@@ -13,6 +13,7 @@ set(heat_examples
 
 set(heat_mpi_examples
     heat1d_pfasst
+    heat1d_faulty_pfasst
 )
 
 if(${pfasst_WITH_MPI})
