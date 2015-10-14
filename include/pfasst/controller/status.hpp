@@ -175,7 +175,7 @@ namespace pfasst
     typename precision
   >
   class Status
-    : public enable_shared_from_this<Status<precision>>
+    :   public enable_shared_from_this<Status<precision>>
       , public el::Loggable
   {
     static_assert(is_arithmetic<precision>::value,
@@ -202,6 +202,7 @@ namespace pfasst
       Status<precision>& operator=(Status<precision>&& other) = default;
 
       virtual void clear();
+      virtual void reset();
 
       virtual size_t& step();
       virtual size_t  get_step() const;
