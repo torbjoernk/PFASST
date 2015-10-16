@@ -424,7 +424,8 @@ namespace pfasst
 
   template<class TransferT, class CommT>
   int
-  TwoLevelPfasst<TransferT, CommT>::compute_tag(const TagType type, const TagLevel level, const TagModifier mod) const
+  TwoLevelPfasst<TransferT, CommT>::compute_tag(const TagType type, const TagLevel level,
+                                                const TagModifier mod) const
   {
     int tag = (type == (+TagType::DATA)) ? 1 : 0;
 

@@ -153,9 +153,9 @@ namespace pfasst
 
   static vector<string>& split(const string& s, char delim, vector<string>& elems)
   {
-    stringstream ss(s);
+    std::stringstream os(s);
     string item;
-    while (getline(ss, item, delim)) {
+    while (std::getline(os, item, delim)) {
       elems.push_back(item);
     }
     return elems;

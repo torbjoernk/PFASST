@@ -150,11 +150,13 @@ namespace pfasst
           this->cycle_up();
 
           if (be_faulty()) {
-            // backup step index
+            // backup step and iteration index
             const auto step = this->get_status()->get_step();
+            const auto iter = this->get_status()->get_iteration();
             this->get_coarse()->reset();
             this->get_fine()->reset();
             this->status()->step() = step;
+            this->status()->iteration() = iter;
             this->status()->set_primary_state(PrimaryState::PREDICTING);
           }
 
@@ -342,16 +344,10 @@ namespace pfasst
 
   template<class TransferT, class CommT>
   int
-  TwoLevelFaultyPfasst<TransferT, CommT>::compute_tag(const TagType type, const TagLevel level, const TagModifier mod) const
+  TwoLevelFaultyPfasst<TransferT, CommT>::compute_tag(const TagType type, const TagLevel level,
+                                                      const TagModifier mod) const
   {
     int tag = (type == (+TagType::DATA)) ? 1 : 0;
-
-//     if (type == (+TagType::DATA)) {
-//       const size_t iter = this->get_status()->get_iteration()
-//                           - ((   mod == (+TagModifier::PREV_ITER)
-//                               || mod == (+TagModifier::PREV_ITER_PREV_STEP)) ? 1 : 0);
-//       tag += (iter + 1) * 10000;
-//     }
 
     const size_t step = this->get_status()->get_step()
                         - ((   mod == (+TagModifier::PREV_STEP)

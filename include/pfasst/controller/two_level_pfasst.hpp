@@ -60,9 +60,9 @@ namespace pfasst
 
       virtual void broadcast();
 
-      int compute_tag(const TagType type,
-                      const TagLevel level = TagLevel::ANY,
-                      const TagModifier mod = TagModifier::UNMOD) const;
+      virtual int compute_tag(const TagType type,
+                              const TagLevel level = TagLevel::ANY,
+                              const TagModifier mod = TagModifier::UNMOD) const;
 
     public:
       TwoLevelPfasst();

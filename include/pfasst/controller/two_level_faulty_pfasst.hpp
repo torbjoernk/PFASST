@@ -44,9 +44,9 @@ namespace pfasst
       virtual void predictor() override;
       bool be_faulty();
 
-      int compute_tag(const TagType type,
-                      const TagLevel level = TagLevel::ANY,
-                      const TagModifier mod = TagModifier::UNMOD) const;
+      virtual int compute_tag(const TagType type,
+                              const TagLevel level = TagLevel::ANY,
+                              const TagModifier mod = TagModifier::UNMOD) const override;
 
     public:
       TwoLevelFaultyPfasst();
