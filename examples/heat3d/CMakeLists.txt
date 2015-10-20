@@ -12,7 +12,8 @@ set(heat3d_examples
 )
 
 set(heat3d_mpi_examples
-#     heat3d_pfasst
+    heat3d_pfasst
+    heat3d_space_parallel_pfasst
 )
 
 if(${pfasst_WITH_MPI})

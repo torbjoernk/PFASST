@@ -11,19 +11,20 @@ using namespace std;
 #include <pfasst/controller/two_level_pfasst.hpp>
 #include <pfasst/contrib/spectral_transfer.hpp>
 
-#include "heat3d_sweeper.hpp"
+#include "heat3d_space_parallel_sweeper.hpp"
 
 using pfasst::encap::VectorEncapsulation;
 using pfasst::quadrature::quadrature_factory;
 using pfasst::quadrature::QuadratureType;
 using pfasst::contrib::SpectralTransfer;
 using pfasst::TwoLevelPfasst;
-using CommunicatorType = pfasst::comm::MpiP2P;
+using temporal_comm_t = pfasst::comm::MpiP2P<pfasst::comm::temporal_communicator_tag>;
+using spatial_comm_t = pfasst::comm::MpiP2P<pfasst::comm::spatial_communicator_tag>;
 
 using pfasst::examples::heat3d::Heat3D;
 
 using encap_t = VectorEncapsulation<double, double, 3>;
-using sweeper_t = Heat3D<pfasst::sweeper_traits<typename encap_t::traits>>;
+using sweeper_t = Heat3D<pfasst::space_parallel_sweeper_traits<typename encap_t::traits, spatial_comm_t>>;
 using transfer_traits_t = pfasst::transfer_traits<sweeper_t, sweeper_t, 2>;
 using spectral_t = SpectralTransfer<transfer_traits_t>;
 
@@ -34,15 +35,22 @@ namespace pfasst
   {
     namespace heat3d
     {
-      void run_pfasst(const size_t& ndofs, const size_t& nnodes, const QuadratureType& quad_type,
-                      const double& t_0, const double& dt, const double& t_end, const size_t& niter)
+      void run_pfasst(const size_t ndofs, const size_t nnodes, const QuadratureType& quad_type,
+                      const double t_0, const double dt, const double t_end, const size_t niter,
+                      const size_t np_space)
       {
-        TwoLevelPfasst<spectral_t, CommunicatorType> pfasst;
-        pfasst.communicator() = make_shared<CommunicatorType>(MPI_COMM_WORLD);
+        shared_ptr<temporal_comm_t> comm_time;
+        shared_ptr<spatial_comm_t> comm_space;
+        tie(comm_time, comm_space) = pfasst::comm::split_comm(np_space);
+
+        TwoLevelPfasst<spectral_t, temporal_comm_t> pfasst;
+        pfasst.communicator() = comm_time;
 
         auto coarse = make_shared<sweeper_t>(ndofs);
+        coarse->spatial_communicator() = comm_space;
         coarse->quadrature() = quadrature_factory<double>(nnodes, quad_type);
         auto fine = make_shared<sweeper_t>(ndofs * 2);
+        fine->spatial_communicator() = comm_space;
         fine->quadrature() = quadrature_factory<double>(nnodes, quad_type);
 
         auto transfer = make_shared<spectral_t>();
@@ -102,7 +110,9 @@ int main(int argc, char** argv)
   }
   const size_t niter = get_value<size_t>("num_iters", 5);
 
-  pfasst::examples::heat3d::run_pfasst(ndofs, nnodes, quad_type, t_0, dt, t_end, niter);
+  const size_t np_space = get_value<size_t>("np_space", 1);
+
+  pfasst::examples::heat3d::run_pfasst(ndofs, nnodes, quad_type, t_0, dt, t_end, niter, np_space);
 
   pfasst::Status<double>::free_mpi_datatype();
 
