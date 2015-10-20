@@ -51,8 +51,11 @@ namespace pfasst
     static void check_mpi_error(const int err_code);
 
 
+    template<
+      class CommTagT = temporal_communicator_tag
+    >
     class MpiP2P
-      : public Communicator
+      : public Communicator<CommTagT>
     {
       protected:
         int      _size = -1;
@@ -64,12 +67,16 @@ namespace pfasst
         vector<shared_ptr<MPI_Request>> _requests;
 
       public:
-        explicit MpiP2P(MPI_Comm comm = MPI_COMM_WORLD);
-        MpiP2P(const MpiP2P& other) = default;
-        MpiP2P(MpiP2P&& other) = default;
+        using type_tag = CommTagT;
+
+      public:
+        explicit MpiP2P(MPI_Comm comm);
+        MpiP2P();
+        MpiP2P(const MpiP2P<CommTagT>& other) = default;
+        MpiP2P(MpiP2P<CommTagT>&& other) = default;
         virtual ~MpiP2P();
-        MpiP2P& operator=(const MpiP2P& other) = default;
-        MpiP2P& operator=(MpiP2P&& other) = default;
+        MpiP2P<CommTagT>& operator=(const MpiP2P<CommTagT>& other) = default;
+        MpiP2P<CommTagT>& operator=(MpiP2P<CommTagT>&& other) = default;
 
         virtual size_t get_size() const override;
         virtual size_t get_rank() const override;
@@ -98,6 +105,10 @@ namespace pfasst
 
         virtual void bcast(double* data, const int count, const int root_rank) override;
     };
+
+
+    pair<shared_ptr<MpiP2P<temporal_communicator_tag>>, shared_ptr<MpiP2P<spatial_communicator_tag>>>
+    split_comm(const size_t np_space);
   }  // ::pfasst::comm
 }  // ::pfasst
 

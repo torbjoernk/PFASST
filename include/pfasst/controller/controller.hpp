@@ -13,7 +13,7 @@ namespace pfasst
 {
   template<
     class TransferT,
-    class CommT = comm::Communicator
+    class CommT = comm::Communicator<>
   >
   class Controller
     : public enable_shared_from_this<Controller<TransferT, CommT>>

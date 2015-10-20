@@ -25,7 +25,7 @@ namespace pfasst
 
   template<
     class TransferT,
-    class CommT = comm::MpiP2P
+    class CommT = comm::MpiP2P<>
   >
   class TwoLevelPfasst
     : public TwoLevelMLSDC<TransferT, CommT>

@@ -18,7 +18,7 @@ namespace pfasst
 {
   template<
     class TransferT,
-    class CommT = comm::MpiP2P
+    class CommT = comm::MpiP2P<>
   >
   class TwoLevelFaultyPfasst
     : public TwoLevelPfasst<TransferT, CommT>

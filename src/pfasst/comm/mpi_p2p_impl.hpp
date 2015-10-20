@@ -4,6 +4,7 @@
 #include <string>
 using namespace std;
 
+#include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
 
 
@@ -59,7 +60,13 @@ namespace pfasst
     }
 
 
-    MpiP2P::MpiP2P(MPI_Comm comm)
+    template<class CommTagT>
+    MpiP2P<CommTagT>::MpiP2P()
+      : MpiP2P(MPI_COMM_WORLD)
+    {}
+
+    template<class CommTagT>
+    MpiP2P<CommTagT>::MpiP2P(MPI_Comm comm)
       :   _comm(comm)
         , _requests(0)
     {
@@ -79,39 +86,52 @@ namespace pfasst
       }
     }
 
-    MpiP2P::~MpiP2P()
+    template<class CommTagT>
+    MpiP2P<CommTagT>::~MpiP2P()
     {
       this->cleanup(true);
     }
 
-    size_t MpiP2P::get_size() const
+    template<class CommTagT>
+    size_t
+    MpiP2P<CommTagT>::get_size() const
     {
       assert(this->_size > 0);
       return this->_size;
     }
 
-    size_t MpiP2P::get_rank() const
+    template<class CommTagT>
+    size_t
+    MpiP2P<CommTagT>::get_rank() const
     {
       assert(this->_rank >= 0);
       return this->_rank;
     }
 
-    string MpiP2P::get_name() const
+    template<class CommTagT>
+    string
+    MpiP2P<CommTagT>::get_name() const
     {
       return this->_name;
     }
 
-    bool MpiP2P::is_first() const
+    template<class CommTagT>
+    bool
+    MpiP2P<CommTagT>::is_first() const
     {
       return (this->get_rank() == this->get_root());
     }
 
-    bool MpiP2P::is_last() const
+    template<class CommTagT>
+    bool
+    MpiP2P<CommTagT>::is_last() const
     {
       return (this->get_rank() == this->get_size() - 1);
     }
 
-    void MpiP2P::cleanup(const bool discard)
+    template<class CommTagT>
+    void
+    MpiP2P<CommTagT>::cleanup(const bool discard)
     {
       ML_CLOG(DEBUG, "COMM_P2P",
               "cleaning up " << this->_requests.size() << " dangling request handlers");
@@ -132,13 +152,17 @@ namespace pfasst
       ML_CLOG(DEBUG, "COMM_P2P", "done");
     }
 
-    void MpiP2P::abort(const int& err_code)
+    template<class CommTagT>
+    void
+    MpiP2P<CommTagT>::abort(const int& err_code)
     {
       MPI_Abort(this->_comm, err_code);
     }
 
 
-    bool MpiP2P::probe(const int src_rank, const int tag)
+    template<class CommTagT>
+    bool
+    MpiP2P<CommTagT>::probe(const int src_rank, const int tag)
     {
       ML_CLOG(DEBUG, "COMM_P2P",
               "probing for incomming message from " << src_rank << " with tag=" << tag);
@@ -151,7 +175,9 @@ namespace pfasst
     }
 
 
-    void MpiP2P::send(const double* const data, const int count, const int dest_rank, const int tag)
+    template<class CommTagT>
+    void
+    MpiP2P<CommTagT>::send(const double* const data, const int count, const int dest_rank, const int tag)
     {
       ML_CLOG(DEBUG, "COMM_P2P",
               "sending " << count << " " << ((count == 1) ? "double" : "doubles")
@@ -161,7 +187,9 @@ namespace pfasst
       check_mpi_error(err);
     }
 
-    void MpiP2P::send_status(const StatusDetail<double>* const data, const int count,
+    template<class CommTagT>
+    void
+    MpiP2P<CommTagT>::send_status(const StatusDetail<double>* const data, const int count,
                              const int dest_rank, const int tag)
     {
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
@@ -176,7 +204,9 @@ namespace pfasst
     }
 
 
-    void MpiP2P::isend(const double* const data, const int count, const int dest_rank, const int tag)
+    template<class CommTagT>
+    void
+    MpiP2P<CommTagT>::isend(const double* const data, const int count, const int dest_rank, const int tag)
     {
       ML_CLOG(DEBUG, "COMM_P2P",
               "non-blocking send of " << count << " " << ((count == 1) ? "double" : "doubles")
@@ -189,7 +219,9 @@ namespace pfasst
       check_mpi_error(err);
     }
 
-    void MpiP2P::isend_status(const StatusDetail<double>* const data, const int count,
+    template<class CommTagT>
+    void
+    MpiP2P<CommTagT>::isend_status(const StatusDetail<double>* const data, const int count,
                               const int dest_rank, const int tag)
     {
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
@@ -206,7 +238,9 @@ namespace pfasst
     }
 
 
-    void MpiP2P::recv(double* data, const int count, const int dest_rank, const int tag)
+    template<class CommTagT>
+    void
+    MpiP2P<CommTagT>::recv(double* data, const int count, const int dest_rank, const int tag)
     {
       auto stat = MPI_Status_factory();
       ML_CLOG(DEBUG, "COMM_P2P",
@@ -217,7 +251,9 @@ namespace pfasst
       check_mpi_error(err);
     }
 
-    void MpiP2P::recv_status(StatusDetail<double>* data, const int count, const int dest_rank, const int tag)
+    template<class CommTagT>
+    void
+    MpiP2P<CommTagT>::recv_status(StatusDetail<double>* data, const int count, const int dest_rank, const int tag)
     {
       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
 
@@ -231,36 +267,26 @@ namespace pfasst
     }
 
 
-    void MpiP2P::irecv(double* data, const int count, const int src_rank, const int tag)
+    template<class CommTagT>
+    void
+    MpiP2P<CommTagT>::irecv(double* data, const int count, const int src_rank, const int tag)
     {
-//       ML_CLOG(DEBUG, "COMM_P2P",
-//               "non-blocking receive of " << count << " " << ((count == 1) ? "double" : "doubles")
-//               << " with tag=" << tag << " from " << src_rank);
-// 
-//       this->_requests.push_back(MPI_REQUEST_NULL);
-//       int err = MPI_Irecv(data, count, MPI_DOUBLE, src_rank, tag,
-//                           mpi_const_cast<MPI_Comm>(this->_comm), &(this->_requests.back()));
-//       check_mpi_error(err);
-      throw runtime_error("dont irecv");
+      UNUSED(data); UNUSED(count); UNUSED(src_rank); UNUSED(tag);
+      throw runtime_error("don't use non-blocking receive on data");
     }
 
-    void MpiP2P::irecv_status(StatusDetail<double>* data, const int count, const int src_rank, const int tag)
+    template<class CommTagT>
+    void
+    MpiP2P<CommTagT>::irecv_status(StatusDetail<double>* data, const int count, const int src_rank, const int tag)
     {
-//       assert(pfasst::status_data_type != MPI_DATATYPE_NULL);
-// 
-//       ML_CLOG(DEBUG, "COMM_P2P",
-//               "non-blocking receive of " << count << " " << ((count == 1) ? "Status" : "Stati")
-//               << " with tag=" << tag << " from " << src_rank);
-// 
-//       this->_requests.push_back(MPI_REQUEST_NULL);
-//       int err = MPI_Irecv(data, count, status_data_type, src_rank, tag,
-//                           mpi_const_cast<MPI_Comm>(this->_comm), &(this->_requests.back()));
-//       check_mpi_error(err);
-      throw runtime_error("dont irecv");
+      UNUSED(data); UNUSED(count); UNUSED(src_rank); UNUSED(tag);
+      throw runtime_error("don't use non-blocking receive on status data");
     }
 
 
-    void MpiP2P::bcast(double* data, const int count, const int root_rank)
+    template<class CommTagT>
+    void
+    MpiP2P<CommTagT>::bcast(double* data, const int count, const int root_rank)
     {
       ML_CLOG(DEBUG, "COMM_P2P",
               "broadcasting " << count << " " << ((count == 1) ? "double" : "doubles")
@@ -271,5 +297,27 @@ namespace pfasst
     }
 
 
+    pair<shared_ptr<MpiP2P<temporal_communicator_tag>>, shared_ptr<MpiP2P<spatial_communicator_tag>>>
+    split_comm(const size_t np_space)
+    {
+      auto comm_world = make_shared<MpiP2P<temporal_communicator_tag>>(MPI_COMM_WORLD);
+      int err = (int)false;
+
+      // split into time comms
+      MPI_Comm COMM_TIME;
+      const int color_time = comm_world->get_rank() / (comm_world->get_size() / np_space);
+      err = MPI_Comm_split(MPI_COMM_WORLD, color_time, comm_world->get_rank(), &COMM_TIME);
+      pfasst::comm::check_mpi_error(err);
+      auto comm_time = make_shared<MpiP2P<temporal_communicator_tag>>(COMM_TIME);
+
+      // split into spatial comms
+      MPI_Comm COMM_SPACE;
+      const int color_space = comm_world->get_rank() % comm_time->get_size();
+      err = MPI_Comm_split(MPI_COMM_WORLD, color_space, comm_world->get_rank(), &COMM_SPACE);
+      pfasst::comm::check_mpi_error(err);
+      auto comm_space = make_shared<MpiP2P<spatial_communicator_tag>>(COMM_SPACE);
+
+      return {comm_time, comm_space};
+    }
   } // ::pfasst::comm
 }  // ::pfasst

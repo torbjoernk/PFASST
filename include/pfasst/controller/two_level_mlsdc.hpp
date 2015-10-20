@@ -12,7 +12,7 @@ namespace pfasst
 {
   template<
     class TransferT,
-    class CommT = comm::Communicator
+    class CommT = comm::Communicator<>
   >
   class TwoLevelMLSDC
     : public Controller<TransferT, CommT>

@@ -12,16 +12,37 @@ namespace pfasst
 {
   namespace comm
   {
+    struct communicator_tag
+    {};
+
+    struct temporal_communicator_tag
+      : public communicator_tag
+    {};
+
+    struct spatial_communicator_tag
+      : public communicator_tag
+    {};
+
+
+    template<
+      class CommTagT = temporal_communicator_tag
+    >
     class Communicator
-      : public enable_shared_from_this<Communicator>
+      : public enable_shared_from_this<Communicator<CommTagT>>
     {
+      static_assert(is_base_of<communicator_tag, CommTagT>::value,
+                    "Communicator must either be for temporal or spatial domain.");
+
+      public:
+        using type_tag = CommTagT;
+
       public:
         Communicator() = default;
-        Communicator(const Communicator& other) = default;
-        Communicator(Communicator&& other) = default;
+        Communicator(const Communicator<CommTagT>& other) = default;
+        Communicator(Communicator<CommTagT>&& other) = default;
         virtual ~Communicator() = default;
-        Communicator& operator=(const Communicator& other) = default;
-        Communicator& operator=(Communicator&& other) = default;
+        Communicator<CommTagT>& operator=(const Communicator<CommTagT>& other) = default;
+        Communicator<CommTagT>& operator=(Communicator<CommTagT>&& other) = default;
 
         virtual size_t get_size() const;
         virtual size_t get_rank() const;
