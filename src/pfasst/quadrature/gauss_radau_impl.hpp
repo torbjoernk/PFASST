@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 #include <vector>
-using namespace std;
 
 #include "pfasst/logging.hpp"
 #include "pfasst/quadrature/polynomial.hpp"
@@ -17,7 +16,7 @@ namespace pfasst
       : IQuadrature<precision>(num_nodes)
     {
       if (this->num_nodes < 2) {
-        throw invalid_argument("Gauss-Radau quadrature requires at least two quadrature nodes.");
+        throw std::invalid_argument("Gauss-Radau quadrature requires at least two quadrature nodes.");
       }
       this->compute_nodes();
       this->compute_weights();
@@ -52,7 +51,7 @@ namespace pfasst
     template<typename precision>
     void GaussRadau<precision>::compute_nodes()
     {
-      this->nodes = vector<precision>(this->num_nodes, precision(0.0));
+      this->nodes = std::vector<precision>(this->num_nodes, precision(0.0));
       auto l   = Polynomial<precision>::legendre(this->num_nodes);
       auto lm1 = Polynomial<precision>::legendre(this->num_nodes - 1);
 

@@ -12,7 +12,8 @@
 #include <memory>
 #include <string>
 #include <sstream>
-using namespace std;
+using std::shared_ptr;
+using std::string;
 
 #ifdef WITH_MPI
   #include <sstream>
@@ -232,7 +233,7 @@ namespace pfasst
      */
     inline string format_mpi_rank(const char fill = ' ')
     {
-      ostringstream frmter;
+      std::ostringstream frmter;
       frmter << std::setw(4) << std::setfill(fill) << pfasst::config::get_rank();
       return frmter.str();
     }
@@ -402,7 +403,7 @@ namespace pfasst
      *
      * @ingroup Internals
      */
-    inline static void load_default_config(const bool no_custom_loggers=false)
+    inline static void load_default_config(const bool no_custom_loggers = false)
     {
       if (!pfasst::log::initialized) {
         el::Configurations defaultConf;
@@ -481,7 +482,7 @@ namespace pfasst
 #else
     inline static void test_logging_levels()
     {
-      cout << "### Example of different Logging Levels:" << endl;
+      std::cout << "### Example of different Logging Levels:" << std::endl;
       LOG(INFO) << "info";
       LOG(DEBUG) << "debug";
       LOG(WARNING) << "warning";
@@ -491,7 +492,7 @@ namespace pfasst
       for (size_t level = 0; level <= 9; ++level) {
         VLOG(level) << "verbosity level " << level;
       }
-      cout << "### End Example Logging Levels" << endl << endl;
+      std::cout << "### End Example Logging Levels" << std::endl << std::endl;
     }
 #endif
 
@@ -510,7 +511,7 @@ namespace pfasst
      *
      * @ingroup Internals
      */
-    inline static void start_log(int argc, char** argv, const bool no_custom_loggers=false)
+    inline static void start_log(int argc, char** argv, const bool no_custom_loggers = false)
     {
       START_EASYLOGGINGPP(argc, argv);
       set_logging_flags();
@@ -527,20 +528,20 @@ template<
 >
 string to_string(const shared_ptr<T>& sp)
 {
-  stringstream out;
-  out << "<" << sp.get() << ">";
-  sp->log(out);
-  return out.str();
+  std::stringstream os;
+  os << "<" << sp.get() << ">";
+  sp->log(os);
+  return os.str();
 }
 
 template<class Tuple, size_t N>
 struct TuplePrinter {
   static string print(const Tuple& t) 
   {
-    stringstream s;
-    s << TuplePrinter<Tuple, N-1>::print(t);
-    s << ", " << get<N-1>(t);
-    return s.str();
+    std::stringstream os;
+    os << TuplePrinter<Tuple, N-1>::print(t);
+    os << ", " << std::get<N-1>(t);
+    return os.str();
   }
 };
 
@@ -548,18 +549,18 @@ template<class Tuple>
 struct TuplePrinter<Tuple, 1>{
   static string print(const Tuple& t) 
   {
-    stringstream s;
-    s << get<0>(t);
-    return s.str();
+    std::stringstream os;
+    os << std::get<0>(t);
+    return os.str();
   }
 };
 
 template<class... Args>
-string to_string(const tuple<Args...>& t) 
+string to_string(const std::tuple<Args...>& t) 
 {
-  stringstream s;
-  s << "(" << TuplePrinter<decltype(t), sizeof...(Args)>::print(t) << ")";
-  return s.str();
+  std::stringstream os;
+  os << "(" << TuplePrinter<decltype(t), sizeof...(Args)>::print(t) << ")";
+  return os.str();
 }
 
 

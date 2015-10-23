@@ -1,6 +1,10 @@
 #include "fixtures/test_helpers.hpp"
 using ::testing::Eq;
 
+#include <memory>
+#include <stdexcept>
+using std::make_shared;
+
 #include <pfasst/controller/status.hpp>
 
 #include "comm/mocks.hpp"
@@ -72,7 +76,7 @@ TEST_F(Interface, combination_of_primary_and_secondary_states_are_validated)
   ASSERT_THAT(status.get_secondary_state(), Eq((+pfasst::SecondaryState::UNKNOWN_SECONDARY)));
 
   status.set_primary_state(pfasst::PrimaryState::ITERATING);
-  EXPECT_THROW(status.set_secondary_state(pfasst::SecondaryState::CONV_CHECK), runtime_error);
+  EXPECT_THROW(status.set_secondary_state(pfasst::SecondaryState::CONV_CHECK), std::runtime_error);
 }
 
 TEST_F(Interface, has_an_absolute_residual_norm)

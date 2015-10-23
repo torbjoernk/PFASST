@@ -2,7 +2,6 @@
 #define _PFASST_HPP_
 
 #include <functional>
-using namespace std;
 
 #include "pfasst/config.hpp"
 #include "pfasst/logging.hpp"

@@ -7,9 +7,12 @@
 
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <map>
-using namespace std;
+#include <vector>
+using std::string;
+using std::vector;
 
 #include <leathers/push>
 #include <leathers/all>
@@ -81,7 +84,7 @@ namespace pfasst
 
       private:
         po::options_description all_options;
-        map<string, po::options_description> option_groups;
+        std::map<string, po::options_description> option_groups;
         po::variables_map variables_map;
         vector<string> unrecognized_args;
         bool initialized = false;
@@ -205,18 +208,18 @@ namespace pfasst
       bool no_params_given = options::get_instance().get_variables_map().empty();
 
       if (!if_no_params || (if_no_params && no_params_given)) {
-        stringstream s;
-        s << options::get_instance().get_all_options() << endl;
-        s << "Logging options:" << endl
-          << "  -v [ --verbose ]       activates maximum verbosity" << endl
-          << "  --v=arg                activates verbosity upto verbose level `arg`" << endl
-          << "                         (valid range: 0-9)" << endl
-          << "  -vmodule=arg           actives verbose logging for specific module" << endl
-          << "                         (see [1] for details)" << endl << endl
-          << "[1]: https://github.com/easylogging/easyloggingpp#vmodule" << endl;
+        std::stringstream s;
+        s << options::get_instance().get_all_options() << std::endl;
+        s << "Logging options:" << std::endl
+          << "  -v [ --verbose ]       activates maximum verbosity" << std::endl
+          << "  --v=arg                activates verbosity upto verbose level `arg`" << std::endl
+          << "                         (valid range: 0-9)" << std::endl
+          << "  -vmodule=arg           actives verbose logging for specific module" << std::endl
+          << "                         (see [1] for details)" << std::endl << std::endl
+          << "[1]: https://github.com/easylogging/easyloggingpp#vmodule" << std::endl;
         return s.str();
       } else {
-        return string();
+        return "";
       }
     }
 
@@ -251,9 +254,9 @@ namespace pfasst
      */
     static inline void read_config_file(const string& file_name)
     {
-      ifstream ifs(file_name.c_str(), ios_base::in);
+      std::ifstream ifs(file_name.c_str(), std::ios_base::in);
       if (!ifs) {
-        throw invalid_argument("Config file '" + file_name + "' not found.");
+        throw std::invalid_argument("Config file '" + file_name + "' not found.");
       } else {
         po::store(po::parse_config_file(ifs, options::get_instance().get_all_options()),
                   options::get_instance().get_variables_map());
@@ -290,14 +293,14 @@ namespace pfasst
 
       if (pfasst::config::has_value("help")) {
         if (get_rank() == 0) {
-          cout << print_help() << endl;
+          std::cout << print_help() << std::endl;
         }
 
         if (exit_on_help) {
 #ifdef WITH_MPI
           MPI_Finalize();
 #endif
-          exit(0);
+          std::exit(0);
         }
       }
     }

@@ -1,10 +1,12 @@
 #include "pfasst/quadrature/clenshaw_curtis.hpp"
 
 #include <stdexcept>
-using namespace std;
 
+#include <leathers/push>
+#include <leathers/all>
 #include <boost/math/constants/constants.hpp>
-using namespace boost::math::constants;
+using boost::math::constants::pi;
+#include <leathers/pop>
 
 #include "pfasst/quadrature/polynomial.hpp"
 
@@ -18,7 +20,7 @@ namespace pfasst
       : IQuadrature<precision>(num_nodes)
     {
       if (this->num_nodes < 2) {
-        throw invalid_argument("Clenshaw-Curtis quadrature requires at least two quadrature nodes.");
+        throw std::invalid_argument("Clenshaw-Curtis quadrature requires at least two quadrature nodes.");
       }
       this->compute_nodes();
       this->compute_weights();

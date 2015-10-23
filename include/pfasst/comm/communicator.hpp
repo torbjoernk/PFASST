@@ -2,8 +2,6 @@
 #define _PFASST__COMM__COMMUNICATOR_HPP_
 
 #include <memory>
-#include <type_traits>
-using namespace std;
 
 #include "pfasst/controller/status.hpp"
 
@@ -13,7 +11,7 @@ namespace pfasst
   namespace comm
   {
     class Communicator
-      : public enable_shared_from_this<Communicator>
+      : public std::enable_shared_from_this<Communicator>
     {
       public:
         Communicator() = default;

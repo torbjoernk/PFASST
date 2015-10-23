@@ -5,15 +5,11 @@
 #ifndef _PFASST__QUADRATURE_HPP_
 #define _PFASST__QUADRATURE_HPP_
 
-#include <cmath>
+#include <memory>
 #include <exception>
 #include <vector>
-using namespace std;
-
-#include <leathers/push>
-#include <leathers/all>
-#include <boost/math/constants/constants.hpp>
-#include <leathers/pop>
+using std::shared_ptr;
+using std::vector;
 
 #include "pfasst/globals.hpp"
 #include "pfasst/config.hpp"
@@ -50,6 +46,8 @@ namespace pfasst
     shared_ptr<IQuadrature<precision>> quadrature_factory(const size_t nnodes,
                                                           const QuadratureType qtype)
     {
+      using std::make_shared;
+
       if (qtype == QuadratureType::GaussLegendre) {
         return make_shared<GaussLegendre<precision>>(nnodes);
       } else if (qtype == QuadratureType::GaussLobatto) {
@@ -61,7 +59,7 @@ namespace pfasst
       } else if (qtype == QuadratureType::Uniform) {
         return make_shared<Uniform<precision>>(nnodes);
       } else {
-        throw invalid_argument("invalid node type passed to compute_nodes.");
+        throw std::invalid_argument("invalid node type passed to compute_nodes.");
         return nullptr;
       }
     }

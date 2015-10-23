@@ -6,8 +6,10 @@
 #define _PFASST__QUADRATURE__INTERFACE_HPP_
 
 #include <cassert>
+#include <string>
 #include <vector>
-using namespace std;
+using std::string;
+using std::vector;
 
 #include "pfasst/globals.hpp"
 #include "pfasst/quadrature/polynomial.hpp"

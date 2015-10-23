@@ -5,8 +5,8 @@
 #include <limits>
 #include <sstream>
 #include <string>
+#include <type_traits>
 #include <vector>
-using namespace std;
 
 #include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
@@ -14,6 +14,9 @@ using namespace std;
 
 namespace pfasst
 {
+  using std::string;
+  using std::vector;
+
   /**
    * Compares absolute difference against zero.
    *
@@ -28,13 +31,15 @@ namespace pfasst
    */
   template<typename precision>
   static bool almost_equal(const precision& a, const precision& b,
-                           const int digits = numeric_limits<precision>::digits)
+                           const int digits = std::numeric_limits<precision>::digits)
   {
+    using std::abs;
+
     // the machine epsilon has to be scaled to the magnitude of the values used
     // and multiplied by the desired precision in ULPs (units in the last place)
-    return abs(a - b) < numeric_limits<precision>::epsilon() * abs(a + b) * digits
+    return abs(a - b) < std::numeric_limits<precision>::epsilon() * abs(a + b) * digits
     // unless the result is subnormal
-           || abs(a - b) < numeric_limits<precision>::min();
+           || abs(a - b) < std::numeric_limits<precision>::min();
   }
 
   /**
@@ -51,55 +56,59 @@ namespace pfasst
   template<typename precision>
   static bool almost_zero(const precision& a)
   {
-    return abs(a) < numeric_limits<precision>::epsilon();
+    return std::abs(a) < std::numeric_limits<precision>::epsilon();
   }
 
 
   template<
     class... Args,
-    typename enable_if<sizeof...(Args) == 2>::type* = nullptr
+    typename std::enable_if<sizeof...(Args) == 2>::type* = nullptr
   >
   static constexpr size_t
-  linearized_index(const tuple<Args...>& indices, const size_t dim_ndofs)
+  linearized_index(const std::tuple<Args...>& indices, const size_t dim_ndofs)
   {
-    return get<0>(indices) * dim_ndofs + get<1>(indices);
+    return std::get<0>(indices) * dim_ndofs + std::get<1>(indices);
   }
 
   template<
     class... Args,
-    typename enable_if<sizeof...(Args) == 3>::type* = nullptr
+    typename std::enable_if<sizeof...(Args) == 3>::type* = nullptr
   >
   static constexpr size_t
-  linearized_index(const tuple<Args...>& indices, const size_t dim_ndofs)
+  linearized_index(const std::tuple<Args...>& indices, const size_t dim_ndofs)
   {
-    return get<0>(indices) * pow(dim_ndofs, 2) + get<1>(indices) * dim_ndofs + get<2>(indices);
+    using std::get;
+
+    return get<0>(indices) * std::pow(dim_ndofs, 2) + get<1>(indices) * dim_ndofs + get<2>(indices);
   }
 
 
   template<
     size_t N,
-    typename enable_if<N == 2>::type* = nullptr
+    typename std::enable_if<N == 2>::type* = nullptr
   >
-  static const tuple<size_t, size_t>
+  static const std::tuple<size_t, size_t>
   split_index(const size_t index, const size_t dim_ndofs)
   {
     const size_t xi = index % dim_ndofs;
     const size_t yi = (index - xi) / dim_ndofs;
-    return make_pair(yi, xi);
+    return std::make_tuple(yi, xi);
   }
 
   template<
     size_t N,
-    typename enable_if<N == 3>::type* = nullptr
+    typename std::enable_if<N == 3>::type* = nullptr
   >
-  static const tuple<size_t, size_t, size_t>
+  static const std::tuple<size_t, size_t, size_t>
   split_index(const size_t index, const size_t dim_ndofs)
   {
+    using std::pow;
+
     const size_t xi = index % dim_ndofs;
     const size_t zyi = index - xi;
     const size_t zi = (zyi >= pow(dim_ndofs, 2)) ? floor(zyi / pow(dim_ndofs, 2)) : 0;
     const size_t yi = (zyi - zi * pow(dim_ndofs, 2)) / dim_ndofs;
-    return make_tuple(zi, yi, xi);
+    return std::make_tuple(zi, yi, xi);
   }
 
 
@@ -127,14 +136,14 @@ namespace pfasst
   static string join(const vector<T>& vec, const string& sep)
   {
 #ifndef PFASST_NO_LOGGING
-    stringstream out;
-    out << "[" << LOG_FLOAT;
+    std::stringstream os;
+    os << "[" << LOG_FLOAT;
     for (size_t i = 0; i < vec.size() - 1; ++i) {
-      out << vec[i] << sep;
+      os << vec[i] << sep;
     }
-    out << vec.back();
-    out << "]";
-    return out.str();
+    os << vec.back();
+    os << "]";
+    return os.str();
 #else
     UNUSED(vec); UNUSED(sep);
     return "";

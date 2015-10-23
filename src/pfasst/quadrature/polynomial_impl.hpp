@@ -4,7 +4,8 @@
 #include <cassert>
 #include <cmath>
 #include <complex>
-using namespace std;
+#include <vector>
+using std::vector;
 
 
 namespace pfasst
@@ -69,13 +70,15 @@ namespace pfasst
     template<typename CoeffT>
     vector<CoeffT> Polynomial<CoeffT>::roots(size_t num_iterations, CoeffT ztol) const
     {
+      using std::complex;
+
       assert(c.size() >= 1);
       size_t n = c.size() - 1;
 
       // initial guess
       vector<complex<CoeffT>> z0(n);
       for (size_t j = 0; j < n; j++) {
-        z0[j] = pow(complex<double>(0.4, 0.9), j);
+        z0[j] = std::pow(complex<double>(0.4, 0.9), j);
       }
 
       // durand-kerner-weierstrass iterations
@@ -95,10 +98,10 @@ namespace pfasst
 
       vector<CoeffT> roots(n);
       for (size_t j = 0; j < n; j++) {
-        roots[j] = abs(z0[j]) < ztol ? 0.0 : real(z0[j]);
+        roots[j] = std::abs(z0[j]) < ztol ? 0.0 : std::real(z0[j]);
       }
 
-      sort(roots.begin(), roots.end());
+      std::sort(roots.begin(), roots.end());
       return roots;
     }
 
