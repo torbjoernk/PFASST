@@ -1,4 +1,6 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::DoubleNear;
+using ::testing::NotNull;
 
 #include <cmath>
 #include <complex>

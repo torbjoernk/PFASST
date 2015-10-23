@@ -1,4 +1,7 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::Eq;
+using ::testing::NotNull;
+using ::testing::SizeIs;
 
 #include <vector>
 using namespace std;

@@ -1,4 +1,15 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::Each;
+using ::testing::Eq;
+using ::testing::IsEmpty;
+using ::testing::IsNull;
+using ::testing::NiceMock;
+using ::testing::Not;
+using ::testing::NotNull;
+using ::testing::Pointwise;
+using ::testing::Return;
+using ::testing::ReturnRef;
+using ::testing::SizeIs;
 
 #include <vector>
 using namespace std;

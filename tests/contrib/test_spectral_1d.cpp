@@ -1,4 +1,6 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::Eq;
+using ::testing::Pointwise;
 
 #include <pfasst/contrib/spectral_transfer.hpp>
 using pfasst::contrib::SpectralTransfer;

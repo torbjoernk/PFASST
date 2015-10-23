@@ -1,4 +1,12 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::AnyNumber;
+using ::testing::Eq;
+using ::testing::IsNull;
+using ::testing::NiceMock;
+using ::testing::Not;
+using ::testing::NotNull;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
 #include <pfasst/controller/two_level_mlsdc.hpp>
 using pfasst::TwoLevelMLSDC;

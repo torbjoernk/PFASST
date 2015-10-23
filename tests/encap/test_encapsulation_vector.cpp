@@ -1,4 +1,7 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::Each;
+using ::testing::Eq;
+using ::testing::Pointwise;
 
 #include <algorithm>
 #include <memory>

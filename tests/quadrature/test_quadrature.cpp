@@ -2,6 +2,8 @@
  * Tests for quadrature related routines: nodes and matrices.
  */
 #include "fixtures/test_helpers.hpp"
+using ::testing::DoubleEq;
+using ::testing::Pointwise;
 
 #include <algorithm>
 using namespace std;
@@ -272,7 +274,7 @@ TEST(QuadratureTest, ClenshawCurtisNodes)
 
 
 class QmatTest
-  : public ::TestWithParam<tuple<size_t, QuadratureType>>
+  : public ::testing::TestWithParam<tuple<size_t, QuadratureType>>
 {
   protected:
     size_t nnodes;
@@ -312,12 +314,12 @@ TEST_P(QmatTest, AllNodes)
 
 
 INSTANTIATE_TEST_CASE_P(Quadrature, QmatTest,
-                        ::Combine(::Range<size_t>(2, 14),
-                                  Values<QuadratureType>(QuadratureType::GaussLegendre,
-                                                         QuadratureType::GaussLobatto,
-                                                         QuadratureType::GaussRadau,
-                                                         QuadratureType::ClenshawCurtis,
-                                                         QuadratureType::Uniform)));
+                        ::testing::Combine(::testing::Range<size_t>(2, 14),
+                                           ::testing::Values<QuadratureType>(QuadratureType::GaussLegendre,
+                                                                             QuadratureType::GaussLobatto,
+                                                                             QuadratureType::GaussRadau,
+                                                                             QuadratureType::ClenshawCurtis,
+                                                                             QuadratureType::Uniform)));
 
 
 TEST(Interpolation, compute_interpolation_matrix_for_equal_nodes)

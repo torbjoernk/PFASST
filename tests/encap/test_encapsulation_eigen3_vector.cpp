@@ -1,4 +1,5 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::Eq;
 
 #include <algorithm>
 #include <memory>

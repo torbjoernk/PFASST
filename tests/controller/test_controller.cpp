@@ -1,4 +1,6 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::Eq;
+using ::testing::NotNull;
 
 #include <pfasst/controller/controller.hpp>
 using pfasst::Controller;
