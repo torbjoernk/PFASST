@@ -5,10 +5,6 @@
 #ifndef _PFASST__QUADRATURE__CLENSHAW_CURTIS_HPP_
 #define _PFASST__QUADRATURE__CLENSHAW_CURTIS_HPP_
 
-#include <cassert>
-#include <vector>
-using namespace std;
-
 #include "pfasst/quadrature/quadrature.hpp"
 
 

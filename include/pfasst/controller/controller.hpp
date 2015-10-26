@@ -2,7 +2,8 @@
 #define _PFASST__CONTROLLER__INTERFACE_HPP_
 
 #include <memory>
-using namespace std;
+#include <string>
+using std::shared_ptr;
 
 #include "pfasst/globals.hpp"
 #include "pfasst/comm/communicator.hpp"
@@ -16,7 +17,7 @@ namespace pfasst
     class CommT = comm::Communicator
   >
   class Controller
-    : public enable_shared_from_this<Controller<TransferT, CommT>>
+    : public std::enable_shared_from_this<Controller<TransferT, CommT>>
   {
     public:
       using transfer_t = TransferT;
@@ -29,7 +30,7 @@ namespace pfasst
       shared_ptr<transfer_t>      _transfer;
       shared_ptr<Status<time_t>>  _status;
       bool                        _ready;
-      string                      _logger_id;
+      std::string                 _logger_id;
 
       virtual void compute_num_steps();
       virtual bool& ready();
@@ -51,7 +52,7 @@ namespace pfasst
       virtual size_t get_num_levels() const;
       virtual bool   is_ready() const;
 
-      virtual       void  set_logger_id(const string& logger_id);
+      virtual       void  set_logger_id(const std::string& logger_id);
       virtual const char* get_logger_id() const;
 
       template<class SweeperT>

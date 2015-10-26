@@ -1,7 +1,10 @@
 #include "pfasst/controller/controller.hpp"
 
 #include <cmath>
-using namespace std;
+#include <memory>
+#include <stdexcept>
+#include <string>
+using std::shared_ptr;
 
 #include "pfasst/util.hpp"
 #include "pfasst/config.hpp"
@@ -12,7 +15,7 @@ namespace pfasst
 {
   template<class TransferT, class CommT>
   Controller<TransferT, CommT>::Controller()
-    :   _status(make_shared<Status<typename TransferT::traits::fine_time_t>>())
+    :   _status(std::make_shared<Status<typename TransferT::traits::fine_time_t>>())
       , _ready(false)
       , _logger_id("CONTROL")
   {}
@@ -64,20 +67,20 @@ namespace pfasst
     if (this->get_status()->get_t_end() <= 0) {
       ML_CLOG(ERROR, this->get_logger_id(), "Time end point (" << this->get_status()->get_t_end()
                                          << ") must be non-zero positive.");
-      throw logic_error("time end point must be non-zero positive");
+      throw std::logic_error("time end point must be non-zero positive");
     }
 
     if (this->get_status()->get_dt() <= 0.0) {
       ML_CLOG(ERROR, this->get_logger_id(), "Time delta (" << this->get_status()->get_dt()
                                          << ") must be non-zero positive.");
-      throw logic_error("time delta must be non-zero positive");
+      throw std::logic_error("time delta must be non-zero positive");
     }
 
     if (this->get_status()->get_time() >= this->get_status()->get_t_end()) {
       ML_CLOG(ERROR, this->get_logger_id(), "Time end point (" << this->get_status()->get_t_end()
                                          << ") must be greater than the current time point ("
                                          << this->get_status()->get_time() << ").");
-      throw logic_error("time end point must be greater start time point");
+      throw std::logic_error("time end point must be greater start time point");
     }
 
     const auto num_steps = (this->get_status()->get_t_end() - this->get_status()->get_time()) / this->get_status()->get_dt();
@@ -106,7 +109,7 @@ namespace pfasst
 
   template<class TransferT, class CommT>
   void
-  Controller<TransferT, CommT>::set_logger_id(const string& logger_id)
+  Controller<TransferT, CommT>::set_logger_id(const std::string& logger_id)
   {
     this->_logger_id = logger_id;
   }
@@ -167,7 +170,7 @@ namespace pfasst
     if (this->get_status()->get_t_end() <= 0.0) {
       ML_CLOG(ERROR, this->get_logger_id(), "End time point must be larger than zero."
         << " (" << this->get_status()->get_t_end() << ")");
-      throw logic_error("end time point must be larger zero");
+      throw std::logic_error("end time point must be larger zero");
     }
 
     this->compute_num_steps();
@@ -176,7 +179,7 @@ namespace pfasst
       ML_CLOG(ERROR, this->get_logger_id(), "End time point not an integral multiple of time delta. " << LOG_FIXED
         << " (" << num_steps << " * " << this->get_status()->get_dt()
         << " = " << num_steps * this->get_status()->get_dt() << " != " << this->get_status()->get_t_end() << ")");
-      throw logic_error("time end point is not an integral multiple of time delta");
+      throw std::logic_error("time end point is not an integral multiple of time delta");
     }
 
     ML_CLOG_IF(this->get_status()->get_max_iterations() == 0, WARNING, this->get_logger_id(),
@@ -192,7 +195,7 @@ namespace pfasst
   {
     if (!this->is_ready()) {
       ML_CLOG(ERROR, this->get_logger_id(), "Controller is not ready to run. setup() not called yet.");
-      throw logic_error("controller not ready to run");
+      throw std::logic_error("controller not ready to run");
     }
   }
 

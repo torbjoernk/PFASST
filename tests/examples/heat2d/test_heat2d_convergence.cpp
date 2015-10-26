@@ -1,7 +1,10 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::Eq;
+using ::testing::Lt;
+using ::testing::Pointwise;
 
 #include <vector>
-using namespace std;
+using std::vector;
 
 #include <pfasst/quadrature.hpp>
 using pfasst::quadrature::QuadratureType;
@@ -68,7 +71,6 @@ TEST_F(TwoLevelMLSDCConvergence, single_step)
 
   for (size_t k = 0; k < abs_res.size(); ++k) {
     auto sdc = pfasst::examples::heat2d::run_mlsdc(8, 2, 3, QuadratureType::GaussRadau, 0.0, 0.05, 0.05, k);
-    LOG(INFO) << to_string(sdc->get_status());
     abs_res[k] = sdc->get_status()->get_abs_res_norm();
   }
 

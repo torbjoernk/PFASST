@@ -1,6 +1,12 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::Eq;
+
+using std::make_tuple;
+using std::get;
+using std::tuple;
 
 #include <pfasst/util.hpp>
+
 
 class IndexManipulation2D
   : public ::testing::TestWithParam<tuple<size_t, size_t>>

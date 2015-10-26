@@ -1,7 +1,11 @@
 #include "pfasst/encap/encapsulation.hpp"
 
+#include <algorithm>
 #include <cassert>
-using namespace std;
+#include <memory>
+#include <vector>
+using std::shared_ptr;
+using std::vector;
 
 #include "pfasst/logging.hpp"
 
@@ -17,7 +21,7 @@ namespace pfasst
          const shared_ptr<Encapsulation<EncapsulationTrait>> y)
     {
       shared_ptr<Encapsulation<EncapsulationTrait>> result = \
-        make_shared<Encapsulation<EncapsulationTrait>>(*y);
+        std::make_shared<Encapsulation<EncapsulationTrait>>(*y);
       result->scaled_add(a, x);
       return result;
     }
@@ -35,7 +39,7 @@ namespace pfasst
         << ") does not match result of matrix-vector multiplication (" << mat.rows() << ")";
 
       if (zero_vec_x) {
-        for_each(x.begin(), x.end(),
+        std::for_each(x.begin(), x.end(),
                  [](shared_ptr<Encapsulation<EncapsulationTrait>> xi) {
                    xi->zero();
                 });
@@ -63,7 +67,7 @@ namespace pfasst
       // initialize result vector of encaps
       vector<shared_ptr<Encapsulation<EncapsulationTrait>>> result(rows);
       for(auto& ri : result) {
-        ri = make_shared<Encapsulation<EncapsulationTrait>>();
+        ri = std::make_shared<Encapsulation<EncapsulationTrait>>();
         ri->data() = x[0]->get_data();
         ri->zero();
       }

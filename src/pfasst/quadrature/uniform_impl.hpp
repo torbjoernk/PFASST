@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 #include <vector>
-using namespace std;
 
 
 namespace pfasst
@@ -14,7 +13,7 @@ namespace pfasst
       : IQuadrature<precision>(num_nodes)
     {
       if (this->num_nodes < 2) {
-        throw invalid_argument("Uniform quadrature requires at least two quadrature nodes.");
+        throw std::invalid_argument("Uniform quadrature requires at least two quadrature nodes.");
       }
       this->compute_nodes();
       this->compute_weights();
@@ -35,7 +34,7 @@ namespace pfasst
     template<typename precision>
     void Uniform<precision>::compute_nodes()
     {
-      this->nodes = vector<precision>(this->num_nodes, precision(0.0));
+      this->nodes = std::vector<precision>(this->num_nodes, precision(0.0));
       for (size_t j = 0; j < this->num_nodes; j++) {
         this->nodes[j] = precision(j) / (this->num_nodes - 1);
       }

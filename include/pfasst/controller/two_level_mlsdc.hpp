@@ -2,7 +2,7 @@
 #define _PFASST__CONTROLLER__TWO_LEVEL_MLSDC_HPP_
 
 #include <memory>
-using namespace std;
+using std::shared_ptr;
 
 #include "pfasst/controller/controller.hpp"
 #include "pfasst/comm/communicator.hpp"

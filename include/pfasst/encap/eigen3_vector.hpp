@@ -1,9 +1,9 @@
-#ifndef _PFASST__ENCAP__VECTOR_HPP_
-#define _PFASST__ENCAP__VECTOR_HPP_
+#ifndef _PFASST__ENCAP__EIGEN3_VECTOR_HPP_
+#define _PFASST__ENCAP__EIGEN3_VECTOR_HPP_
 
 #include <memory>
 #include <type_traits>
-using namespace std;
+using std::shared_ptr;
 
 #include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
@@ -21,10 +21,10 @@ namespace pfasst
       class EncapsulationTrait
     >
     class Encapsulation<EncapsulationTrait,
-                        typename enable_if<
-                                   is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
+                        typename std::enable_if<
+                                   std::is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                                  >::type>
-      :   public enable_shared_from_this<Encapsulation<EncapsulationTrait>>
+      :   public std::enable_shared_from_this<Encapsulation<EncapsulationTrait>>
         , public el::Loggable
     {
       static_assert(EncapsulationTrait::DIM <= 2,
@@ -46,7 +46,7 @@ namespace pfasst
         virtual const typename EncapsulationTrait::data_t& get_data() const;
         virtual size_t get_total_num_dofs() const;
         // assuming square-shaped space
-        virtual array<int, EncapsulationTrait::DIM> get_dimwise_num_dofs() const;
+        virtual std::array<int, EncapsulationTrait::DIM> get_dimwise_num_dofs() const;
 
         virtual void zero();
         virtual void scaled_add(const typename EncapsulationTrait::time_t& a,
@@ -81,10 +81,10 @@ namespace pfasst
       class EncapsulationTrait
     >
     class EncapsulationFactory<EncapsulationTrait,
-                               typename enable_if<
-                                          is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
+                               typename std::enable_if<
+                                          std::is_same<eigen3_encap_tag, typename EncapsulationTrait::tag_t>::value
                                         >::type>
-      : public enable_shared_from_this<EncapsulationFactory<EncapsulationTrait>>
+      : public std::enable_shared_from_this<EncapsulationFactory<EncapsulationTrait>>
     {
       protected:
         size_t _size;
@@ -108,4 +108,4 @@ namespace pfasst
 
 #include "pfasst/encap/eigen3_vector_impl.hpp"
 
-#endif  // _PFASST__ENCAP__VECTOR_HPP_
+#endif  // _PFASST__ENCAP__EIGEN3_VECTOR_HPP_

@@ -1,8 +1,9 @@
 #ifndef _PFASST__ENCAP__TRAITS_HPP_
 #define _PFASST__ENCAP__TRAITS_HPP_
 
+#include <type_traits>
 #include <vector>
-using namespace std;
+using std::vector;
 
 #include "pfasst/globals.hpp"
 
@@ -51,7 +52,7 @@ namespace pfasst
 
       using tag_t = encap_data_tag;
 
-      using dim_t = integral_constant<size_t, Dim>;
+      using dim_t = std::integral_constant<size_t, Dim>;
 
       static constexpr size_t DIM = Dim;
     };
@@ -77,7 +78,7 @@ namespace pfasst
       using spatial_t = SpatialPrecision;
       using data_t = vector<spatial_t>;
       using tag_t = vector_encap_tag;
-      using dim_t = integral_constant<size_t, Dim>;
+      using dim_t = std::integral_constant<size_t, Dim>;
       static constexpr size_t  DIM = Dim;
     };
 
@@ -102,7 +103,7 @@ namespace pfasst
       using spatial_t = SpatialPrecision;
       using data_t = EigenVector<spatial_t>;
       using tag_t = eigen3_encap_tag;
-      using dim_t = integral_constant<size_t, Dim>;
+      using dim_t = std::integral_constant<size_t, Dim>;
       static constexpr size_t  DIM = Dim;
     };
   }  // ::pfasst::encap

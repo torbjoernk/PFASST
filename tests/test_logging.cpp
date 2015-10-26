@@ -1,4 +1,5 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::StrEq;
 
 #include <pfasst/logging.hpp>
 using namespace pfasst::log;

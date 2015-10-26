@@ -1,7 +1,10 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::Pointwise;
 
+#include <memory>
 #include <vector>
-using namespace std;
+using std::shared_ptr;
+using std::vector;
 
 #include <pfasst/quadrature.hpp>
 #include <pfasst/encap/traits.hpp>
@@ -19,7 +22,7 @@ class ProblemSetup
   protected:
     shared_ptr<sweeper_t> sweeper;
 
-    shared_ptr<pfasst::Status<double>> status = make_shared<pfasst::Status<double>>();
+    shared_ptr<pfasst::Status<double>> status = std::make_shared<pfasst::Status<double>>();
 
     vector<double> exact_t0{   0.000000000000000000000000
                             ,  0.7071067811865474617150085

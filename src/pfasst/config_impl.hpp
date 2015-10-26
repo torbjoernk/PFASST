@@ -1,9 +1,10 @@
 #include "pfasst/config.hpp"
 
-#include <fstream>
-#include <sstream>
+#include <string>
 #include <utility>
-using namespace std;
+#include <vector>
+using std::string;
+using std::vector;
 
 
 namespace pfasst
@@ -40,7 +41,7 @@ namespace pfasst
     void options::add_option(const string& group, const string& option, const string& help)
     {
       auto& opts = get_instance();
-      opts.option_groups.emplace(make_pair<string,
+      opts.option_groups.emplace(std::make_pair<string,
                                  po::options_description>(string(group),
                                                           po::options_description(string(group),
                                                                                   LINE_WIDTH)));
@@ -56,7 +57,7 @@ namespace pfasst
     {
       auto& opts = get_instance();
 
-      opts.option_groups.emplace(make_pair<string,
+      opts.option_groups.emplace(std::make_pair<string,
                                  po::options_description>(string(group),
                                                           po::options_description(string(group),
                                                                                   LINE_WIDTH)));
@@ -70,7 +71,7 @@ namespace pfasst
       auto& config_map = get_instance().get_variables_map();
       if (config_map.count(name) == 0) {
         // abs_res_tol not there
-        config_map.emplace(make_pair(name, boost::program_options::variable_value()));
+        config_map.emplace(std::make_pair(name, boost::program_options::variable_value()));
       }
       config_map.at(name).value() = boost::any{value};
     }

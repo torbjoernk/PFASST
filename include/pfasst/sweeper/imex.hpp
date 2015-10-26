@@ -1,6 +1,11 @@
 #ifndef _PFASST__SWEEPER__IMEX_HPP_
 #define _PFASST__SWEEPER__IMEX_HPP_
 
+#include <memory>
+#include <vector>
+using std::shared_ptr;
+using std::vector;
+
 #include "pfasst/sweeper/sweeper.hpp"
 
 

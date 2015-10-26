@@ -1,7 +1,9 @@
 #include "pfasst/controller/two_level_pfasst.hpp"
 
 #include <cassert>
-using namespace std;
+#include <memory>
+#include <stdexcept>
+using std::shared_ptr;
 
 #include "pfasst/util.hpp"
 #include "pfasst/config.hpp"
@@ -16,7 +18,7 @@ namespace pfasst
   {
     TwoLevelPfasst<TransferT, CommT>::init_loggers();
     this->set_logger_id("PFASST");
-    this->_prev_status = make_shared<Status<time_t>>();
+    this->_prev_status = std::make_shared<Status<time_t>>();
   }
 
   template<class TransferT, class CommT>
@@ -48,17 +50,17 @@ namespace pfasst
 
     if (this->get_num_levels() != 2) {
       ML_CLOG(ERROR, this->get_logger_id(), "Two levels (Sweeper) must have been added for Two-Level-PFASST.");
-      throw logic_error("Two-Level-PFASST requires two levels");
+      throw std::logic_error("Two-Level-PFASST requires two levels");
     }
 
     if (this->get_communicator()->get_size() < 2) {
       ML_CLOG(ERROR, this->get_logger_id(), "Two-Level-PFASST requires at least two processes.");
-      throw logic_error("two processes required for Two-Level-PFASST");
+      throw std::logic_error("two processes required for Two-Level-PFASST");
     }
 
-    this->_prev_status = make_shared<Status<time_t>>();
+    this->_prev_status = std::make_shared<Status<time_t>>();
     this->_prev_status->clear();
-    this->_prev_status_temp = make_shared<Status<time_t>>();
+    this->_prev_status_temp = std::make_shared<Status<time_t>>();
     this->_prev_status_temp->clear();
   }
 
@@ -74,7 +76,7 @@ namespace pfasst
       ML_CLOG(ERROR, this->get_logger_id(), "Number of time steps (" << this->get_status()->get_num_steps()
                                          << ") must be a multiple of the number of processors ("
                                          << this->get_communicator()->get_size() << ").");
-      throw logic_error("number time steps must be multiple of number processors");
+      throw std::logic_error("number time steps must be multiple of number processors");
     }
 
     const size_t num_blocks = this->get_status()->get_num_steps() / this->get_communicator()->get_size();
@@ -83,7 +85,7 @@ namespace pfasst
       ML_CLOG(ERROR, this->get_logger_id(), "Invalid Duration: There are more time processes ("
                                          << this->get_communicator()->get_size() << ") than time steps ("
                                          << this->get_status()->get_num_steps() << ").");
-      throw logic_error("invalid duration: too many time processes for given time steps");
+      throw std::logic_error("invalid duration: too many time processes for given time steps");
     }
 
     // iterate over time blocks (i.e. time-parallel blocks)
@@ -129,7 +131,7 @@ namespace pfasst
           ML_CLOG(FATAL, this->get_logger_id(), "Something went severly wrong with the states.");
           ML_CLOG(FATAL, this->get_logger_id(), "Expected state: PREDICTING or ITERATING, got: "
                                                 << (+this->get_status()->get_primary_state())._to_string());
-          throw runtime_error("something went severly wrong");
+          throw std::runtime_error("something went severly wrong");
         }
 
         // convergence check

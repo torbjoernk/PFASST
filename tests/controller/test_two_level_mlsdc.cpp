@@ -1,4 +1,16 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::AnyNumber;
+using ::testing::Eq;
+using ::testing::IsNull;
+using ::testing::NiceMock;
+using ::testing::Not;
+using ::testing::NotNull;
+using ::testing::Return;
+using ::testing::ReturnRef;
+
+#include <memory>
+#include <stdexcept>
+using std::shared_ptr;
 
 #include <pfasst/controller/two_level_mlsdc.hpp>
 using pfasst::TwoLevelMLSDC;
@@ -34,9 +46,9 @@ class Interface
 
     virtual void SetUp()
     {
-      this->controller = make_shared<TwoLevelMLSDC<transfer_t>>();
-      this->status = make_shared<pfasst::Status<double>>();
-      this->comm = make_shared<comm_t>();
+      this->controller = std::make_shared<TwoLevelMLSDC<transfer_t>>();
+      this->status = std::make_shared<pfasst::Status<double>>();
+      this->comm = std::make_shared<comm_t>();
     }
 };
 
@@ -87,12 +99,12 @@ class Setup
 
     virtual void SetUp()
     {
-      this->controller = make_shared<TwoLevelMLSDC<transfer_t>>();
-      this->transfer = make_shared<transfer_t>();
-      this->status = make_shared<pfasst::Status<double>>();
+      this->controller = std::make_shared<TwoLevelMLSDC<transfer_t>>();
+      this->transfer = std::make_shared<transfer_t>();
+      this->status = std::make_shared<pfasst::Status<double>>();
 
-      this->sweeper1 = make_shared<sweeper_t>();
-      this->sweeper2 = make_shared<sweeper_t>();
+      this->sweeper1 = std::make_shared<sweeper_t>();
+      this->sweeper2 = std::make_shared<sweeper_t>();
 
       this->sweeper1_initial = this->sweeper1->get_encap_factory().create();
       this->sweeper1_end = this->sweeper1->get_encap_factory().create();
@@ -146,9 +158,9 @@ TEST_F(Setup, exactly_two_levels_must_be_added)
   controller->add_transfer(transfer);
 
   ASSERT_THAT(controller->get_num_levels(), Eq(0));
-  EXPECT_THROW(controller->setup(), logic_error);
+  EXPECT_THROW(controller->setup(), std::logic_error);
 
-  controller = make_shared<TwoLevelMLSDC<transfer_t>>();
+  controller = std::make_shared<TwoLevelMLSDC<transfer_t>>();
   controller->status() = status;
   controller->status()->t_end() = 0.1;
   controller->status()->dt() = 0.1;
@@ -156,9 +168,9 @@ TEST_F(Setup, exactly_two_levels_must_be_added)
   controller->add_transfer(transfer);
   controller->add_sweeper(sweeper1, true);
   ASSERT_THAT(controller->get_num_levels(), Eq(1));
-  EXPECT_THROW(controller->setup(), logic_error);
+  EXPECT_THROW(controller->setup(), std::logic_error);
 
-  controller = make_shared<TwoLevelMLSDC<transfer_t>>();
+  controller = std::make_shared<TwoLevelMLSDC<transfer_t>>();
   controller->status() = status;
   controller->status()->t_end() = 0.1;
   controller->status()->dt() = 0.1;
@@ -184,7 +196,7 @@ TEST_F(Setup, setup_required_for_running)
   controller->add_transfer(transfer);
 
   ASSERT_FALSE(controller->is_ready());
-  EXPECT_THROW(controller->run(), logic_error);
+  EXPECT_THROW(controller->run(), std::logic_error);
 
   EXPECT_CALL(*(sweeper1.get()), status()).Times(AnyNumber()).WillRepeatedly(ReturnRef(status));
   EXPECT_CALL(*(sweeper2.get()), status()).Times(AnyNumber()).WillRepeatedly(ReturnRef(status));
@@ -209,11 +221,11 @@ class Logic
 
     virtual void SetUp()
     {
-      this->controller = make_shared<TwoLevelMLSDC<transfer_t>>();
-      this->transfer = make_shared<transfer_t>();
-      this->status = make_shared<pfasst::Status<double>>();
-      this->sweeper1 = make_shared<sweeper_t>();
-      this->sweeper2 = make_shared<sweeper_t>();
+      this->controller = std::make_shared<TwoLevelMLSDC<transfer_t>>();
+      this->transfer = std::make_shared<transfer_t>();
+      this->status = std::make_shared<pfasst::Status<double>>();
+      this->sweeper1 = std::make_shared<sweeper_t>();
+      this->sweeper2 = std::make_shared<sweeper_t>();
       this->controller->add_sweeper(this->sweeper1, true);
       this->controller->add_sweeper(this->sweeper2, false);
       this->controller->add_transfer(this->transfer);

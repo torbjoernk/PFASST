@@ -1,7 +1,17 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::_;
+using ::testing::Eq;
+using ::testing::Mock;
+using ::testing::NiceMock;
+using ::testing::NotNull;
+using ::testing::Return;
+using ::testing::ReturnRef;
 
+#include <memory>
+#include <stdexcept>
 #include <vector>
-using namespace std;
+using std::shared_ptr;
+using std::vector;
 
 #include <pfasst/controller/sdc.hpp>
 using pfasst::SDC;
@@ -38,8 +48,8 @@ class Interface
 
     virtual void SetUp()
     {
-      this->controller = make_shared<SDC<transfer_t>>();
-      this->status = make_shared<pfasst::Status<double>>();
+      this->controller = std::make_shared<SDC<transfer_t>>();
+      this->status = std::make_shared<pfasst::Status<double>>();
     }
 };
 
@@ -77,17 +87,17 @@ class Setup
 
     virtual void SetUp()
     {
-      this->encap = make_shared<encap_t>(vector<double>{0.0, 0.0});
-      this->controller = make_shared<SDC<transfer_t>>();
-      this->status = make_shared<pfasst::Status<double>>();
+      this->encap = std::make_shared<encap_t>(vector<double>{0.0, 0.0});
+      this->controller = std::make_shared<SDC<transfer_t>>();
+      this->status = std::make_shared<pfasst::Status<double>>();
       this->controller->status() = status;
 
-      this->quad = make_shared<quadrature_t>();
+      this->quad = std::make_shared<quadrature_t>();
       ON_CALL(*(this->quad.get()), right_is_node()).WillByDefault(Return(true));
       ON_CALL(*(this->quad.get()), get_nodes()).WillByDefault(ReturnRef(this->nodes));
       ON_CALL(*(this->quad.get()), get_num_nodes()).WillByDefault(Return(3));
 
-      this->sweeper = make_shared<sweeper_t>();
+      this->sweeper = std::make_shared<sweeper_t>();
       ON_CALL(*(this->sweeper.get()), get_quadrature()).WillByDefault(Return(this->quad));
       ON_CALL(*(this->sweeper.get()), status()).WillByDefault(ReturnRef(this->status));
       ON_CALL(*(this->sweeper.get()), get_status()).WillByDefault(Return(this->status));
@@ -109,7 +119,7 @@ TEST_F(Setup, a_level_must_be_added)
   controller->status()->dt() = 0.1;
   controller->status()->max_iterations() = 1;
 
-  EXPECT_THROW(controller->setup(), logic_error);
+  EXPECT_THROW(controller->setup(), std::logic_error);
 
   controller->add_sweeper(sweeper);
 
@@ -127,7 +137,7 @@ TEST_F(Setup, setup_required_for_running)
   controller->add_sweeper(sweeper);
 
   ASSERT_FALSE(controller->is_ready());
-  EXPECT_THROW(controller->run(), logic_error);
+  EXPECT_THROW(controller->run(), std::logic_error);
 
   EXPECT_CALL(*(sweeper.get()), setup()).Times(1);
   controller->setup();
@@ -150,16 +160,16 @@ class Logic
 
     virtual void SetUp()
     {
-      this->encap = make_shared<encap_t>(vector<double>{0.0, 0.0});
-      this->controller = make_shared<SDC<transfer_t>>();
-      this->status = make_shared<pfasst::Status<double>>();
+      this->encap = std::make_shared<encap_t>(vector<double>{0.0, 0.0});
+      this->controller = std::make_shared<SDC<transfer_t>>();
+      this->status = std::make_shared<pfasst::Status<double>>();
       this->controller->status() = status;
-      this->quad = make_shared<quadrature_t>();
+      this->quad = std::make_shared<quadrature_t>();
       ON_CALL(*(this->quad.get()), right_is_node()).WillByDefault(Return(true));
       ON_CALL(*(this->quad.get()), get_nodes()).WillByDefault(ReturnRef(this->nodes));
       ON_CALL(*(this->quad.get()), get_num_nodes()).WillByDefault(Return(3));
 
-      this->sweeper = make_shared<sweeper_t>();
+      this->sweeper = std::make_shared<sweeper_t>();
       ON_CALL(*(this->sweeper.get()), get_quadrature()).WillByDefault(Return(this->quad));
       ON_CALL(*(this->sweeper.get()), status()).WillByDefault(ReturnRef(this->status));
       ON_CALL(*(this->sweeper.get()), get_status()).WillByDefault(Return(this->status));

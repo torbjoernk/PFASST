@@ -3,7 +3,7 @@
 
 #include <memory>
 #include <type_traits>
-using namespace std;
+using std::shared_ptr;
 
 #include "pfasst/transfer/traits.hpp"
 
@@ -15,17 +15,17 @@ namespace pfasst
     typename Enabled = void
   >
   class Transfer
-    : public enable_shared_from_this<Transfer<TransferTraits, Enabled>>
+    : public std::enable_shared_from_this<Transfer<TransferTraits, Enabled>>
   {
     public:
       using traits = TransferTraits;
 
-      static_assert(is_convertible<
+      static_assert(std::is_convertible<
                       typename traits::coarse_time_t,
                       typename traits::fine_time_t
                     >::value,
                     "Coarse Time Type must be convertible to Fine Time Type");
-      static_assert(is_convertible<
+      static_assert(std::is_convertible<
                       typename traits::fine_time_t,
                       typename traits::coarse_time_t
                     >::value,

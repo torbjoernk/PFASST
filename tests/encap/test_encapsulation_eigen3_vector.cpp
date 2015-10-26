@@ -1,10 +1,12 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::Eq;
 
 #include <algorithm>
 #include <memory>
 #include <type_traits>
 #include <vector>
-using namespace std;
+using std::shared_ptr;
+using std::vector;
 
 #include <pfasst/globals.hpp>
 #include <pfasst/encap/traits.hpp>
@@ -69,7 +71,7 @@ TEST(Operation, in_place_axpy)
   data << 1.0, 2.0, 3.0;
   encap_t vec_x(data);
   shared_ptr<encap_t> vec_y = \
-    make_shared<encap_t>(EigenVector<double>::Ones(3));
+ std::make_shared<encap_t>(EigenVector<double>::Ones(3));
 
   vec_x.scaled_add(0.5, vec_y);
   EigenVector<double> expected(3);
@@ -81,9 +83,9 @@ TEST(Operation, global_axpy)
 {
   EigenVector<double> data(3);
   data << 1.0, 2.0, 3.0;
-  shared_ptr<encap_t> vec_x = make_shared<encap_t>(data);
+  shared_ptr<encap_t> vec_x = std::make_shared<encap_t>(data);
   shared_ptr<encap_t> vec_y = 
-    make_shared<encap_t>(EigenVector<double>::Ones(3));
+    std::make_shared<encap_t>(EigenVector<double>::Ones(3));
 
   auto result = pfasst::encap::axpy(0.5, vec_x, vec_y);
 
@@ -105,7 +107,7 @@ TEST(Operation, global_norm0)
   EigenVector<double> data(3);
   data << 1.0, -4.0, 3.0;
   shared_ptr<encap_t> vec_x = \
-    make_shared<encap_t>(data);
+    std::make_shared<encap_t>(data);
   EXPECT_THAT(norm0(vec_x), Eq(4.0));
 }
 
@@ -115,22 +117,22 @@ TEST(MatrixApplication, identity)
   EigenVector<double> data(3);
   data << 1.0, 2.0, 3.0;
   vector<shared_ptr<encap_t>> vec(3);
-  generate(vec.begin(), vec.end(),
-           [data]() { return make_shared<encap_t>(data); });
+  std::generate(vec.begin(), vec.end(),
+                [data]() { return std::make_shared<encap_t>(data); });
   for_each(vec.cbegin(), vec.cend(), [data](const shared_ptr<encap_t>& xi) {
     EXPECT_TRUE((xi->get_data().array() == data.array()).all());
   });
   Matrix<double> mat = Matrix<double>::Identity(3, 3);
 
   auto result_mat_mul_vec = pfasst::encap::mat_mul_vec(1.0, mat, vec);
-  for_each(result_mat_mul_vec.cbegin(), result_mat_mul_vec.cend(),
+  std::for_each(result_mat_mul_vec.cbegin(), result_mat_mul_vec.cend(),
            [data](const shared_ptr<encap_t>& xi) {
              EXPECT_TRUE((xi->get_data().array() == data.array()).all());
            });
 
   vector<shared_ptr<encap_t>> result_mat_apply(result_mat_mul_vec);
   pfasst::encap::mat_apply(result_mat_apply, 1.0, mat, vec, true);
-  for_each(result_mat_apply.cbegin(), result_mat_apply.cend(),
+  std::for_each(result_mat_apply.cbegin(), result_mat_apply.cend(),
            [data](const shared_ptr<encap_t>& xi) {
              EXPECT_TRUE((xi->get_data().array() == data.array()).all());
            });
@@ -141,22 +143,22 @@ TEST(MatrixApplication, zero_matrix)
   EigenVector<double> data(3);
   data << 1.0, 2.0, 3.0;
   vector<shared_ptr<encap_t>> vec(3);
-  generate(vec.begin(), vec.end(),
-           [data]() { return make_shared<encap_t>(data); });
-  for_each(vec.cbegin(), vec.cend(), [data](const shared_ptr<encap_t>& xi) {
+  std::generate(vec.begin(), vec.end(),
+           [data]() { return std::make_shared<encap_t>(data); });
+  std::for_each(vec.cbegin(), vec.cend(), [data](const shared_ptr<encap_t>& xi) {
     EXPECT_TRUE((xi->get_data().array() == data.array()).all());
   });
   Matrix<double> mat = Matrix<double>::Zero(3, 3);
 
   auto result_mat_mul_vec = pfasst::encap::mat_mul_vec(1.0, mat, vec);
-  for_each(result_mat_mul_vec.cbegin(), result_mat_mul_vec.cend(),
+  std::for_each(result_mat_mul_vec.cbegin(), result_mat_mul_vec.cend(),
            [&](const shared_ptr<encap_t>& xi) {
              EXPECT_TRUE((xi->get_data().array() == EigenVector<double>::Zero(3).array()).all());
            });
 
   vector<shared_ptr<encap_t>> result_mat_apply(result_mat_mul_vec);
   pfasst::encap::mat_apply(result_mat_apply, 1.0, mat, vec, true);
-  for_each(result_mat_apply.cbegin(), result_mat_apply.cend(),
+  std::for_each(result_mat_apply.cbegin(), result_mat_apply.cend(),
            [&](const shared_ptr<encap_t>& xi) {
              EXPECT_TRUE((xi->get_data().array() == EigenVector<double>::Zero(3).array()).all());
            });
@@ -167,9 +169,9 @@ TEST(MatrixApplication, all_ones)
   EigenVector<double> data(3);
   data << 1.0, 2.0, 3.0;
   vector<shared_ptr<encap_t>> vec(3);
-  generate(vec.begin(), vec.end(),
-           [data]() { return make_shared<encap_t>(data); });
-  for_each(vec.cbegin(), vec.cend(), [data](const shared_ptr<encap_t>& xi) {
+  std::generate(vec.begin(), vec.end(),
+           [data]() { return std::make_shared<encap_t>(data); });
+  std::for_each(vec.cbegin(), vec.cend(), [data](const shared_ptr<encap_t>& xi) {
     EXPECT_TRUE((xi->get_data().array() == data.array()).all());
   });
   Matrix<double> mat = Matrix<double>::Ones(3, 3);
@@ -178,14 +180,14 @@ TEST(MatrixApplication, all_ones)
 
   EigenVector<double> expected(3);
   expected << 3.0, 6.0, 9.0;
-  for_each(result_mat_mul_vec.cbegin(), result_mat_mul_vec.cend(),
+  std::for_each(result_mat_mul_vec.cbegin(), result_mat_mul_vec.cend(),
            [&](const shared_ptr<encap_t>& xi) {
              EXPECT_TRUE((xi->get_data().array() == expected.array()).all());
            });
 
   vector<shared_ptr<encap_t>> result_mat_apply(result_mat_mul_vec);
   pfasst::encap::mat_apply(result_mat_apply, 1.0, mat, vec, true);
-  for_each(result_mat_apply.cbegin(), result_mat_apply.cend(),
+  std::for_each(result_mat_apply.cbegin(), result_mat_apply.cend(),
            [&](const shared_ptr<encap_t>& xi) {
              EXPECT_TRUE((xi->get_data().array() == expected.array()).all());
            });
@@ -196,9 +198,8 @@ TEST(Communication, sending)
 {
   EigenVector<double> data(3);
   data << 1.0, 2.0, 3.0;
-  shared_ptr<comm_t> comm = make_shared<comm_t>();
-  shared_ptr<encap_t> vec = \
-    make_shared<encap_t>(data);
+  shared_ptr<comm_t> comm = std::make_shared<comm_t>();
+  shared_ptr<encap_t> vec = std::make_shared<encap_t>(data);
   vec->send(comm, 1, 0, true);
 
   vec->send(comm, 1, 0, false);
@@ -208,9 +209,8 @@ TEST(Communication, receiving)
 {
   EigenVector<double> data(3);
   data << 1.0, 2.0, 3.0;
-  shared_ptr<comm_t> comm = make_shared<comm_t>();
-  shared_ptr<encap_t> vec = \
-    make_shared<encap_t>(data);
+  shared_ptr<comm_t> comm = std::make_shared<comm_t>();
+  shared_ptr<encap_t> vec = std::make_shared<encap_t>(data);
   vec->recv(comm, 1, 0, true);
 
   vec->recv(comm, 1, 0, false);
@@ -220,9 +220,8 @@ TEST(Communication, broadcasting)
 {
   EigenVector<double> data(3);
   data << 1.0, 2.0, 3.0;
-  shared_ptr<comm_t> comm = make_shared<comm_t>();
-  shared_ptr<encap_t> vec = \
-    make_shared<encap_t>(data);
+  shared_ptr<comm_t> comm = std::make_shared<comm_t>();
+  shared_ptr<encap_t> vec = std::make_shared<encap_t>(data);
   vec->bcast(comm, 0);
 }
 

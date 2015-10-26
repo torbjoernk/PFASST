@@ -4,7 +4,8 @@
 #include <memory>
 #include <type_traits>
 #include <vector>
-using namespace std;
+using std::shared_ptr;
+using std::vector;
 
 #include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
@@ -22,10 +23,10 @@ namespace pfasst
       class EncapsulationTrait
     >
     class Encapsulation<EncapsulationTrait,
-                        typename enable_if<
-                                   is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
+                        typename std::enable_if<
+                                   std::is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                                  >::type>
-      :   public enable_shared_from_this<Encapsulation<EncapsulationTrait>>
+      :   public std::enable_shared_from_this<Encapsulation<EncapsulationTrait>>
         , public el::Loggable
     {
       public:
@@ -44,7 +45,7 @@ namespace pfasst
         virtual const typename EncapsulationTrait::data_t& get_data() const;
         virtual size_t get_total_num_dofs() const;
         // assuming square-shaped space
-        virtual array<int, EncapsulationTrait::DIM> get_dimwise_num_dofs() const;
+        virtual std::array<int, EncapsulationTrait::DIM> get_dimwise_num_dofs() const;
 
         virtual void zero();
         virtual void scaled_add(const typename EncapsulationTrait::time_t& a,
@@ -79,10 +80,10 @@ namespace pfasst
       class EncapsulationTrait
     >
     class EncapsulationFactory<EncapsulationTrait,
-                               typename enable_if<
-                                          is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
+                               typename std::enable_if<
+                                          std::is_same<vector_encap_tag, typename EncapsulationTrait::tag_t>::value
                                         >::type>
-      : public enable_shared_from_this<EncapsulationFactory<EncapsulationTrait>>
+      : public std::enable_shared_from_this<EncapsulationFactory<EncapsulationTrait>>
     {
       protected:
         size_t _size;

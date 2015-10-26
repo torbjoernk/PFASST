@@ -3,11 +3,12 @@
 
 #include <limits>
 #include <iostream>
-#include <map>
 #include <memory>
 #include <type_traits>
 #include <utility>
-using namespace std;
+using std::shared_ptr;
+using std::string;
+using std::vector;
 
 #include <leathers/push>
 #include <leathers/all>
@@ -42,12 +43,12 @@ namespace pfasst
     // intermediate states
     INTER_ITER        = 30,
 
-    UNKNOWN_PRIMARY   = numeric_limits<int>::max()
+    UNKNOWN_PRIMARY   = std::numeric_limits<int>::max()
   )
 
   template<class CharT, class Traits>
-  inline basic_ostream<CharT, Traits>&
-  operator<<(basic_ostream<CharT, Traits>& os, const pfasst::PrimaryState& state)
+  inline std::basic_ostream<CharT, Traits>&
+  operator<<(std::basic_ostream<CharT, Traits>& os, const pfasst::PrimaryState& state)
   {
     os << (+state)._to_string();
     return os;
@@ -71,19 +72,19 @@ namespace pfasst
     // intermediate states
     CONV_CHECK        = 30,
 
-    UNKNOWN_SECONDARY = numeric_limits<int>::max()
+    UNKNOWN_SECONDARY = std::numeric_limits<int>::max()
   )
 
   template<class CharT, class Traits>
-  inline basic_ostream<CharT, Traits>&
-  operator<<(basic_ostream<CharT, Traits>& os, const pfasst::SecondaryState& state)
+  inline std::basic_ostream<CharT, Traits>&
+  operator<<(std::basic_ostream<CharT, Traits>& os, const pfasst::SecondaryState& state)
   {
     os << (+state)._to_string();
     return os;
   }
 
   // the idea for this C++11 constexpr stuff is based on http://stackoverflow.com/a/26079954/588243
-  using PrimarySecondaryMapItem = pair<PrimaryState, SecondaryState>;
+  using PrimarySecondaryMapItem = std::pair<PrimaryState, SecondaryState>;
   constexpr PrimarySecondaryMapItem VALID_STATES_COMBINATIONS[] = {
     { PrimaryState::CONVERGED,       SecondaryState::UNKNOWN_SECONDARY },
 
@@ -175,10 +176,10 @@ namespace pfasst
     typename precision
   >
   class Status
-    :   public enable_shared_from_this<Status<precision>>
+    :   public std::enable_shared_from_this<Status<precision>>
       , public el::Loggable
   {
-    static_assert(is_arithmetic<precision>::value,
+    static_assert(std::is_arithmetic<precision>::value,
                   "precision type must be arithmetic");
 
     public:
@@ -189,7 +190,7 @@ namespace pfasst
       static inline void free_mpi_datatype();
 #endif
 
-      static_assert(is_standard_layout<StatusDetail<precision>>::value,
+      static_assert(std::is_standard_layout<StatusDetail<precision>>::value,
                     "Status::Detail needs to be have standard layout for MPI derived datatype");
       StatusDetail<precision> _detail;
 

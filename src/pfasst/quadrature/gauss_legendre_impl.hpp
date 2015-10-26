@@ -1,7 +1,6 @@
 #include "pfasst/quadrature/gauss_legendre.hpp"
 
 #include <vector>
-using namespace std;
 
 #include "pfasst/quadrature/polynomial.hpp"
 
@@ -33,7 +32,7 @@ namespace pfasst
     template<typename precision>
     void GaussLegendre<precision>::compute_nodes()
     {
-      this->nodes = vector<precision>(this->num_nodes, precision(0.0));
+      this->nodes = std::vector<precision>(this->num_nodes, precision(0.0));
       auto roots = Polynomial<precision>::legendre(this->num_nodes).roots();
 
       for (size_t j = 0; j < this->num_nodes; j++) {

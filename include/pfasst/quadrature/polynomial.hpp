@@ -6,7 +6,7 @@
 #define _PFASST__POLYNOMIAL_HPP_
 
 #include <vector>
-using namespace std;
+using std::vector;
 
 
 namespace pfasst

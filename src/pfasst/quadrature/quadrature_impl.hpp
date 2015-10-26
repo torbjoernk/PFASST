@@ -1,5 +1,10 @@
 #include "pfasst/quadrature/quadrature.hpp"
 
+#include <stdexcept>
+#include <vector>
+using std::vector;
+
+
 namespace pfasst
 {
   namespace quadrature
@@ -9,7 +14,7 @@ namespace pfasst
       : num_nodes(num_nodes)
     {
       if (this->num_nodes == 0) {
-        throw invalid_argument("Any quadrature requires at least one quadrature nodes.");
+        throw std::invalid_argument("Any quadrature requires at least one quadrature nodes.");
       }
     }
 
@@ -57,21 +62,21 @@ namespace pfasst
     template<typename precision>
     bool IQuadrature<precision>::left_is_node() const
     {
-      throw runtime_error("Quadrature");
+      throw std::runtime_error("Quadrature");
       return LEFT_IS_NODE;
     }
 
     template<typename precision>
     bool IQuadrature<precision>::right_is_node() const
     {
-      throw runtime_error("Quadrature");
+      throw std::runtime_error("Quadrature");
       return RIGHT_IS_NODE;
     }
 
     template<typename precision>
     void IQuadrature<precision>::compute_nodes()
     {
-      throw runtime_error("Quadrature");
+      throw std::runtime_error("Quadrature");
     }
 
     template<typename precision>

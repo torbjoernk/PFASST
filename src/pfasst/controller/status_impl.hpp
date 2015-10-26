@@ -1,8 +1,14 @@
 #include "pfasst/controller/status.hpp"
 
+#include <cstddef>  // offsetof
+#include <memory>
+#include <stdexcept>
 #include <sstream>
+#include <string>
 #include <vector>
-using namespace std;
+using std::shared_ptr;
+using std::string;
+using std::vector;
 
 #include <pfasst/logging.hpp>
 
@@ -218,7 +224,7 @@ namespace pfasst
                                 << (+this->get_primary_state())._to_string()
                                 << ") and secondary state ("
                                 << (+state)._to_string() << ")");
-      throw runtime_error("invalid combination of primary and secondary state");
+      throw std::runtime_error("invalid combination of primary and secondary state");
     }
   }
 
@@ -289,16 +295,16 @@ namespace pfasst
   Status<precision>::summary() const
   {
     vector<string> out;
-    out.push_back("Number Iterations: " + to_string(this->get_iteration()));
+    out.push_back("Number Iterations: " + std::to_string(this->get_iteration()));
     {
-      stringstream s;
-      s << "Absolute Residual: " << LOG_FLOAT << this->get_abs_res_norm();
-      out.push_back(s.str());
+      std::stringstream os;
+      os << "Absolute Residual: " << LOG_FLOAT << this->get_abs_res_norm();
+      out.push_back(os.str());
     }
     {
-      stringstream s;
-      s << "Relative Residual: " << LOG_FLOAT << this->get_rel_res_norm();
-      out.push_back(s.str());
+      std::stringstream os;
+      os << "Relative Residual: " << LOG_FLOAT << this->get_rel_res_norm();
+      out.push_back(os.str());
     }
     return out;
   }

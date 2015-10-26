@@ -1,18 +1,22 @@
 #ifndef _PFASST__TESTS__TEST_HELPERS_HPP_
 #define _PFASST__TESTS__TEST_HELPERS_HPP_
 
+#include <cmath>
+#include <string>
 #include <tuple>
-using namespace std;
+#include <utility>
+using std::get;
+using std::string;
+
 
 #include <leathers/push>
 #include <leathers/all>
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-using namespace ::testing;
 
 MATCHER(DoubleNear, "")
 {
-  return abs(get<0>(arg) - get<1>(arg)) < 1e-15;
+  return std::abs(get<0>(arg) - get<1>(arg)) < 1e-15;
 }
 
 MATCHER(MutuallyEqual, "")
@@ -28,8 +32,6 @@ MATCHER(MutuallyEqual, "")
   return true;
 }
 #include <leathers/pop>
-
-
 #include <pfasst/config.hpp>
 
 class ConfigModder
@@ -45,7 +47,7 @@ class ConfigModder
     ConfigModder(ConfigModder&& o) = delete;
     ~ConfigModder()
     {
-      pfasst::config::options::get_instance().get_variables_map() = move(this->backup);
+      pfasst::config::options::get_instance().get_variables_map() = std::move(this->backup);
     }
 
     ConfigModder& operator=(const ConfigModder& o) = delete;
@@ -66,7 +68,7 @@ class ConfigModder
   int main(int argc, char** argv) { \
     MPI_Init(&argc, &argv); \
     pfasst::log::start_log(argc, argv); \
-    InitGoogleTest(&argc, argv); \
+    ::testing::InitGoogleTest(&argc, argv); \
     const int out = RUN_ALL_TESTS(); \
     MPI_Finalize(); \
     return out; \
@@ -75,7 +77,7 @@ class ConfigModder
 #define TEST_MAIN() \
   int main(int argc, char** argv) { \
     pfasst::log::start_log(argc, argv); \
-    InitGoogleTest(&argc, argv); \
+    ::testing::InitGoogleTest(&argc, argv); \
     return RUN_ALL_TESTS(); \
   }
 #endif

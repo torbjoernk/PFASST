@@ -2,7 +2,7 @@
 #define _PFASST__CONTROLLER__TWO_LEVEL_PFASST_HPP_
 
 #include <memory>
-using namespace std;
+using std::shared_ptr;
 
 #include <leathers/push>
 #include <leathers/all>

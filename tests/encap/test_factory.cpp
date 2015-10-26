@@ -1,7 +1,7 @@
 #include "fixtures/test_helpers.hpp"
-
-#include <vector>
-using namespace std;
+using ::testing::Eq;
+using ::testing::NotNull;
+using ::testing::SizeIs;
 
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/encapsulation.hpp>

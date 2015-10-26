@@ -1,9 +1,12 @@
 #ifndef _PFASST__EXAMPLES__HEAD1D__HEAD1D_SWEEPER_HPP_
 #define _PFASST__EXAMPLES__HEAD1D__HEAD1D_SWEEPER_HPP_
 
+#include <complex>
 #include <memory>
+#include <type_traits>
 #include <vector>
-using namespace std;
+using std::shared_ptr;
+using std::vector;
 
 #include <pfasst/sweeper/imex.hpp>
 #include <pfasst/contrib/fft.hpp>
@@ -22,9 +25,9 @@ namespace pfasst
       class Heat1D
         : public IMEX<SweeperTrait, Enabled>
       {
-        static_assert(is_same<
+        static_assert(std::is_same<
                         typename SweeperTrait::encap_t::traits::dim_t,
-                        integral_constant<size_t, 1>
+                        std::integral_constant<size_t, 1>
                       >::value,
                       "Heat1D Sweeper requires 1D data structures");
 
@@ -39,7 +42,7 @@ namespace pfasst
           typename traits::time_t                        _t0{0.0};
           spatial_t                                      _nu{0.2};
           pfasst::contrib::FFT<typename traits::encap_t> _fft;
-          vector<complex<spatial_t>>                     _lap;
+          vector<std::complex<spatial_t>>                _lap;
 
         protected:
           virtual shared_ptr<typename SweeperTrait::encap_t>

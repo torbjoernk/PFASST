@@ -4,9 +4,9 @@
 #include "pfasst/transfer/transfer.hpp"
 
 #include <memory>
-#include <vector>
-using namespace std;
+using std::shared_ptr;
 
+#include "pfasst/globals.hpp"
 #include "pfasst/quadrature.hpp"
 
 

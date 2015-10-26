@@ -1,8 +1,13 @@
 #include "heat1d_sweeper.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <complex>
-using namespace std;
+#include <memory>
+#include <string>
+#include <vector>
+using std::shared_ptr;
+using std::vector;
 
 #include <leathers/push>
 #include <leathers/all>
@@ -70,7 +75,7 @@ namespace pfasst
         //   me.values = np.sin(2 * np.pi * xvalues) * np.exp(-t * (2 * np.pi)**2 * self.nu)
         const spatial_t dx = 1.0 / spatial_t(this->get_num_dofs());
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
-          result->data()[i] = sin(two_pi<spatial_t>() * i * dx)
+          result->data()[i] = std::sin(two_pi<spatial_t>() * i * dx)
                                 * exp(-t * 4 * pi_sqr<spatial_t>() * this->_nu);
         }
 
@@ -115,8 +120,8 @@ namespace pfasst
           ML_CVLOG(1, this->get_logger_id(),
                    "Observables after "
                    << ((this->get_status()->get_iteration() == 0)
-                          ? string("prediction")
-                          : string("iteration ") + to_string(this->get_status()->get_iteration())));
+                          ? std::string("prediction")
+                          : std::string("iteration ") + std::to_string(this->get_status()->get_iteration())));
           for (size_t m = 0; m < num_nodes; ++m) {
             ML_CVLOG(1, this->get_logger_id(),
                      "  t["<<m<<"]=" << LOG_FIXED << (t + dt * nodes[m])
@@ -167,8 +172,8 @@ namespace pfasst
 
         vector<shared_ptr<typename traits::encap_t>> error;
         error.resize(num_nodes + 1);
-        generate(error.begin(), error.end(),
-                 bind(&traits::encap_t::factory_t::create, this->encap_factory()));
+        std::generate(error.begin(), error.end(),
+                 std::bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           const typename traits::time_t ds = dt * (nodes[m] - nodes[0]);
@@ -194,8 +199,8 @@ namespace pfasst
 
         vector<shared_ptr<typename traits::encap_t>> rel_error;
         rel_error.resize(error.size());
-        generate(rel_error.begin(), rel_error.end(),
-                 bind(&traits::encap_t::factory_t::create, this->encap_factory()));
+        std::generate(rel_error.begin(), rel_error.end(),
+                 std::bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           rel_error[m]->scaled_add(1.0 / this->get_states()[m]->norm0(), error[m]);
