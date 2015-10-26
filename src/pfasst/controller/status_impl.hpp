@@ -79,6 +79,16 @@ namespace pfasst
   }
 
   template<typename precision>
+  void
+  Status<precision>::reset()
+  {
+    this->set_primary_state(PrimaryState::UNKNOWN_PRIMARY);
+    this->iteration() = 0;
+    this->abs_res_norm() = 0.0;
+    this->rel_res_norm() = 0.0;
+  }
+
+  template<typename precision>
   size_t
   Status<precision>::get_step() const
   {
