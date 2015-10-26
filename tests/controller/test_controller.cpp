@@ -2,6 +2,10 @@
 using ::testing::Eq;
 using ::testing::NotNull;
 
+#include <memory>
+#include <stdexcept>
+using std::shared_ptr;
+
 #include <pfasst/controller/controller.hpp>
 using pfasst::Controller;
 
@@ -35,8 +39,8 @@ class Interface
 
     virtual void SetUp()
     {
-      this->controller = make_shared<Controller<transfer_t>>();
-      this->status = make_shared<pfasst::Status<double>>();
+      this->controller = std::make_shared<Controller<transfer_t>>();
+      this->status = std::make_shared<pfasst::Status<double>>();
     }
 };
 
@@ -68,8 +72,8 @@ class Setup
 
     virtual void SetUp()
     {
-      this->controller = make_shared<Controller<transfer_t>>();
-      this->status = make_shared<pfasst::Status<double>>();
+      this->controller = std::make_shared<Controller<transfer_t>>();
+      this->status = std::make_shared<pfasst::Status<double>>();
     }
 };
 
@@ -80,7 +84,7 @@ TEST_F(Setup, setup_required_for_running)
   controller->status()->max_iterations() = 1;
 
   ASSERT_FALSE(controller->is_ready());
-  EXPECT_THROW(controller->run(), logic_error);
+  EXPECT_THROW(controller->run(), std::logic_error);
 
   controller->setup();
   EXPECT_TRUE(controller->is_ready());
@@ -98,8 +102,8 @@ class Logic
 
     virtual void SetUp()
     {
-      this->controller = make_shared<Controller<transfer_t>>();
-      this->status = make_shared<pfasst::Status<double>>();
+      this->controller = std::make_shared<Controller<transfer_t>>();
+      this->status = std::make_shared<pfasst::Status<double>>();
     }
 };
 

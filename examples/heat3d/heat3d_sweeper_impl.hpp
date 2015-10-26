@@ -1,8 +1,15 @@
 #include "heat3d_sweeper.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <complex>
-using namespace std;
+#include <functional>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+using std::shared_ptr;
+using std::vector;
 
 #include <leathers/push>
 #include <leathers/all>
@@ -49,17 +56,17 @@ namespace pfasst
         for (size_t zi = 0; zi < ndofs; ++zi) {
           this->_lap[zi] = vector<vector<spatial_t>>(ndofs);
           const spatial_t kzi = compute_kdi(zi);
-          const spatial_t kzi_sqt = pfasst::almost_zero(pow(kzi, 2)) ? 0.0 : -pow(kzi, 2);
+          const spatial_t kzi_sqt = pfasst::almost_zero(std::pow(kzi, 2)) ? 0.0 : -std::pow(kzi, 2);
 
           for (size_t yi = 0; yi < ndofs; ++yi) {
             this->_lap[zi][yi] = vector<spatial_t>(ndofs);
 
             const spatial_t kyi = compute_kdi(yi);
-            const spatial_t kyi_sqt = pfasst::almost_zero(pow(kyi, 2)) ? 0.0 : -pow(kyi, 2);
+            const spatial_t kyi_sqt = pfasst::almost_zero(std::pow(kyi, 2)) ? 0.0 : -std::pow(kyi, 2);
 
             for (size_t xi = 0; xi < ndofs; ++xi) {
               const spatial_t kxi = compute_kdi(xi);
-              const spatial_t kxi_sqt = pfasst::almost_zero(pow(kxi, 2)) ? 0.0 : -pow(kxi, 2);
+              const spatial_t kxi_sqt = pfasst::almost_zero(std::pow(kxi, 2)) ? 0.0 : -std::pow(kxi, 2);
 
               this->_lap[zi][yi][xi] = kzi_sqt + kyi_sqt + kxi_sqt;
             }
@@ -82,22 +89,22 @@ namespace pfasst
       {
         auto result = this->get_encap_factory().create();
 
-        const size_t dofs_p_dim = cbrt(this->get_num_dofs());
+        const size_t dofs_p_dim = std::cbrt(this->get_num_dofs());
         const spatial_t dx = 1.0 / spatial_t(dofs_p_dim);
         const spatial_t dy = 1.0 / spatial_t(dofs_p_dim);
         const spatial_t dz = 1.0 / spatial_t(dofs_p_dim);
 
         auto lin_index = [&dofs_p_dim](const size_t zi, const size_t yi, const size_t xi) {
-          return linearized_index(make_tuple(zi, yi, xi), dofs_p_dim);
+          return linearized_index(std::make_tuple(zi, yi, xi), dofs_p_dim);
         };
 
         for (size_t zi = 0; zi < dofs_p_dim; ++zi) {
           for (size_t yi = 0; yi < dofs_p_dim; ++yi) {
             for (size_t xi = 0; xi < dofs_p_dim; ++xi) {
-              result->data()[lin_index(zi, yi, xi)] = (sin(two_pi<spatial_t>() * zi * dz)
-                                                       + sin(two_pi<spatial_t>() * yi * dy)
-                                                       + sin(two_pi<spatial_t>() * xi * dx))
-                                                      * exp(-t * 4 * pi_sqr<spatial_t>() * this->_nu);
+              result->data()[lin_index(zi, yi, xi)] = (std::sin(two_pi<spatial_t>() * zi * dz)
+                                                       + std::sin(two_pi<spatial_t>() * yi * dy)
+                                                       + std::sin(two_pi<spatial_t>() * xi * dx))
+                                                      * std::exp(-t * 4 * pi_sqr<spatial_t>() * this->_nu);
             }
           }
         }
@@ -143,8 +150,8 @@ namespace pfasst
           ML_CVLOG(1, this->get_logger_id(),
                    "Observables after "
                    << ((this->get_status()->get_iteration() == 0)
-                          ? string("prediction")
-                          : string("iteration ") + to_string(this->get_status()->get_iteration())));
+                          ? std::string("prediction")
+                          : std::string("iteration ") + std::to_string(this->get_status()->get_iteration())));
           for (size_t m = 0; m < num_nodes; ++m) {
             ML_CVLOG(1, this->get_logger_id(),
                      "  t["<<m<<"]=" << LOG_FIXED << (t + dt * nodes[m])
@@ -195,8 +202,8 @@ namespace pfasst
 
         vector<shared_ptr<typename traits::encap_t>> error;
         error.resize(num_nodes + 1);
-        generate(error.begin(), error.end(),
-                 bind(&traits::encap_t::factory_t::create, this->encap_factory()));
+        std::generate(error.begin(), error.end(),
+                 std::bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           const typename traits::time_t ds = dt * (nodes[m] - nodes[0]);
@@ -220,8 +227,8 @@ namespace pfasst
 
         vector<shared_ptr<typename traits::encap_t>> rel_error;
         rel_error.resize(error.size());
-        generate(rel_error.begin(), rel_error.end(),
-                 bind(&traits::encap_t::factory_t::create, this->encap_factory()));
+        std::generate(rel_error.begin(), rel_error.end(),
+                 std::bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           rel_error[m]->scaled_add(1.0 / this->get_states()[m]->norm0(), error[m]);
@@ -256,7 +263,7 @@ namespace pfasst
                  LOG_FIXED << "evaluating IMPLICIT part at t=" << t);
 
         const spatial_t c = this->_nu / spatial_t(this->get_num_dofs());
-        const size_t dofs_p_dim = cbrt(this->get_num_dofs());
+        const size_t dofs_p_dim = std::cbrt(this->get_num_dofs());
 
         auto* z = this->_fft.forward(u);
 
@@ -287,7 +294,7 @@ namespace pfasst
 
         const spatial_t c = this->_nu * dt;
         const size_t ndofs = this->get_num_dofs();
-        const size_t dofs_p_dim = cbrt(ndofs);
+        const size_t dofs_p_dim = std::cbrt(ndofs);
 
         auto* z = this->_fft.forward(rhs);
 

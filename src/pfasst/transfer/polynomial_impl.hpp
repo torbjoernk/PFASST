@@ -1,9 +1,10 @@
 #include "pfasst/transfer/polynomial.hpp"
 
+#include <algorithm>
 #include <stdexcept>
 #include <memory>
 #include <vector>
-using namespace std;
+using std::shared_ptr;
 
 #include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
@@ -51,7 +52,7 @@ namespace pfasst
 
     if (coarse->get_quadrature()->left_is_node() || fine->get_quadrature()->left_is_node()) {
       ML_CLOG(ERROR, "TRANS", "Time interpolation with left time point as a node is still not supported.");
-      throw runtime_error("time interpolation with left time point as node");
+      throw std::runtime_error("time interpolation with left time point as node");
     }
 
     ML_CLOG_IF(fine->get_quadrature()->get_num_nodes() != coarse->get_quadrature()->get_num_nodes(),
@@ -71,8 +72,8 @@ namespace pfasst
     auto& fine_factory = fine->get_encap_factory();
 
     // step 1: compute coarse level correction
-    vector<shared_ptr<typename traits::fine_encap_t>> fine_deltas(num_coarse_nodes);
-    generate(fine_deltas.begin(), fine_deltas.end(),
+    std::vector<shared_ptr<typename traits::fine_encap_t>> fine_deltas(num_coarse_nodes);
+    std::generate(fine_deltas.begin(), fine_deltas.end(),
              [&fine_factory]() { return fine_factory.create(); });
 
     //  c_delta = restrict(u_m^F) - u_m^C
@@ -111,7 +112,7 @@ namespace pfasst
                                                                 shared_ptr<typename TransferTraits::fine_encap_t> fine)
   {
     UNUSED(coarse); UNUSED(fine);
-    throw runtime_error("interpolation for generic Encapsulations");
+    throw std::runtime_error("interpolation for generic Encapsulations");
   }
 
   template<class TransferTraits, typename Enabled>
@@ -134,7 +135,7 @@ namespace pfasst
 
     if (coarse->get_quadrature()->left_is_node() || fine->get_quadrature()->left_is_node()) {
       ML_CLOG(ERROR, "TRANS", "Time restriction with left time point as a node is still not supported.");
-      throw runtime_error("time restriction with left time point as node");
+      throw std::runtime_error("time restriction with left time point as node");
     }
 
 
@@ -168,7 +169,7 @@ namespace pfasst
                                                              shared_ptr<typename TransferTraits::coarse_encap_t> coarse)
   {
     UNUSED(coarse); UNUSED(fine);
-    throw runtime_error("restriction for generic Encapsulations");
+    throw std::runtime_error("restriction for generic Encapsulations");
   }
 
   template<class TransferTraits, typename Enabled>
@@ -186,17 +187,17 @@ namespace pfasst
 
     if (num_fine_nodes != num_coarse_nodes) {
       ML_CLOG(ERROR, "TRANS", "FAS Correction for different time scales not supported yet.");
-      throw runtime_error("fas correction for different time scales");
+      throw std::runtime_error("fas correction for different time scales");
     } else if (!equal(coarse_nodes.cbegin(), coarse_nodes.cend(), fine_nodes.cbegin())) {
       ML_CLOG(ERROR, "TRANS", "FAS Correction for different time nodes not supported yet.");
-      throw runtime_error("fas correction for different sets of nodes");
+      throw std::runtime_error("fas correction for different sets of nodes");
     }
     assert(coarse_nodes.size() == fine_nodes.size());
 
     auto& coarse_factory = coarse->get_encap_factory();
 
-    vector<shared_ptr<typename traits::coarse_encap_t>> fas(num_coarse_nodes + 1);
-    generate(fas.begin(), fas.end(), [&coarse_factory]() { return coarse_factory.create(); });
+    std::vector<shared_ptr<typename traits::coarse_encap_t>> fas(num_coarse_nodes + 1);
+    std::generate(fas.begin(), fas.end(), [&coarse_factory]() { return coarse_factory.create(); });
 
     const auto coarse_integral = coarse->integrate(dt);
     const auto fine_integral = fine->integrate(dt);

@@ -1,4 +1,6 @@
 #include "fixtures/test_helpers.hpp"
+using ::testing::Eq;
+using ::testing::DoubleEq;
 
 #include <leathers/push>
 #include <leathers/all>

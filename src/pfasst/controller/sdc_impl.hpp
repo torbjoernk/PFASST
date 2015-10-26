@@ -1,7 +1,9 @@
 #include "pfasst/controller/sdc.hpp"
 
+#include <memory>
 #include <stdexcept>
-using namespace std;
+#include <type_traits>
+using std::shared_ptr;
 
 #include "pfasst/util.hpp"
 #include "pfasst/config.hpp"
@@ -46,7 +48,7 @@ namespace pfasst
   void
   SDC<TransferT>::add_sweeper(shared_ptr<SweeperT> sweeper)
   {
-    static_assert(is_same<SweeperT, typename TransferT::traits::fine_sweeper_t>::value,
+    static_assert(std::is_same<SweeperT, typename TransferT::traits::fine_sweeper_t>::value,
                   "Sweeper must be a Fine Sweeper Type.");
 
     this->_sweeper = sweeper;
@@ -91,7 +93,7 @@ namespace pfasst
 
     if (this->get_num_levels() != 1) {
       ML_CLOG(ERROR, this->get_logger_id(), "One level (Sweeper) must have been added for SDC.");
-      throw logic_error("SDC requires one level");
+      throw std::logic_error("SDC requires one level");
     }
 
     this->get_sweeper()->status() = this->get_status();

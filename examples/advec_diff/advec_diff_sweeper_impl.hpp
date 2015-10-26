@@ -1,8 +1,14 @@
 #include "advec_diff_sweeper.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <complex>
-using namespace std;
+#include <functional>
+#include <memory>
+#include <string>
+#include <vector>
+using std::shared_ptr;
+using std::vector;
 
 #include <leathers/push>
 #include <leathers/all>
@@ -50,7 +56,7 @@ namespace pfasst
           typename traits::spatial_t kx = two_pi<typename traits::spatial_t>()
                             * ((i <= ndofs / 2) ? typename traits::spatial_t(i)
                                                 : typename traits::spatial_t(i) - typename traits::spatial_t(ndofs));
-          this->_ddx[i] = complex<typename traits::spatial_t>(0.0, 1.0) * kx;
+          this->_ddx[i] = std::complex<typename traits::spatial_t>(0.0, 1.0) * kx;
           this->_lap[i] = pfasst::almost_zero(kx * kx) ? 0.0 : -kx * kx;
         }
       }
@@ -124,7 +130,10 @@ namespace pfasst
           const auto num_nodes = this->get_quadrature()->get_num_nodes();
           nodes.insert(nodes.begin(), typename traits::time_t(0.0));
 
-          ML_CVLOG(1, this->get_logger_id(), "Observables after " << ((this->get_status()->get_iteration() == 0) ? string("prediction") : string("iteration ") + to_string(this->get_status()->get_iteration())));
+          ML_CVLOG(1, this->get_logger_id(),
+                   "Observables after " << ((this->get_status()->get_iteration() == 0)
+                                            ? std::string("prediction")
+                                            : std::string("iteration ") + std::to_string(this->get_status()->get_iteration())));
           for (size_t m = 0; m < num_nodes; ++m) {
             ML_CVLOG(1, this->get_logger_id(), "  t["<<m<<"]=" << LOG_FIXED << (t + dt * nodes[m])
                                             << "      |abs residual| = " << LOG_FLOAT << this->_abs_res_norms[m]
@@ -173,8 +182,8 @@ namespace pfasst
 
         vector<shared_ptr<typename traits::encap_t>> error;
         error.resize(num_nodes + 1);
-        generate(error.begin(), error.end(),
-                 bind(&traits::encap_t::factory_t::create, this->encap_factory()));
+        std::generate(error.begin(), error.end(),
+                 std::bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           const typename traits::time_t ds = dt * (nodes[m] - nodes[0]);
@@ -200,8 +209,8 @@ namespace pfasst
 
         vector<shared_ptr<typename traits::encap_t>> rel_error;
         rel_error.resize(error.size());
-        generate(rel_error.begin(), rel_error.end(),
-                 bind(&traits::encap_t::factory_t::create, this->encap_factory()));
+        std::generate(rel_error.begin(), rel_error.end(),
+                 std::bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
         for (size_t m = 1; m < num_nodes + 1; ++m) {
           rel_error[m]->scaled_add(1.0 / this->get_states()[m]->norm0(), error[m]);

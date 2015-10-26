@@ -1,7 +1,9 @@
 #include "fixtures/test_helpers.hpp"
 
 #include <memory>
-using namespace std;
+#include <vector>
+using std::shared_ptr;
+using std::vector;
 
 #include "pfasst/sweeper/sweeper.hpp"
 

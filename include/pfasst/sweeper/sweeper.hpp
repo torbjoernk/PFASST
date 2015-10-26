@@ -4,7 +4,8 @@
 #include <memory>
 #include <type_traits>
 #include <vector>
-using namespace std;
+using std::shared_ptr;
+using std::vector;
 
 #include "pfasst/sweeper/traits.hpp"
 #include "pfasst/controller/status.hpp"
@@ -20,16 +21,16 @@ namespace pfasst
     typename Enabled = void
   >
   class Sweeper
-    : public enable_shared_from_this<Sweeper<SweeperTrait, Enabled>>
+    : public std::enable_shared_from_this<Sweeper<SweeperTrait, Enabled>>
   {
     public:
       using traits = SweeperTrait;
 
-    static_assert(is_arithmetic<typename traits::time_t>::value,
+    static_assert(std::is_arithmetic<typename traits::time_t>::value,
                   "precision type must be arithmetic");
-    static_assert(is_constructible<typename traits::encap_t>::value,
+    static_assert(std::is_constructible<typename traits::encap_t>::value,
                   "Encapsulation type must be constructible");
-    static_assert(is_destructible<typename traits::encap_t>::value,
+    static_assert(std::is_destructible<typename traits::encap_t>::value,
                   "Encapsulation type must be destructible");
 
     protected:

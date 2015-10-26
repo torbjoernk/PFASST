@@ -1,8 +1,8 @@
 #include "pfasst/comm/mpi_p2p.hpp"
 
-#include <exception>
+#include <algorithm>
+#include <stdexcept>
 #include <string>
-using namespace std;
 
 #include "pfasst/logging.hpp"
 
@@ -18,9 +18,9 @@ MAKE_LOGGABLE(MPI_Status, mpi_status, os)
     int err_len = 0;
     int err = MPI_Error_string(mpi_status.MPI_ERROR, err_str, &err_len);
     pfasst::comm::check_mpi_error(err);
-    os << "MPI_Status(source=" << to_string(mpi_status.MPI_SOURCE) << ", "
-       << "tag=" << to_string(mpi_status.MPI_TAG) << ", "
-       << "error=" << string(err_str, err_len) << ")";
+    os << "MPI_Status(source=" << std::to_string(mpi_status.MPI_SOURCE) << ", "
+       << "tag=" << std::to_string(mpi_status.MPI_TAG) << ", "
+       << "error=" << std::string(err_str, err_len) << ")";
   }
   return os;
 }
@@ -30,13 +30,13 @@ namespace pfasst
 {
   namespace comm
   {
-    string error_from_code(const int err_code)
+    std::string error_from_code(const int err_code)
     {
       char err_str[MPI_MAX_ERROR_STRING];
       int err_len = 0;
       int err = MPI_Error_string(err_code, err_str, &err_len);
       check_mpi_error(err);
-      return string(err_str, err_len) + " (code=" + to_string(err_code) + ")";
+      return std::string(err_str, err_len) + " (code=" + std::to_string(err_code) + ")";
     }
 
 
@@ -52,9 +52,9 @@ namespace pfasst
     void check_mpi_error(const int err_code)
     {
       if (err_code != MPI_SUCCESS) {
-        string err_msg = error_from_code(err_code);
+        std::string err_msg = error_from_code(err_code);
         ML_CLOG(ERROR, "COMM_P2P", "MPI encountered an error: " << err_msg);
-        throw runtime_error("MPI encountered an error: " + err_msg);
+        throw std::runtime_error("MPI encountered an error: " + err_msg);
       }
     }
 
@@ -75,7 +75,7 @@ namespace pfasst
       int err = MPI_Comm_get_name(this->_comm, buff, &len);
       check_mpi_error(err);
       if (len > 0) {
-        this->_name = string(buff, len);
+        this->_name = std::string(buff, len);
       }
     }
 
@@ -96,7 +96,7 @@ namespace pfasst
       return this->_rank;
     }
 
-    string MpiP2P::get_name() const
+    std::string MpiP2P::get_name() const
     {
       return this->_name;
     }
@@ -126,7 +126,7 @@ namespace pfasst
         }
       }
 
-      this->_requests.erase(remove(this->_requests.begin(), this->_requests.end(), nullptr),
+      this->_requests.erase(std::remove(this->_requests.begin(), this->_requests.end(), nullptr),
                             this->_requests.end());
 
       ML_CLOG(DEBUG, "COMM_P2P", "done");
@@ -241,7 +241,7 @@ namespace pfasst
 //       int err = MPI_Irecv(data, count, MPI_DOUBLE, src_rank, tag,
 //                           mpi_const_cast<MPI_Comm>(this->_comm), &(this->_requests.back()));
 //       check_mpi_error(err);
-      throw runtime_error("dont irecv");
+      throw std::runtime_error("dont irecv");
     }
 
     void MpiP2P::irecv_status(StatusDetail<double>* data, const int count, const int src_rank, const int tag)
@@ -256,7 +256,7 @@ namespace pfasst
 //       int err = MPI_Irecv(data, count, status_data_type, src_rank, tag,
 //                           mpi_const_cast<MPI_Comm>(this->_comm), &(this->_requests.back()));
 //       check_mpi_error(err);
-      throw runtime_error("dont irecv");
+      throw std::runtime_error("dont irecv");
     }
 
 

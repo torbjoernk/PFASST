@@ -2,8 +2,10 @@
 #define _PFASST__EXAMPLES__HEAD2D__HEAD2D_SWEEPER_HPP_
 
 #include <memory>
+#include <type_traits>
 #include <vector>
-using namespace std;
+using std::shared_ptr;
+using std::vector;
 
 #include <pfasst/sweeper/imex.hpp>
 #include <pfasst/contrib/fft.hpp>
@@ -22,9 +24,9 @@ namespace pfasst
       class Heat2D
         : public IMEX<SweeperTrait, Enabled>
       {
-        static_assert(is_same<
+        static_assert(std::is_same<
                         typename SweeperTrait::encap_t::traits::dim_t,
-                        integral_constant<size_t, 2>
+                        std::integral_constant<size_t, 2>
                       >::value,
                       "Heat2D Sweeper requires 2D data structures");
 

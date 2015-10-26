@@ -2,8 +2,11 @@
 
 #include <algorithm>
 #include <cassert>
+#include <memory>
 #include <stdexcept>
-using namespace std;
+#include <vector>
+using std::shared_ptr;
+using std::vector;
 
 #include "pfasst/logging.hpp"
 #include "pfasst/quadrature.hpp"
@@ -15,7 +18,7 @@ namespace pfasst
   template<class SweeperTrait, typename Enabled>
   Sweeper<SweeperTrait, Enabled>::Sweeper()
     :   _quadrature(nullptr)
-      , _factory(make_shared<typename SweeperTrait::encap_t::factory_t>())
+      , _factory(std::make_shared<typename SweeperTrait::encap_t::factory_t>())
       , _states(0)
       , _previous_states(0)
       , _end_state(nullptr)
@@ -75,7 +78,7 @@ namespace pfasst
   {
     if (this->get_states().size() == 0) {
       ML_CLOG(ERROR, this->get_logger_id(), "Sweeper need to be setup first before querying initial state.");
-      throw runtime_error("sweeper not setup before querying initial state");
+      throw std::runtime_error("sweeper not setup before querying initial state");
     }
     return this->states().front();
   }
@@ -86,7 +89,7 @@ namespace pfasst
   {
     if (this->get_states().size() == 0) {
       ML_CLOG(ERROR, this->get_logger_id(), "Sweeper need to be setup first before querying initial state.");
-      throw runtime_error("sweeper not setup before querying initial state");
+      throw std::runtime_error("sweeper not setup before querying initial state");
     }
     return this->get_states().front();
   }
@@ -205,7 +208,7 @@ namespace pfasst
   Sweeper<SweeperTrait, Enabled>::setup()
   {
     if (this->get_status() == nullptr) {
-      throw runtime_error("Status not yet set.");
+      throw std::runtime_error("Status not yet set.");
     }
     ML_CVLOG(1, this->get_logger_id(), "setting up with t0=" << LOG_FIXED << this->get_status()->get_time()
               << ", dt=" << LOG_FIXED << this->get_status()->get_dt()
@@ -213,7 +216,7 @@ namespace pfasst
               << ", max_iter=" << LOG_FIXED << this->get_status()->get_max_iterations());
 
     if (this->get_quadrature() == nullptr) {
-      throw runtime_error("Quadrature not yet set.");
+      throw std::runtime_error("Quadrature not yet set.");
     }
     ML_CLOG(INFO, this->get_logger_id(), "using as quadrature: " << this->get_quadrature()->print_summary()
                                       << " and an expected error of " << LOG_FLOAT << this->get_quadrature()->expected_error());
@@ -226,18 +229,18 @@ namespace pfasst
 
     this->states().resize(num_nodes + 1);
     auto& factory = this->get_encap_factory();
-    generate(this->states().begin(), this->states().end(), [&factory](){ return factory.create(); });
+    std::generate(this->states().begin(), this->states().end(), [&factory](){ return factory.create(); });
 
     this->previous_states().resize(num_nodes + 1);
-    generate(this->previous_states().begin(), this->previous_states().end(), [&factory](){ return factory.create(); });
+    std::generate(this->previous_states().begin(), this->previous_states().end(), [&factory](){ return factory.create(); });
 
     this->end_state() = this->get_encap_factory().create();
 
     this->tau().resize(num_nodes + 1);
-    generate(this->tau().begin(), this->tau().end(), [&factory](){ return factory.create(); });
+    std::generate(this->tau().begin(), this->tau().end(), [&factory](){ return factory.create(); });
 
     this->residuals().resize(num_nodes + 1);
-    generate(this->residuals().begin(), this->residuals().end(), [&factory](){ return factory.create(); });
+    std::generate(this->residuals().begin(), this->residuals().end(), [&factory](){ return factory.create(); });
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -364,7 +367,7 @@ namespace pfasst
   Sweeper<SweeperTrait, Enabled>::reevaluate(const bool initial_only)
   {
     UNUSED(initial_only);
-    throw runtime_error("reevaluation of right-hand-side");
+    throw std::runtime_error("reevaluation of right-hand-side");
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -379,7 +382,7 @@ namespace pfasst
   Sweeper<SweeperTrait, Enabled>::integrate(const typename SweeperTrait::time_t& dt)
   {
     UNUSED(dt);
-    throw runtime_error("integration over dt");
+    throw std::runtime_error("integration over dt");
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -424,8 +427,8 @@ namespace pfasst
         this->_rel_res_norms[m] = this->_abs_res_norms[m] / this->get_states()[m]->norm0();
       }
 
-      this->status()->abs_res_norm() = *(max_element(this->_abs_res_norms.cbegin(), this->_abs_res_norms.cend()));
-      this->status()->rel_res_norm() = *(max_element(this->_rel_res_norms.cbegin(), this->_rel_res_norms.cend()));
+      this->status()->abs_res_norm() = *(std::max_element(this->_abs_res_norms.cbegin(), this->_abs_res_norms.cend()));
+      this->status()->rel_res_norm() = *(std::max_element(this->_rel_res_norms.cbegin(), this->_rel_res_norms.cend()));
 
       if (this->_abs_residual_tol > 0.0 || this->_rel_residual_tol > 0.0) {
         ML_CVLOG(4, this->get_logger_id(), "convergence check");
@@ -471,7 +474,7 @@ namespace pfasst
       this->end_state()->data() = this->get_states().back()->get_data();
 //       ML_CVLOG(1, this->get_logger_id(), "end state: " << to_string(this->get_end_state()));
     } else {
-      throw runtime_error("integration of end state for quadrature not including right time interval boundary");
+      throw std::runtime_error("integration of end state for quadrature not including right time interval boundary");
     }
   }
 
@@ -480,7 +483,7 @@ namespace pfasst
   Sweeper<SweeperTrait, Enabled>::compute_residuals(const bool& only_last)
   {
     UNUSED(only_last);
-    throw runtime_error("computation of residuals");
+    throw std::runtime_error("computation of residuals");
   }
 
   template<class SweeperTrait, typename Enabled>

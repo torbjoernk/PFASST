@@ -1,9 +1,12 @@
 #ifndef _PFASST__EXAMPLES__ADVEC_DIFF__ADVEC_DIFF_SWEEPER_HPP_
 #define _PFASST__EXAMPLES__ADVEC_DIFF__ADVEC_DIFF_SWEEPER_HPP_
 
+#include <complex>
 #include <memory>
+#include <type_traits>
 #include <vector>
-using namespace std;
+using std::shared_ptr;
+using std::vector;
 
 #include <pfasst/sweeper/imex.hpp>
 #include <pfasst/contrib/fft.hpp>
@@ -26,9 +29,9 @@ namespace pfasst
       class AdvecDiff
         : public IMEX<SweeperTrait, Enabled>
       {
-        static_assert(is_same<
+        static_assert(std::is_same<
                         typename SweeperTrait::encap_traits::dim_t,
-                        integral_constant<size_t, 1>
+                        std::integral_constant<size_t, 1>
                       >::value,
                       "Advection-Diffusion Sweeper requires 1D data structures");
 
@@ -42,9 +45,9 @@ namespace pfasst
           typename traits::spatial_t _nu;
           typename traits::spatial_t _v;
 
-          pfasst::contrib::FFT<typename traits::encap_t> _fft;
-          vector<complex<typename traits::spatial_t>>    _ddx;
-          vector<complex<typename traits::spatial_t>>    _lap;
+          pfasst::contrib::FFT<typename traits::encap_t>   _fft;
+          vector<std::complex<typename traits::spatial_t>> _ddx;
+          vector<std::complex<typename traits::spatial_t>> _lap;
 
         protected:
           virtual shared_ptr<typename SweeperTrait::encap_t> evaluate_rhs_expl(const typename SweeperTrait::time_t& t,

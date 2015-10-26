@@ -8,9 +8,12 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <string>
 #include <type_traits>
 #include <utility>
-using namespace std;
+#include <vector>
+using std::shared_ptr;
+using std::vector;
 
 #include <leathers/push>
 #include <leathers/all>
@@ -55,9 +58,9 @@ namespace pfasst
       : public Communicator
     {
       protected:
-        int      _size = -1;
-        int      _rank = -1;
-        string   _name = "";
+        int         _size = -1;
+        int         _rank = -1;
+        std::string _name = "";
 
         MPI_Comm _comm;
 
@@ -74,7 +77,7 @@ namespace pfasst
         virtual size_t get_size() const override;
         virtual size_t get_rank() const override;
 
-        virtual string get_name() const;
+        virtual std::string get_name() const;
 
         virtual bool is_first() const override;
         virtual bool is_last() const override;

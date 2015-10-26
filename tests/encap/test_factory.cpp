@@ -3,9 +3,6 @@ using ::testing::Eq;
 using ::testing::NotNull;
 using ::testing::SizeIs;
 
-#include <vector>
-using namespace std;
-
 #include <pfasst/encap/traits.hpp>
 #include <pfasst/encap/encapsulation.hpp>
 #include <pfasst/encap/vector.hpp>

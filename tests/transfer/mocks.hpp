@@ -1,7 +1,7 @@
 #include "fixtures/test_helpers.hpp"
 
 #include <memory>
-using namespace std;
+using std::shared_ptr;
 
 #include "pfasst/transfer/transfer.hpp"
 

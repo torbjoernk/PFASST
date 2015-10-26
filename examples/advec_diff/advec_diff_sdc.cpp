@@ -1,5 +1,6 @@
 #include <memory>
-using namespace std;
+#include <stdexcept>
+using std::shared_ptr;
 
 #include <pfasst.hpp>
 #include <pfasst/quadrature.hpp>
@@ -33,7 +34,7 @@ namespace pfasst
       {
         SDC<TransferType> sdc;
 
-        auto sweeper = make_shared<SweeperType>(ndofs);
+        auto sweeper = std::make_shared<SweeperType>(ndofs);
         sweeper->quadrature() = quadrature_factory<double>(nnodes, quad_type);
 
         sdc.add_sweeper(sweeper);
@@ -72,13 +73,13 @@ int main(int argc, char** argv)
   size_t nsteps = get_value<size_t>("num_steps", 0);
   if (t_end == -1 && nsteps == 0) {
     ML_CLOG(ERROR, "USER", "Either t_end or num_steps must be specified.");
-    throw runtime_error("either t_end or num_steps must be specified");
+    throw std::runtime_error("either t_end or num_steps must be specified");
   } else if (t_end != -1 && nsteps != 0) {
     if (!pfasst::almost_equal(t_0 + nsteps * dt, t_end)) {
       ML_CLOG(ERROR, "USER", "t_0 + nsteps * dt != t_end ("
                           << t_0 << " + " << nsteps << " * " << dt << " = " << (t_0 + nsteps * dt)
                           << " != " << t_end << ")");
-      throw runtime_error("t_0 + nsteps * dt != t_end");
+      throw std::runtime_error("t_0 + nsteps * dt != t_end");
     }
   } else if (nsteps != 0) {
     t_end = t_0 + dt * nsteps;

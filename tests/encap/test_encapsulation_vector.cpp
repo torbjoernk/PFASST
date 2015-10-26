@@ -7,7 +7,8 @@ using ::testing::Pointwise;
 #include <memory>
 #include <type_traits>
 #include <vector>
-using namespace std;
+using std::shared_ptr;
+using std::vector;
 
 #include <leathers/push>
 #include <leathers/all>
@@ -69,7 +70,7 @@ TEST(Operation, in_place_axpy)
 {
   encap_t vec_x(vector<double>{1.0, 2.0, 3.0});
   shared_ptr<encap_t> vec_y = \
-    make_shared<encap_t>(vector<double>{1.0, 1.0, 1.0});
+    std::make_shared<encap_t>(vector<double>{1.0, 1.0, 1.0});
 
   vec_x.scaled_add(0.5, vec_y);
   EXPECT_THAT(vec_x.get_data(), Pointwise(Eq(), vector<double>{1.5, 2.5, 3.5}));
@@ -78,9 +79,9 @@ TEST(Operation, in_place_axpy)
 TEST(Operation, global_axpy)
 {
   shared_ptr<encap_t> vec_x = \
-    make_shared<encap_t>(vector<double>{1.0, 2.0, 3.0});
+    std::make_shared<encap_t>(vector<double>{1.0, 2.0, 3.0});
   shared_ptr<encap_t> vec_y = \
-    make_shared<encap_t>(vector<double>{1.0, 1.0, 1.0});
+    std::make_shared<encap_t>(vector<double>{1.0, 1.0, 1.0});
 
   auto result = pfasst::encap::axpy(0.5, vec_x, vec_y);
   EXPECT_THAT(result->get_data(), Pointwise(Eq(), vector<double>{1.5, 2.0, 2.5}));
@@ -95,7 +96,7 @@ TEST(Operation, norm0_as_member)
 TEST(Operation, global_norm0)
 {
   shared_ptr<encap_t> vec_x = \
-    make_shared<encap_t>(vector<double>{1.0, -4.0, 3.0});
+    std::make_shared<encap_t>(vector<double>{1.0, -4.0, 3.0});
   EXPECT_THAT(norm0(vec_x), Eq(4.0));
 }
 
@@ -104,83 +105,83 @@ TEST(MatrixApplication, identity)
 {
   vector<double> data{1.0, 2.0, 3.0};
   vector<shared_ptr<encap_t>> vec(3);
-  generate(vec.begin(), vec.end(),
-           [data]() { return make_shared<encap_t>(data); });
-  for_each(vec.cbegin(), vec.cend(), [data](const shared_ptr<encap_t>& xi) {
+  std::generate(vec.begin(), vec.end(),
+                [data]() { return std::make_shared<encap_t>(data); });
+  std::for_each(vec.cbegin(), vec.cend(), [data](const shared_ptr<encap_t>& xi) {
     EXPECT_THAT(xi->get_data(), Pointwise(Eq(), data));
   });
   Matrix<double> mat = Matrix<double>::Identity(3, 3);
 
   auto result_mat_mul_vec = pfasst::encap::mat_mul_vec(1.0, mat, vec);
-  for_each(result_mat_mul_vec.cbegin(), result_mat_mul_vec.cend(),
-           [data](const shared_ptr<encap_t>& xi) {
-             EXPECT_THAT(xi->get_data(), Pointwise(Eq(), data));
-           });
+  std::for_each(result_mat_mul_vec.cbegin(), result_mat_mul_vec.cend(),
+                [data](const shared_ptr<encap_t>& xi) {
+                  EXPECT_THAT(xi->get_data(), Pointwise(Eq(), data));
+                  });
 
   vector<shared_ptr<encap_t>> result_mat_apply(result_mat_mul_vec);
   pfasst::encap::mat_apply(result_mat_apply, 1.0, mat, vec, true);
-  for_each(result_mat_apply.cbegin(), result_mat_apply.cend(),
-           [data](const shared_ptr<encap_t>& xi) {
-             EXPECT_THAT(xi->get_data(), Pointwise(Eq(), data));
-           });
+  std::for_each(result_mat_apply.cbegin(), result_mat_apply.cend(),
+                [data](const shared_ptr<encap_t>& xi) {
+                  EXPECT_THAT(xi->get_data(), Pointwise(Eq(), data));
+                });
 }
 
 TEST(MatrixApplication, zero_matrix)
 {
   vector<double> data{1.0, 2.0, 3.0};
   vector<shared_ptr<encap_t>> vec(3);
-  generate(vec.begin(), vec.end(),
-           [data]() { return make_shared<encap_t>(data); });
-  for_each(vec.cbegin(), vec.cend(), [data](const shared_ptr<encap_t>& xi) {
+  std::generate(vec.begin(), vec.end(),
+           [data]() { return std::make_shared<encap_t>(data); });
+  std::for_each(vec.cbegin(), vec.cend(), [data](const shared_ptr<encap_t>& xi) {
     EXPECT_THAT(xi->get_data(), Pointwise(Eq(), data));
   });
   Matrix<double> mat = Matrix<double>::Zero(3, 3);
 
   auto result_mat_mul_vec = pfasst::encap::mat_mul_vec(1.0, mat, vec);
-  for_each(result_mat_mul_vec.cbegin(), result_mat_mul_vec.cend(),
-           [](const shared_ptr<encap_t>& xi) {
-             EXPECT_THAT(xi->get_data(), Pointwise(Eq(), vector<double>{0.0, 0.0, 0.0}));
-           });
+  std::for_each(result_mat_mul_vec.cbegin(), result_mat_mul_vec.cend(),
+                [](const shared_ptr<encap_t>& xi) {
+                  EXPECT_THAT(xi->get_data(), Pointwise(Eq(), vector<double>{0.0, 0.0, 0.0}));
+                });
 
   vector<shared_ptr<encap_t>> result_mat_apply(result_mat_mul_vec);
   pfasst::encap::mat_apply(result_mat_apply, 1.0, mat, vec, true);
-  for_each(result_mat_apply.cbegin(), result_mat_apply.cend(),
-           [data](const shared_ptr<encap_t>& xi) {
-             EXPECT_THAT(xi->get_data(), Pointwise(Eq(), vector<double>{0.0, 0.0, 0.0}));
-           });
+  std::for_each(result_mat_apply.cbegin(), result_mat_apply.cend(),
+                [data](const shared_ptr<encap_t>& xi) {
+                  EXPECT_THAT(xi->get_data(), Pointwise(Eq(), vector<double>{0.0, 0.0, 0.0}));
+                });
 }
 
 TEST(MatrixApplication, all_ones)
 {
   vector<double> data{1.0, 2.0, 3.0};
   vector<shared_ptr<encap_t>> vec(3);
-  generate(vec.begin(), vec.end(),
-           [data]() { return make_shared<encap_t>(data); });
-  for_each(vec.cbegin(), vec.cend(), [data](const shared_ptr<encap_t>& xi) {
+  std::generate(vec.begin(), vec.end(),
+                [data]() { return std::make_shared<encap_t>(data); });
+  std::for_each(vec.cbegin(), vec.cend(), [data](const shared_ptr<encap_t>& xi) {
     EXPECT_THAT(xi->get_data(), Pointwise(Eq(), data));
   });
   Matrix<double> mat = Matrix<double>::Ones(3, 3);
 
   auto result_mat_mul_vec = pfasst::encap::mat_mul_vec(1.0, mat, vec);
-  for_each(result_mat_mul_vec.cbegin(), result_mat_mul_vec.cend(),
-           [](const shared_ptr<encap_t>& xi) {
-             EXPECT_THAT(xi->get_data(), Pointwise(Eq(), vector<double>{3.0, 6.0, 9.0}));
-           });
+  std::for_each(result_mat_mul_vec.cbegin(), result_mat_mul_vec.cend(),
+                [](const shared_ptr<encap_t>& xi) {
+                  EXPECT_THAT(xi->get_data(), Pointwise(Eq(), vector<double>{3.0, 6.0, 9.0}));
+                });
 
   vector<shared_ptr<encap_t>> result_mat_apply(result_mat_mul_vec);
   pfasst::encap::mat_apply(result_mat_apply, 1.0, mat, vec, true);
-  for_each(result_mat_apply.cbegin(), result_mat_apply.cend(),
-           [data](const shared_ptr<encap_t>& xi) {
-             EXPECT_THAT(xi->get_data(), Pointwise(Eq(), vector<double>{3.0, 6.0, 9.0}));
-           });
+  std::for_each(result_mat_apply.cbegin(), result_mat_apply.cend(),
+                [data](const shared_ptr<encap_t>& xi) {
+                  EXPECT_THAT(xi->get_data(), Pointwise(Eq(), vector<double>{3.0, 6.0, 9.0}));
+                });
 }
 
 
 TEST(Communication, sending)
 {
-  shared_ptr<comm_t> comm = make_shared<comm_t>();
+  shared_ptr<comm_t> comm = std::make_shared<comm_t>();
   shared_ptr<encap_t> vec = \
-    make_shared<encap_t>(vector<double>{1.0, 2.0, 3.0});
+    std::make_shared<encap_t>(vector<double>{1.0, 2.0, 3.0});
   vec->send(comm, 1, 0, true);
 
   vec->send(comm, 1, 0, false);
@@ -188,9 +189,9 @@ TEST(Communication, sending)
 
 TEST(Communication, receiving)
 {
-  shared_ptr<comm_t> comm = make_shared<comm_t>();
+  shared_ptr<comm_t> comm = std::make_shared<comm_t>();
   shared_ptr<encap_t> vec = \
-    make_shared<encap_t>(vector<double>{1.0, 2.0, 3.0});
+    std::make_shared<encap_t>(vector<double>{1.0, 2.0, 3.0});
   vec->recv(comm, 1, 0, true);
 
   vec->recv(comm, 1, 0, false);
@@ -198,9 +199,9 @@ TEST(Communication, receiving)
 
 TEST(Communication, broadcasting)
 {
-  shared_ptr<comm_t> comm = make_shared<comm_t>();
+  shared_ptr<comm_t> comm = std::make_shared<comm_t>();
   shared_ptr<encap_t> vec = \
-    make_shared<encap_t>(vector<double>{1.0, 2.0, 3.0});
+    std::make_shared<encap_t>(vector<double>{1.0, 2.0, 3.0});
   vec->bcast(comm, 0);
 }
 

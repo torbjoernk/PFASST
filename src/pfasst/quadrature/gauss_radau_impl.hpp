@@ -1,6 +1,7 @@
 #include "pfasst/quadrature/gauss_radau.hpp"
 
 #include <stdexcept>
+#include <string>
 #include <vector>
 
 #include "pfasst/logging.hpp"
@@ -45,7 +46,7 @@ namespace pfasst
     string
     GaussRadau<precision>::print_summary() const
     {
-      return "Gauss-Radau (right) on [0.0, 1.0] with " + to_string(this->get_num_nodes()) + " nodes";
+      return "Gauss-Radau (right) on [0.0, 1.0] with " + std::to_string(this->get_num_nodes()) + " nodes";
     }
 
     template<typename precision>

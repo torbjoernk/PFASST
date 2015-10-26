@@ -1,7 +1,12 @@
 #include "pfasst/sweeper/imex.hpp"
 
+#include <algorithm>
+#include <functional>
 #include <stdexcept>
-using namespace std;
+#include <memory>
+#include <vector>
+using std::shared_ptr;
+using std::vector;
 
 
 namespace pfasst
@@ -30,16 +35,16 @@ namespace pfasst
     assert(this->get_states().size() == num_nodes + 1);
 
     this->_q_integrals.resize(num_nodes + 1);
-    generate(this->_q_integrals.begin(), this->_q_integrals.end(),
-             bind(&traits::encap_t::factory_t::create, this->encap_factory()));
+    std::generate(this->_q_integrals.begin(), this->_q_integrals.end(),
+             std::bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
     this->_expl_rhs.resize(num_nodes + 1);
-    generate(this->_expl_rhs.begin(), this->_expl_rhs.end(),
-             bind(&traits::encap_t::factory_t::create, this->encap_factory()));
+    std::generate(this->_expl_rhs.begin(), this->_expl_rhs.end(),
+             std::bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
     this->_impl_rhs.resize(num_nodes + 1);
-    generate(this->_impl_rhs.begin(), this->_impl_rhs.end(),
-             bind(&traits::encap_t::factory_t::create, this->encap_factory()));
+    std::generate(this->_impl_rhs.begin(), this->_impl_rhs.end(),
+             std::bind(&traits::encap_t::factory_t::create, this->encap_factory()));
 
     this->compute_delta_matrices();
   }
@@ -360,7 +365,7 @@ namespace pfasst
   {
     try {
       Sweeper<SweeperTrait, Enabled>::integrate_end_state(dt);
-    } catch (runtime_error err) {
+    } catch (std::runtime_error err) {
       assert(this->get_quadrature() != nullptr);
       assert(this->get_initial_state() != nullptr);
 
@@ -436,7 +441,7 @@ namespace pfasst
                                                  const shared_ptr<typename SweeperTrait::encap_t> u)
   {
     UNUSED(t); UNUSED(u);
-    throw runtime_error("evaluation of explicit part of right-hand-side");
+    throw std::runtime_error("evaluation of explicit part of right-hand-side");
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -445,7 +450,7 @@ namespace pfasst
                                                  const shared_ptr<typename SweeperTrait::encap_t> u)
   {
     UNUSED(t); UNUSED(u);
-    throw runtime_error("evaluation of implicit part of right-hand-side");
+    throw std::runtime_error("evaluation of implicit part of right-hand-side");
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -457,7 +462,7 @@ namespace pfasst
                                               const shared_ptr<typename SweeperTrait::encap_t> rhs)
   {
     UNUSED(f); UNUSED(u); UNUSED(t); UNUSED(dt); UNUSED(dt); UNUSED(rhs);
-    throw runtime_error("spatial solver");
+    throw std::runtime_error("spatial solver");
   }
 
   template<class SweeperTrait, typename Enabled>
@@ -469,7 +474,7 @@ namespace pfasst
     auto nodes = this->get_quadrature()->get_nodes();
     if (this->get_quadrature()->left_is_node()) {
       ML_CLOG(ERROR, this->get_logger_id(), "Don't know how to compute delta matrices for quadrature containing left time point.");
-      throw runtime_error("IMEX with quadrature containing left time point");
+      throw std::runtime_error("IMEX with quadrature containing left time point");
     } else {
       nodes.insert(nodes.begin(), typename traits::time_t(0.0));
     }

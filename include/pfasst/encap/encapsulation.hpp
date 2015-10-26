@@ -3,7 +3,9 @@
 
 #include <memory>
 #include <type_traits>
-using namespace std;
+#include <vector>
+using std::shared_ptr;
+using std::vector;
 
 #include "pfasst/globals.hpp"
 #include "pfasst/logging.hpp"
@@ -132,7 +134,7 @@ namespace pfasst
       typename Enabled
     >
     class Encapsulation
-      :   public enable_shared_from_this<Encapsulation<EncapsulationTrait, Enabled>>
+      :   public std::enable_shared_from_this<Encapsulation<EncapsulationTrait, Enabled>>
         , el::Loggable
     {
       public:
@@ -141,27 +143,27 @@ namespace pfasst
 
       //! @internal
       //! time_type must be an arithmetic type
-      static_assert(is_arithmetic<typename traits::time_t>::value,
+      static_assert(std::is_arithmetic<typename traits::time_t>::value,
                     "time precision must be an arithmetic type");
-      static_assert(is_arithmetic<typename traits::spatial_t>::value,
+      static_assert(std::is_arithmetic<typename traits::spatial_t>::value,
                     "spatial precision must be an arithmetic type");
-      static_assert(is_constructible<typename traits::data_t>::value,
+      static_assert(std::is_constructible<typename traits::data_t>::value,
                     "Data Type must be constructible");
-      static_assert(is_default_constructible<typename traits::data_t>::value,
+      static_assert(std::is_default_constructible<typename traits::data_t>::value,
                     "Data Type must be default constructible");
-      static_assert(is_destructible<typename traits::data_t>::value,
+      static_assert(std::is_destructible<typename traits::data_t>::value,
                     "Data Type must be destructible");
-      static_assert(is_assignable<typename traits::data_t, typename traits::data_t>::value,
+      static_assert(std::is_assignable<typename traits::data_t, typename traits::data_t>::value,
                     "Data Type must be assignable");
 
       //! @cond static_warnings
-      STATIC_WARNING(is_move_constructible<typename traits::data_t>::value,
+      STATIC_WARNING(std::is_move_constructible<typename traits::data_t>::value,
                      "Data Type should be move constructible");
-      STATIC_WARNING(is_copy_constructible<typename traits::data_t>::value,
+      STATIC_WARNING(std::is_copy_constructible<typename traits::data_t>::value,
                      "Data Type should be copy constructible");
-      STATIC_WARNING(is_move_assignable<typename traits::data_t>::value,
+      STATIC_WARNING(std::is_move_assignable<typename traits::data_t>::value,
                      "Data Type should be move assignable");
-      STATIC_WARNING(is_copy_assignable<typename traits::data_t>::value,
+      STATIC_WARNING(std::is_copy_assignable<typename traits::data_t>::value,
                      "Data Type should be copy assignable");
       //! @endcond
       //! @endinternal
@@ -207,7 +209,7 @@ namespace pfasst
         virtual const typename EncapsulationTrait::data_t& get_data() const;
 
         virtual size_t get_total_num_dofs() const;
-        virtual array<int, EncapsulationTrait::DIM> get_dimwise_num_dofs() const;
+        virtual std::array<int, EncapsulationTrait::DIM> get_dimwise_num_dofs() const;
 
         /**
          * Computes maximums norm of encapsulated data.

@@ -2,7 +2,8 @@
 #define _PFASST__CONTROLLER__SDC_HPP_
 
 #include <memory>
-using namespace std;
+#include <type_traits>
+using std::shared_ptr;
 
 #include "pfasst/globals.hpp"
 #include "pfasst/controller/status.hpp"
@@ -17,9 +18,9 @@ namespace pfasst
   class SDC
     : public Controller<TransferT>
   {
-    static_assert(is_same<
-                    integral_constant<size_t, TransferT::traits::num_levels>,
-                    integral_constant<size_t, 1>>::value,
+    static_assert(std::is_same<
+                    std::integral_constant<size_t, TransferT::traits::num_levels>,
+                    std::integral_constant<size_t, 1>>::value,
                   "SDC only works for single sweeper setups.");
 
     public:

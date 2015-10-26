@@ -1,9 +1,6 @@
 #ifndef _PFASST__TRANSFER__TRAITS_HPP_
 #define _PFASST__TRANSFER__TRAITS_HPP_
 
-#include <type_traits>
-using namespace std;
-
 
 namespace pfasst
 {

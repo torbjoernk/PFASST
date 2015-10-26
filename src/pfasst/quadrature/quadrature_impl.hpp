@@ -14,7 +14,7 @@ namespace pfasst
       : num_nodes(num_nodes)
     {
       if (this->num_nodes == 0) {
-        throw invalid_argument("Any quadrature requires at least one quadrature nodes.");
+        throw std::invalid_argument("Any quadrature requires at least one quadrature nodes.");
       }
     }
 
