@@ -1,5 +1,8 @@
 #include "fixtures/test_helpers.hpp"
 using ::testing::Eq;
+using ::testing::Pointwise;
+
+#include <string>
 
 using std::make_tuple;
 using std::get;
@@ -73,6 +76,26 @@ INSTANTIATE_TEST_CASE_P(IndexManipulation3DTests,
                           make_tuple<size_t, size_t>(8, 3)
                         )
                        );
+
+
+class StringOperationsTest
+  : public ::testing::Test
+{};
+
+TEST_F(StringOperationsTest, split_string_into_new_vec)
+{
+  string input{"a,b,c,d,e"};
+  auto vec = pfasst::split(input, ',');
+  EXPECT_THAT(vec, Pointwise(Eq(), vector<string>{"a", "b", "c", "d", "e"}));
+}
+
+TEST_F(StringOperationsTest, split_string_into_existing_vec)
+{
+  string input{"a,b,c,d,e"};
+  auto vec = vector<string>{};
+  pfasst::split(input, ',', vec);
+  EXPECT_THAT(vec, Pointwise(Eq(), vector<string>{"a", "b", "c", "d", "e"}));
+}
 
 
 class ConfigModderTest

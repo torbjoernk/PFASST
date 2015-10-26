@@ -149,9 +149,9 @@ namespace pfasst
     return "";
 #endif
   }
+ 
 
-
-  static vector<string>& split(const string& s, char delim, vector<string>& elems)
+  inline static vector<string>& split(const string& s, char delim, vector<string>& elems)
   {
     std::stringstream os(s);
     string item;
@@ -161,7 +161,7 @@ namespace pfasst
     return elems;
   }
 
-  static vector<string> split(const string& s, char delim)
+  inline static vector<string> split(const string& s, char delim)
   {
     vector<string> elems;
     split(s, delim, elems);
