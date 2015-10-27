@@ -38,9 +38,10 @@ namespace pfasst
     protected:
       // map: rank -> step -> iter
       map<size_t, map<size_t, size_t>> _faults;
+      bool _been_faulty = false;
 
+      virtual void cycle_up() override;
       virtual void get_check_prev_status() override;
-      virtual void recv_coarse() override;
       virtual void predictor() override;
       bool be_faulty();
 

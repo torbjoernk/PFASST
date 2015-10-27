@@ -147,8 +147,6 @@ namespace pfasst
           this->sweep_coarse();
           this->send_coarse();
 
-          this->cycle_up();
-
           if (be_faulty()) {
             // backup step and iteration index
             const auto step = this->get_status()->get_step();
@@ -158,8 +156,10 @@ namespace pfasst
             this->status()->step() = step;
             this->status()->iteration() = iter;
             this->status()->set_primary_state(PrimaryState::PREDICTING);
+            this->_been_faulty = true;
           }
 
+          this->cycle_up();
           this->sweep_fine();
           this->send_fine();
 
@@ -226,26 +226,9 @@ namespace pfasst
 
     this->get_fine()->converged(false);
 
-    return (this->get_status()->get_primary_state() > (+PrimaryState::FAILED));
-  }
+    this->_been_faulty = false;
 
-  template<class TransferT, class CommT>
-  void
-  TwoLevelFaultyPfasst<TransferT, CommT>::recv_coarse()
-  {
-    if (!this->get_communicator()->is_first()) {
-      if (this->_prev_status->get_primary_state() > (+PrimaryState::FAILED)) {
-        ML_CVLOG(2, this->get_logger_id(), "looking for coarse data");
-        this->get_coarse()
-            ->initial_state()
-            ->recv(this->get_communicator(),
-                   this->get_communicator()->get_rank() - 1,
-                   this->compute_tag(TagType::DATA, TagLevel::COARSE, TagModifier::PREV_STEP),
-                   true);
-      } else {
-        ML_CLOG(WARNING, this->get_logger_id(), "previous process doesn't send any coarse data any more");
-      }
-    }
+    return (this->get_status()->get_primary_state() > (+PrimaryState::FAILED));
   }
 
   template<class TransferT, class CommT>
@@ -275,6 +258,32 @@ namespace pfasst
           ML_CVLOG(1, this->get_logger_id(), "previous process not finished");
         }
       }
+    }
+  }
+
+  template<class TransferT, class CommT>
+  void
+  TwoLevelFaultyPfasst<TransferT, CommT>::cycle_up()
+  {
+    ML_CVLOG(1, this->get_logger_id(), "cycle up to fine level");
+
+    this->status()->set_secondary_state(SecondaryState::CYCLE_UP);
+
+    // XXX: why?!
+    if (!this->_been_faulty) {
+      this->get_transfer()->interpolate(this->get_coarse(), this->get_fine(), true);
+    }
+
+    this->recv_fine();
+
+    if (this->_been_faulty) {
+      ML_CLOG(DEBUG, this->get_logger_id(), "I've been faulty and need to spread received fine initial value.");
+      this->get_fine()->spread();
+    }
+
+    // XXX: why?!
+    if (!this->_been_faulty) {
+      this->get_transfer()->interpolate_initial(this->get_coarse(), this->get_fine());
     }
   }
 

@@ -399,6 +399,7 @@ namespace pfasst
     const size_t num_nodes = this->get_quadrature()->get_num_nodes() + 1;
 
     if (only_last) {
+      ML_CVLOG(5, this->get_logger_id(), "only for last node");
       const size_t cols = this->get_quadrature()->get_q_mat().cols();
       const size_t rows = this->get_quadrature()->get_q_mat().rows();
       this->residuals().back()->data() = this->get_initial_state()->get_data();
@@ -429,11 +430,10 @@ namespace pfasst
       ML_CVLOG(5, this->get_logger_id(), "  res += dt * Q * F_im");
       encap::mat_apply(this->residuals(), dt, this->get_quadrature()->get_q_mat(), this->_impl_rhs, false);
 
-      ML_CVLOG(5, this->get_logger_id(), "  ==>");
-      for (size_t m = 0; m < num_nodes; ++m) {
-        ML_CVLOG(5, this->get_logger_id(), "    |res["<<m<<"]| = " << LOG_FLOAT << this->get_residuals()[m]->norm0());
-  //                                       << "    res["<<m<<"] = " << to_string(this->get_residuals()[m]));
-      }
+//      ML_CVLOG(5, this->get_logger_id(), "  ==>");
+//      for (size_t m = 0; m < num_nodes; ++m) {
+//        ML_CVLOG(5, this->get_logger_id(), "    |res["<<m<<"]| = " << to_string(this->get_residuals()[m]));
+//      }
     }
   }
 
