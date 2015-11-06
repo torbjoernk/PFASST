@@ -191,10 +191,10 @@ ExternalProject_Add(
     LOG_BUILD ON
 )
 
-set(JsonCPP_INCLUDE_PATH ${JsonCPP_INSTALL_DIR}/include)
-set(JsonCPP_LIBRARIES ${JsonCPP_INSTALL_DIR}/lib/libjsoncpp.a)
-set(JsonCPP_FOUND TRUE)
-set(JsonCPP_FOUND ${JsonCPP_FOUND} PARENT_SCOPE)
+set(JsonCpp_INCLUDE_PATH ${JsonCpp_INSTALL_DIR}/include)
+set(JsonCpp_LIBRARIES ${JsonCpp_INSTALL_DIR}/lib/libjsoncpp.a)
+set(JsonCpp_FOUND TRUE)
+set(JsonCpp_FOUND ${JsonCpp_FOUND} PARENT_SCOPE)
 
 set_package_properties(JsonCpp
     PROPERTIES
