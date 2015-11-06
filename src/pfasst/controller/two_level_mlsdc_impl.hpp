@@ -154,7 +154,7 @@ namespace pfasst
       do {
         if (this->get_status()->get_primary_state() == (+PrimaryState::PREDICTING)) {
           ML_CLOG(INFO, this->get_logger_id(), "");
-          ML_CLOG(INFO, this->get_logger_id(), "MLSDC Prediction step");
+          ML_CLOG(INFO, this->get_logger_id(), "Iteration 0 (MLSDC Prediction)");
 
           assert(this->get_status()->get_iteration() == 0);
 

@@ -133,7 +133,7 @@ const string OUT::reset = "\033[0m";
 
 #ifndef PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH
   //! precision of milliseconds to be printed
-  #define PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH "2"
+  #define PFASST_LOGGER_DEFAULT_GLOBAL_MILLISECOND_WIDTH "4"
 #endif
 
 #ifndef VLOG_FUNC_START
@@ -349,7 +349,7 @@ namespace pfasst
       const string TIMESTAMP_COLOR = (colorize) ? OUT::white           : "";
       const string RESTET_COLOR    = (colorize) ? OUT::reset           : "";
 
-      const string TIMESTAMP = RESTET_COLOR + TIMESTAMP_COLOR + "%datetime{%H:%m:%s,%g}" + RESTET_COLOR + " ";
+      const string TIMESTAMP = RESTET_COLOR + TIMESTAMP_COLOR + "%datetime{%d.%M.%Y %H:%m:%s,%g}" + RESTET_COLOR + " ";
       const string LEVEL     = "%level";
       const string VLEVEL    = "VERB%vlevel";
       const string POSITION  = "%fbase:%line";

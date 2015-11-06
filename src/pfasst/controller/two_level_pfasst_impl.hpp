@@ -379,7 +379,7 @@ namespace pfasst
     assert(this->get_status()->get_iteration() == 0);
 
     ML_CLOG(INFO, this->get_logger_id(), "");
-    ML_CLOG(INFO, this->get_logger_id(), "PFASST Prediction step");
+    ML_CLOG(INFO, this->get_logger_id(), "Iteration 0 (PFASST Prediction)");
 
     // restrict fine initial condition ...
     this->get_transfer()->restrict_initial(this->get_fine(), this->get_coarse());

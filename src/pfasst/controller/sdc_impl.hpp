@@ -127,7 +127,7 @@ namespace pfasst
 
         if (do_prediction) {
           ML_CLOG(INFO, this->get_logger_id(), "");
-          ML_CLOG(INFO, this->get_logger_id(), "SDC Prediction step");
+          ML_CLOG(INFO, this->get_logger_id(), "Iteration 0 (SDC Prediction)");
           this->get_sweeper()->pre_predict();
           this->get_sweeper()->predict();
           this->get_sweeper()->post_predict();
