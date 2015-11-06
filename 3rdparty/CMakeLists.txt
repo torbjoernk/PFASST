@@ -160,6 +160,55 @@ list(APPEND 3rdparty_INCLUDES "${FFTW_INCLUDE_PATH}")
 list(APPEND 3rdparty_DEPENDEND_LIBS "${FFTW_LIBRARIES}")
 
 
+
+message(STATUS "--------------------------------------------------------------------------------")
+message(STATUS "JsonCpp")
+
+set(JsonCpp_SOURCE_URL "git@github.com:open-source-parsers/jsoncpp.git")
+set(JsonCpp_VERSION_TAG "1.6.5")
+
+message(STATUS "going to download and compile static library from sources retrieved from:")
+message(STATUS " ${JsonCpp_SOURCE_URL}")
+message(STATUS " Version: ${JsonCpp_VERSION_TAG}")
+
+set(JsonCpp_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/JsonCpp")
+set(JsonCpp_INSTALL_DIR "${pfasst_BINARY_DIR}/3rdparty/src/JsonCpp-install")
+ExternalProject_Add(
+    JsonCpp
+    GIT_REPOSITORY ${JsonCpp_SOURCE_URL}
+    GIT_TAG ${JsonCpp_VERSION_TAG}
+    TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
+    PATCH_COMMAND ""
+    CMAKE_ARGS -DCMAKE_C_COMPILE=${CMAKE_C_COMPILER}
+        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+        -DCMAKE_INSTALL_PREFIX=${JsonCpp_INSTALL_DIR}
+        -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+        -DBUILD_STATIC_LIBS=ON
+        -DBUILD_SHARED_LIBS=OFF
+        -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    LOG_DOWNLOAD ON
+    LOG_CONFIGURE ON
+    LOG_BUILD ON
+)
+
+set(JsonCPP_INCLUDE_PATH ${JsonCPP_INSTALL_DIR}/include)
+set(JsonCPP_LIBRARIES ${JsonCPP_INSTALL_DIR}/lib/libjsoncpp.a)
+set(JsonCPP_FOUND TRUE)
+set(JsonCPP_FOUND ${JsonCPP_FOUND} PARENT_SCOPE)
+
+set_package_properties(JsonCpp
+    PROPERTIES
+    DESCRIPTION "JSON parser library"
+    URL "https://github.com/open-source-parsers/jsoncpp"
+    TYPE REQUIRED
+    PURPOSE "writing and reading JSON data"
+)
+
+list(APPEND pfasst_DEPENDEND_LIBS JsonCpp)
+list(APPEND 3rdparty_INCLUDES "${JsonCpp_INCLUDE_PATH}")
+list(APPEND 3rdparty_DEPENDEND_LIBS "${JsonCpp_LIBRARIES}")
+
+
 if(pfasst_BUILD_TESTS)
     set(TESTS_3rdparty_INCLUDES ${TESTS_3rdparty_INCLUDES})
     set(TESTS_3rdparty_DEPENDEND_LIBS ${TESTS_3rdparty_DEPENDEND_LIBS})
