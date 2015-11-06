@@ -7,6 +7,7 @@ include_directories(
 )
 
 set(TESTS
+    test_json
     test_logging
     test_utils
 )

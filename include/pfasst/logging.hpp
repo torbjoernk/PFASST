@@ -424,6 +424,7 @@ namespace pfasst
         add_custom_logger("TRANS");
         add_custom_logger("ENCAP");
         add_custom_logger("QUAD");
+        add_custom_logger("OUTPUT");
         add_custom_logger("USER");
       }
     }
