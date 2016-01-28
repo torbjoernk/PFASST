@@ -25,6 +25,7 @@ namespace pfasst
        * FFTManager::get_workspace().
        *
        * @tparam WorkspaceT type of the @ref FFTWorkspace the manager instance is for
+       * @ingroup AdvectionDiffusion
        */
       template<class WorkspaceT>
       class FFTManager
@@ -72,54 +73,6 @@ namespace pfasst
           static void finalize_cleanup();
           //! @}
       };
-
-      /**
-       * @class pfasst::examples::advection_diffusion::FFTWorkspace
-       * @brief Concept of a FFT workspace
-       *
-       * A FFT workspace, manageable by @ref FFTManager, provides a wrapper around calls to FFT
-       * and persists variables and memory between calls to FFT.
-       *
-       * A @ref FFTWorkspace is expected to conform to the RAII principle.
-       *
-       * Usually, the initial setup of FFT for a given number of degrees of freedom is done on
-       * construction of a @ref FFTWorkspace, e.g. allocating memory for transformed values and
-       * creating _plans_.
-       *
-       * Cleanup and freeing of this setup should be done on destruction.
-       *
-       * A FFTWorkspace has the following member functions implemented:
-       *
-       * * `complex<DataT::value_type>* FFTWorkspace::forward(const DataT&)`
-       *
-       *   Transforms given data encapsulation to Fourier space and returns pointer to transformed
-       *   values.
-       *   `DataT` is the encapsulation type, e.g. pfasst::encap::VectorEncapsulation<double>,
-       *   and `DataT::value_type` the type of the data at a single point in space, e.g. `double`.
-       *
-       * * `void FFTWorkspace::backward(DataT&)`
-       *
-       *   Transformed values in Fourier space stored in `z_ptr()` back to problem space and stores
-       *   them in given `DataT` object, overwriting existing data.
-       *   `DataT` is the encapsulation type.
-       *
-       * * `size_t size() const`
-       *
-       *   Returns number of degrees of freedom of this workspace.
-       *
-       * * `complex<DataT::value_type>* z_ptr()`
-       *
-       *   Returns a pointer to the values in Fourier space for computations in Fourier space.
-       *
-       * * `static void finalize_cleanup()`
-       *
-       *   Routine to do static cleanup after freeing all other workspaces.
-       *   Some FFT implementations require to call a cleanup function before program exit, e.g.
-       *   `fftw_cleanup()`.
-       *
-       * @note This is only the specification of a concept and not available as code.
-       * @ingroup Concepts
-       */
     }  // ::pfasst::examples::advection_diffusion
   }  // ::pfasst::examples
 }  // ::pfasst

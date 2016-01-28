@@ -25,7 +25,9 @@ namespace pfasst
        *               `value_type` providing the type of single data points, public member
        *               function `size()` returning number of elements and public member subscript
        *               operator.
-       * @implements FFTWWorkspace
+       *
+       * @implements FFTWorkspace
+       * @ingroup AdvectionDiffusion
        */
       template<class DataT>
       class FFTWWorkspaceDFT1D
