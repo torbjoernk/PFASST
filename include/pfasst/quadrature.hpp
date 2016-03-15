@@ -26,9 +26,16 @@ using std::vector;
 namespace pfasst
 {
   /**
+   * @defgroup Quadrature Quadrature
+   *   Quadrature rules provide the foundation for numerical integration.
+   * @ingroup Assistance
+   */
+
+  /**
    * Functionality related to computing quadrature nodes and weights.
    *
    * @note Please note, that all quadrature nodes are in the range \\( [0, 1] \\).
+   * @ingroup Quadrature
    */
   namespace quadrature
   {
@@ -41,6 +48,8 @@ namespace pfasst
      * @returns instance of pfasst::quadrature::IQuadrature of specified type with desired number
      *   of nodes
      * @throws invalid_argument if @p qtype is not a valid quadrature type descriptor
+     *
+     * @ingroup Quadrature
      */
     template<typename precision>
     shared_ptr<IQuadrature<precision>> quadrature_factory(const size_t nnodes,
@@ -74,6 +83,8 @@ namespace pfasst
      *
      * @see pfasst::quadrature::QuadratureType for valid types
      * @see pfasst::quadrature::quadrature_factory for further details
+     *
+     * @ingroup Quadrature
      */
     template<typename precision>
     vector<precision> compute_nodes(size_t nnodes, QuadratureType qtype)
@@ -89,6 +100,8 @@ namespace pfasst
      * \\( j \\)-th Lagrange polynomial evaluated at the \\( i \\)-th entry of @p y .
      *
      * @tparam precision numerical type of the interpolation (e.g. `double`)
+     *
+     * @ingroup Quadrature
      */
     template<typename precision>
     Matrix<precision> compute_interp(const vector<precision>& x, const vector<precision>& y)

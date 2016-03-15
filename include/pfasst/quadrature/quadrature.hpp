@@ -17,15 +17,6 @@ using std::vector;
 
 namespace pfasst
 {
-  /**
-   * @defgroup Quadrature Quadrature
-   *   Quadrature rules provide the foundation for numerical integration.
-   * @ingroup Assistance
-   */
-
-  /**
-   * @ingroup Quadrature
-   */
   namespace quadrature
   {
     /**
