@@ -13,7 +13,12 @@ import subprocess
 from os.path import dirname, abspath, join
 
 # get git version
-version = subprocess.check_output(['git', 'describe', '--dirty']).decode().strip()
+try:
+    version = subprocess.check_output(['git', 'describe', '--dirty']).decode().strip()
+except subprocess.CalledProcessError:
+    # `git describe` will fail in case the Git tags are not fetched
+    #  this happens when cloning the repo only from a fork pruned of tags
+    version = 'unknown'
 
 # read in site_config.hpp
 base = dirname(dirname(abspath(__file__)))
