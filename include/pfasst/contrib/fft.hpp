@@ -16,8 +16,14 @@ using namespace std;
 
 namespace pfasst
 {
+  /**
+   * @ingroup Contributed
+   */
   namespace contrib
   {
+    /**
+     * @ingroup Contributed
+     */
     //! TODO: rewrite to get rid of side-effects and use real RAII
     template<
       class Encapsulation

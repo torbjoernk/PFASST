@@ -21,6 +21,9 @@ namespace pfasst
   {
     namespace heat3d
     {
+      /**
+       * @ingroup Heat3D
+       */
       shared_ptr<
         pfasst::SDC<
           pfasst::contrib::SpectralTransfer<

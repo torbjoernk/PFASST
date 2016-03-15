@@ -10,6 +10,15 @@ using std::shared_ptr;
 
 namespace pfasst
 {
+  /**
+   * @defgroup TransferOp Transfer Operators
+   *   Transfer Operators define the transition from one _level_ to another.
+   * @ingroup Assistance
+   */
+
+  /**
+   * @ingroup TransferOp
+   */
   template<
     class TransferTraits,
     typename Enabled = void

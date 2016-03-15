@@ -15,6 +15,9 @@ namespace pfasst
 {
   namespace contrib
   {
+    /**
+     * @ingroup Contributed
+     */
     template<
       class TransferTraits
     >

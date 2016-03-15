@@ -18,6 +18,8 @@ namespace pfasst
   {
     /**
      * Specialization of Encapsulation for `std::vector`.
+     *
+     * @ingroup Encapsulation
      */
     template<
       class EncapsulationTrait
@@ -67,6 +69,8 @@ namespace pfasst
 
     /**
      * Shortcut for encapsulation of `std::vector` data types.
+     *
+     * @ingroup Encapsulation
      */
     template<
       typename time_precision,
@@ -76,6 +80,9 @@ namespace pfasst
     using VectorEncapsulation = Encapsulation<vector_encap_traits<time_precision, spatial_precision, Dim>>;
 
 
+    /**
+     * @ingroup Encapsulation
+     */
     template<
       class EncapsulationTrait
     >

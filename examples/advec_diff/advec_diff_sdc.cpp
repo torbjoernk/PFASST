@@ -29,6 +29,9 @@ namespace pfasst
   {
     namespace advec_diff
     {
+      /**
+       * @ingroup AdvectionDiffusion
+       */
       void run_sdc(const size_t& ndofs, const size_t& nnodes, const QuadratureType& quad_type,
                    const double& t_0, const double& dt, const double& t_end, const size_t& niter)
       {

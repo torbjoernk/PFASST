@@ -10,6 +10,9 @@ using std::shared_ptr;
 
 namespace pfasst
 {
+  /**
+   * @ingroup Controllers
+   */
   template<
     class TransferT,
     class CommT = comm::Communicator

@@ -16,8 +16,19 @@ namespace pfasst
 {
   namespace examples
   {
+    /**
+     * @defgroup Heat3D Heat3D
+     * @ingroup Examples
+     */
+
+    /**
+     * @ingroup Heat3D
+     */
     namespace heat3d
     {
+      /**
+       * @ingroup Heat3D
+       */
       template<
         class SweeperTrait,
         typename Enabled = void

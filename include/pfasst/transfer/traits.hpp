@@ -4,6 +4,16 @@
 
 namespace pfasst
 {
+  /**
+   * Type Traits for the Transfer Operators.
+   *
+   * @tparam CoarseSweeper  type of the coarser sweeper
+   * @tparam FineSweeper    type of the finer sweeper
+   * @tparam NumLevels      number of levels
+   * @tparam Ts             further optional parameters potentially used by specializations
+   *
+   * @ingroup Traits
+   */
   template<
     class CoarseSweeper,
     class FineSweeper,

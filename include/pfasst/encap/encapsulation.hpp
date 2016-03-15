@@ -15,7 +15,16 @@ using std::vector;
 namespace pfasst
 {
   /**
+   * @defgroup Encapsulation Encapsulation
+   *   Encapsulations provide a uniform wrapper around user data for the Controllers and Sweepers to
+   *   work on.
+   * @ingroup Assistance
+   */
+
+  /**
    * Dealing with user data.
+   *
+   * @ingroup Encapsulation
    */
   namespace encap
   {
@@ -43,6 +52,8 @@ namespace pfasst
      *
      * @see pfasst::encap_traits
      *  for instances of @p EncapsulationTrait
+     *
+     * @ingroup Encapsulation
      */
     template<
       class EncapsulationTrait
@@ -69,6 +80,8 @@ namespace pfasst
      *  for instances of @p EncapsulationTrait
      * @see pfasst::encap::mat_mul_vec()
      *  for a version not modifying any input data
+     *
+     * @ingroup Encapsulation
      */
     template<
       class EncapsulationTrait
@@ -93,6 +106,8 @@ namespace pfasst
      *  for instances of @p EncapsulationTrait
      * @see pfasst::encap::mat_apply()
      *  for an in-place version
+     *
+     * @ingroup Encapsulation
      */
     template<
       class EncapsulationTrait
@@ -112,6 +127,8 @@ namespace pfasst
      * @returns maximums norm
      *
      * @see Encapsulation::norm0()
+     *
+     * @ingroup Encapsulation
      */
     template<
       class EncapsulationTrait
@@ -126,8 +143,10 @@ namespace pfasst
      * @tparam EncapsulationTrait type trait describing encapsulated data
      * @tparam Enabled            utility type for template specializations
      *
-     * @see pfasst::encap_traits
+     * @see pfasst::encap::encap_traits
      *  for instances of @p EncapsulationTrait
+     *
+     * @ingroup Encapsulation
      */
     template<
       class EncapsulationTrait,
@@ -303,6 +322,8 @@ namespace pfasst
      *
      * @note Specializations for certain encapsulated data types may define additional member functions for setting
      *  and accessing default values for instantiated Encapsulations.
+     *
+     * @ingroup Encapsulation
      */
     template<
       class EncapsulationTrait,

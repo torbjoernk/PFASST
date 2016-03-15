@@ -16,6 +16,15 @@ using pfasst::quadrature::IQuadrature;
 
 namespace pfasst
 {
+  /**
+   * @defgroup Sweepers Sweepers
+   *   Sweepers represent the core method for advancing from one time point to another.
+   * @ingroup Controllers
+   */
+
+  /**
+   * @ingroup Sweepers
+   */
   template<
     class SweeperTrait,
     typename Enabled = void

@@ -54,6 +54,9 @@ namespace pfasst
     static void check_mpi_error(const int err_code);
 
 
+    /**
+     * @ingroup Communicators
+     */
     class MpiP2P
       : public Communicator
     {

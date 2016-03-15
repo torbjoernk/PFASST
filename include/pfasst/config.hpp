@@ -38,6 +38,18 @@ namespace po = boost::program_options;
 namespace pfasst
 {
   /**
+   * @defgroup Configuration Configuration
+   *   Interface for configuring the runtime behaviour of _PFASST_
+   *
+   *   Some default runtime configuration parameters are defined in config::init().
+   *   Further options can be defined via config::options::add_option which should be called via
+   *   pfasst::init().
+   *
+   * @ingroup Utilities
+   */
+
+  /**
+   * @ingroup Configuration
    * @since v0.3.0
    */
   namespace config
@@ -45,10 +57,10 @@ namespace pfasst
     /**
      * Get MPI rank during initialization.
      *
-     * When running without MPI (ie, without using mpirun/mpiexec), returns 0.  When running with
+     * When running without MPI (ie, without using mpirun/mpiexec), returns 0. When running with
      * MPI, returns the MPI rank.
      *
-     * If the user is running with MPI and MPI_Init hasn't been called yet, this will return 0.  I
+     * If the user is running with MPI and MPI_Init hasn't been called yet, this will return 0. I
      * hope this is rare.
      */
     int get_rank()
@@ -153,6 +165,9 @@ namespace pfasst
         void init();
     };
 
+    /**
+     * @ingroup Configuration
+     */
     inline bool has_value(const string& name)
     {
       return options::get_instance().get_variables_map().count(name) > 0;
@@ -169,6 +184,7 @@ namespace pfasst
      * @see
      *   [boost::any::bad_any_cast]
      *   (http://www.boost.org/doc/libs/1_57_0/doc/html/boost/bad_any_cast.html)
+     * @ingroup Configuration
      */
     template<typename T>
     inline T get_value(const string& name)
@@ -181,6 +197,7 @@ namespace pfasst
      *
      * @tparam T type of the retreived value
      *
+     * @ingroup Configuration
      * @overload
      */
     template<typename T>
@@ -201,7 +218,10 @@ namespace pfasst
      * generated.
      *
      * @param[in] if_no_params flag governing compilation of help and usage information
+     *
      * @returns string containing basic help and usage information; string may be empty
+     *
+     * @ingroup Configuration
      */
     static string print_help(bool if_no_params = false)
     {
@@ -251,6 +271,7 @@ namespace pfasst
      * @see
      *   [Boost Program Options Documentation on supported INI-like file format]
      *   (http://www.boost.org/doc/libs/1_57_0/doc/html/program_options/overview.html#idp343292240)
+     * @ingroup Configuration
      */
     static inline void read_config_file(const string& file_name)
     {
@@ -274,6 +295,7 @@ namespace pfasst
      *
      * @note Will call `std::exit` in case the `help` parameter has been provided and
      *   @p exit_on_help is `true`.
+     * @ingroup Configuration
      */
     static inline void read_commandline(int argc, char* argv[], bool exit_on_help = true)
     {
@@ -305,6 +327,9 @@ namespace pfasst
       }
     }
 
+    /**
+     * @ingroup Configuration
+     */
     static inline vector<string> check_unrecognized_args()
     {
       vector<string> log_lines;
@@ -346,6 +371,8 @@ namespace pfasst
      * Quadrature | `num_nodes`   | `size_t`
      * Tolerances | `abs_res_tol` | `double`
      * Tolerances | `rel_res_tol` | `double`
+     *
+     * @ingroup Configuration
      */
     static inline void init()
     {

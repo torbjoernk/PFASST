@@ -8,8 +8,17 @@
 
 namespace pfasst
 {
+  /**
+   * @defgroup Communicators Communicators
+   *   Communicators are required for the parallel execution of _PFASST_ and provide ways of passing
+   *   data between multiple processors.
+   * @ingroup Assistance
+   */
   namespace comm
   {
+    /**
+     * @ingroup Communicators
+     */
     class Communicator
       : public std::enable_shared_from_this<Communicator>
     {

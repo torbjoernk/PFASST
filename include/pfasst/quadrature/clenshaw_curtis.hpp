@@ -17,6 +17,7 @@ namespace pfasst
      *
      * @tparam scalar precision of quadrature (i.e. `double`)
      *
+     * @ingroup Quadrature
      * @since v0.3.0
      */
     template<typename precision = pfasst::time_precision>

@@ -333,6 +333,7 @@ namespace pfasst
      *   a specific logger.
      *   Otherwise the default logger will be used.
      *
+     * @ingroup Utilities
      * @since v0.3.0
      */
     inline static void add_custom_logger(const string& id)

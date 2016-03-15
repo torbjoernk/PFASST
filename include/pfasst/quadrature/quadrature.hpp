@@ -17,10 +17,20 @@ using std::vector;
 
 namespace pfasst
 {
+  /**
+   * @defgroup Quadrature Quadrature
+   *   Quadrature rules provide the foundation for numerical integration.
+   * @ingroup Assistance
+   */
+
+  /**
+   * @ingroup Quadrature
+   */
   namespace quadrature
   {
     /**
      * Quadrature type descriptors.
+     * @ingroup Quadrature
      * @since v0.3.0
      */
     enum class QuadratureType : int {
@@ -33,6 +43,9 @@ namespace pfasst
     };
 
 
+    /**
+     * @ingroup Quadrature
+     */
     // TODO: get the grasp of this stuff
     template<typename precision>
     static Polynomial<precision> build_polynomial(const size_t node, const vector<precision>& nodes)
@@ -69,6 +82,7 @@ namespace pfasst
      * @pre For correctness of the algorithm it is assumed, that both sets of nodes are in the range
      *   \\( [0, 1] \\).
      *
+     * @ingroup Quadrature
      * @since v0.3.0
      */
     template<typename precision>
@@ -100,6 +114,7 @@ namespace pfasst
      * @tparam precision precision of quadrature (i.e. `double`)
      * @param[in] nodes quadrature nodes to compute \\( Q \\) matrix for
      *
+     * @ingroup Quadrature
      * @since v0.3.0
      *
      * @overload
@@ -118,6 +133,7 @@ namespace pfasst
      * @param[in] s_mat \\( S \\) matrix to compute \\( Q \\) from
      * @see pfasst::quadrature::compute_s_matrix
      *
+     * @ingroup Quadrature
      * @since v0.3.0
      *
      * @overload
@@ -147,6 +163,7 @@ namespace pfasst
      * @param[in] q_mat \\( Q \\) matrix to compute \\( S \\) of
      * @returns \\( S \\) matrix
      *
+     * @ingroup Quadrature
      * @since v0.3.0
      */
     template<typename precision>
@@ -168,6 +185,7 @@ namespace pfasst
      * @param[in] from first set of quadrature nodes
      * @param[in] to second set of quadrature nodes
      *
+     * @ingroup Quadrature
      * @since v0.3.0
      *
      * @overload
@@ -189,6 +207,7 @@ namespace pfasst
      * @pre For correctness of the algorithm it is assumed, that the nodes are in the range
      *   \\( [0, 1] \\).
      *
+     * @ingroup Quadrature
      * @since v0.3.0
      */
     template<typename precision>
@@ -221,6 +240,7 @@ namespace pfasst
      *
      * @tparam precision precision of quadrature (i.e. `double`)
      *
+     * @ingroup Quadrature
      * @since v0.3.0
      */
     template<typename precision>

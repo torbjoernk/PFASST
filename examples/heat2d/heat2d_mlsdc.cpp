@@ -30,6 +30,9 @@ namespace pfasst
       using transfer_t = SpectralTransfer<transfer_traits_t>;
       using heat2d_mlsdc_t = TwoLevelMLSDC<transfer_t>;
 
+      /**
+       * @ingroup Heat2D
+       */
       shared_ptr<heat2d_mlsdc_t> run_mlsdc(const size_t ndofs, const size_t coarse_factor,
                                            const size_t nnodes, const QuadratureType& quad_type,
                                            const double& t_0, const double& dt, const double& t_end,

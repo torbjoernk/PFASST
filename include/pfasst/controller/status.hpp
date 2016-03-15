@@ -172,6 +172,9 @@ namespace pfasst
   }
 
 
+  /**
+   * @ingroup Controllers
+   */
   template<
     typename precision
   >

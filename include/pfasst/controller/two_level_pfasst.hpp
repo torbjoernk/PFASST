@@ -23,6 +23,9 @@ namespace pfasst
   }  // ::pfasst::detail
 
 
+  /**
+   * @ingroup Controllers
+   */
   template<
     class TransferT,
     class CommT = comm::MpiP2P

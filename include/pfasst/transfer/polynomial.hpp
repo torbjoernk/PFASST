@@ -12,6 +12,9 @@ using std::shared_ptr;
 
 namespace pfasst
 {
+  /**
+   * @ingroup TransferOp
+   */
   template<
     class TransferTraits,
     typename Enabled = void

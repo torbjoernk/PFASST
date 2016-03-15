@@ -20,8 +20,19 @@ namespace pfasst
 {
   namespace examples
   {
+    /**
+     * @defgroup AdvectionDiffusion Advection-Diffusion
+     * @ingroup Examples
+     */
+
+    /**
+     * @ingroup AdvectionDiffusion
+     */
     namespace advec_diff
     {
+      /**
+       * @ingroup AdvectionDiffusion
+       */
       template<
         class SweeperTrait,
         typename Enabled = void

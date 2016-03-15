@@ -29,6 +29,9 @@ namespace pfasst
       using pfasst::quadrature::QuadratureType;
       using heat1d_sdc_t = SDC<SpectralTransfer<transfer_traits<sweeper_t, sweeper_t, 1>>>;
 
+      /**
+       * @ingroup Heat1D
+       */
       shared_ptr<heat1d_sdc_t> run_sdc(const size_t ndofs, const size_t nnodes,
                                                const QuadratureType& quad_type, const double& t_0,
                                                const double& dt, const double& t_end,

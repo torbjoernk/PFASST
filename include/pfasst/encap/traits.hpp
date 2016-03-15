@@ -12,23 +12,34 @@ namespace pfasst
 {
   namespace encap
   {
+    /**
+     * @ingroup Tags
+     */
     struct encap_data_tag
     {};
 
+    /**
+     * @ingroup Tags
+     */
     struct vector_encap_tag
       : public encap_data_tag
     {};
 
+    /**
+     * @ingroup Tags
+     */
     struct eigen3_encap_tag
       : public encap_data_tag
     {};
 
     /**
-     * Type Traits for encapsulation of user data types.
+     * Type Traits for encapsulation of generic user data types.
      *
      * @tparam TimePrecision    the time precision, e.g. precision of the integration nodes
      * @tparam SpatialPrecision the spatial data precision
+     * @tparam Dim              number of spatial dimensions
      * @tparam DataT            the actual data type encapsulated
+     * @tparam Ts               further optional parameters potentially used by specializations
      *
      * @ingroup Traits
      */
@@ -41,25 +52,26 @@ namespace pfasst
     >
     struct encap_traits
     {
-      //! public member type for the time precision
+      //! type of the time precision, e.g. precision of integration nodes
       using time_t = TimePrecision;
 
-      //! public member type for the spatial precision
+      //! type of the spatial precision
       using spatial_t = SpatialPrecision;
 
-      //! public member type for the encapsulated data type
+      //! type of the encapsulated data
       using data_t = DataT;
 
       using tag_t = encap_data_tag;
 
       using dim_t = std::integral_constant<size_t, Dim>;
 
+      //! number of spatial dimensions
       static constexpr size_t DIM = Dim;
     };
 
 
     /**
-     * Spatialized Type Traits for encapsulation of std::vector.
+     * Specialized Type Traits for encapsulation of std::vector.
      *
      * @tparam TimePrecision    the time precision, e.g. precision of the integration nodes
      * @tparam SpatialPrecision the spatial data precision
@@ -79,12 +91,12 @@ namespace pfasst
       using data_t = vector<spatial_t>;
       using tag_t = vector_encap_tag;
       using dim_t = std::integral_constant<size_t, Dim>;
-      static constexpr size_t  DIM = Dim;
+      static constexpr size_t DIM = Dim;
     };
 
 
     /**
-     * Spatialized Type Traits for encapsulation of std::vector.
+     * Specialized Type Traits for encapsulation of std::vector.
      *
      * @tparam TimePrecision    the time precision, e.g. precision of the integration nodes
      * @tparam SpatialPrecision the spatial data precision
@@ -104,7 +116,7 @@ namespace pfasst
       using data_t = EigenVector<spatial_t>;
       using tag_t = eigen3_encap_tag;
       using dim_t = std::integral_constant<size_t, Dim>;
-      static constexpr size_t  DIM = Dim;
+      static constexpr size_t DIM = Dim;
     };
   }  // ::pfasst::encap
 }  // ::pfasst

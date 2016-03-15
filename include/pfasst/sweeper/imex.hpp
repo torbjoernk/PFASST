@@ -11,6 +11,9 @@ using std::vector;
 
 namespace pfasst
 {
+  /**
+   * @ingroup Sweepers
+   */
   template<
     class SweeperTrait,
     typename Enabled = void

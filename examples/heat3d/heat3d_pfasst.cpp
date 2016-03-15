@@ -34,6 +34,9 @@ namespace pfasst
   {
     namespace heat2d
     {
+      /**
+       * @ingroup Heat3D
+       */
       void run_pfasst(const size_t& ndofs, const size_t& nnodes, const QuadratureType& quad_type,
                       const double& t_0, const double& dt, const double& t_end, const size_t& niter)
       {

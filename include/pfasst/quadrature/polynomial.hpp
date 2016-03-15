@@ -22,6 +22,7 @@ namespace pfasst
      *
      * @tparam CoeffT numerical precision of polynomial coefficients (e.g. `double`)
      *
+     * @ingroup Quadrature
      * @since v0.3.0
      */
     template<typename CoeffT>
