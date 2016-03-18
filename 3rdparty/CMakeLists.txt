@@ -15,7 +15,7 @@ if(${pfasst_BUILD_SHARED_LIBS})
 else()
     set(Boost_USE_STATIC_LIBS ON)
 endif()
-set(Boost_ADDITIONAL_VERSIONS "1.59" "1.59.0" "1.58" "1.58.0" "1.57" "1.57.0" ${Boost_ADDITIONAL_VERSIONS})
+set(Boost_ADDITIONAL_VERSIONS "1.60.0" "1.59" "1.59.0" "1.58" "1.58.0" "1.57" "1.57.0" ${Boost_ADDITIONAL_VERSIONS})
 
 if(${compiler_version_available} AND ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
     set(Boost_COMPILER "-clang${CMAKE_CXX_COMPILER_VERSION_MAJOR}${CMAKE_CXX_COMPILER_VERSION_MINOR}")

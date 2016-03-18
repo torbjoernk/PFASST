@@ -72,6 +72,9 @@ namespace pfasst
     return *(this->_factory);
   }
 
+  /**
+   * @throws std::runtime_error if `get_states()` has zero length
+   */
   template<class SweeperTrait, typename Enabled>
   shared_ptr<typename SweeperTrait::encap_t>&
   Sweeper<SweeperTrait, Enabled>::initial_state()
@@ -83,6 +86,9 @@ namespace pfasst
     return this->states().front();
   }
 
+  /**
+   * @throws std::runtime_error if `get_states()` has zero length
+   */
   template<class SweeperTrait, typename Enabled>
   const shared_ptr<typename SweeperTrait::encap_t>
   Sweeper<SweeperTrait, Enabled>::get_initial_state() const
@@ -178,6 +184,10 @@ namespace pfasst
     return this->_logger_id.c_str();
   }
 
+  /**
+   * @note Sets tolerances for absolute and relative residual if given on the command line.
+   *   Otherwise the currently set values are unchanged.
+   */
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::set_options()
@@ -185,7 +195,7 @@ namespace pfasst
     ML_CVLOG(3, this->get_logger_id(), "setting options from runtime parameters (if available)");
     this->_abs_residual_tol = config::get_value<typename traits::spatial_t>("abs_res_tol", this->_abs_residual_tol);
     this->_rel_residual_tol = config::get_value<typename traits::spatial_t>("rel_res_tol", this->_rel_residual_tol);
-    ML_CVLOG(3, this->get_logger_id(), "  absolut residual tolerance:  " << this->_abs_residual_tol);
+    ML_CVLOG(3, this->get_logger_id(), "  absolute residual tolerance: " << this->_abs_residual_tol);
     ML_CVLOG(3, this->get_logger_id(), "  relative residual tolerance: " << this->_rel_residual_tol);
   }
 
@@ -203,6 +213,9 @@ namespace pfasst
     this->_rel_residual_tol = rel_res_tol;
   }
 
+  /**
+   * @throws std::runtime_error if either `get_status()` or `get_quadrature()` are not set, i.e. `nullptr`.
+   */
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::initialize()
@@ -243,6 +256,9 @@ namespace pfasst
     std::generate(this->residuals().begin(), this->residuals().end(), [&factory](){ return factory.create(); });
   }
 
+  /**
+   * @throws std::runtime_error if either `get_status()` or `get_quadrature()` are not set, i.e. `nullptr`.
+   */
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::setup()
@@ -298,7 +314,7 @@ namespace pfasst
     assert(this->get_status() != nullptr);
     this->integrate_end_state(this->get_status()->get_dt());
 
-    assert(this->get_quadrature() != nullptr);
+//    assert(this->get_quadrature() != nullptr);
 //     ML_CVLOG(2, this->get_logger_id(), "solution at nodes:");
 //     for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
 //       ML_CVLOG(2, this->get_logger_id(), "  " << m << ": " << to_string(this->get_states()[m]));
@@ -329,7 +345,7 @@ namespace pfasst
     assert(this->get_status() != nullptr);
     this->integrate_end_state(this->get_status()->get_dt());
 
-    assert(this->get_quadrature() != nullptr);
+//    assert(this->get_quadrature() != nullptr);
 //     ML_CVLOG(2, this->get_logger_id(), "solution at nodes:");
 //     for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
 //       ML_CVLOG(2, this->get_logger_id(), "\t" << m << ": " << to_string(this->get_states()[m]));
@@ -343,7 +359,7 @@ namespace pfasst
   {
     ML_CVLOG(4, this->get_logger_id(), "post step");
 
-    assert(this->get_quadrature() != nullptr);
+//    assert(this->get_quadrature() != nullptr);
 //     ML_CVLOG(2, this->get_logger_id(), "solution at nodes:");
 //     for (size_t m = 0; m <= this->get_quadrature()->get_num_nodes(); ++m) {
 //       ML_CVLOG(2, this->get_logger_id(), "\t" << m << ": " << to_string(this->get_states()[m]));
@@ -394,6 +410,9 @@ namespace pfasst
     }
   }
 
+  /**
+   * @throws std::runtime_error if not overwritten in specialized implementation
+   */
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::reevaluate(const bool initial_only)
@@ -409,6 +428,9 @@ namespace pfasst
     this->reevaluate(false);
   }
 
+  /**
+   * @throws std::runtime_error if not overwritten in specialized implementation
+   */
   template<class SweeperTrait, typename Enabled>
   vector<shared_ptr<typename SweeperTrait::encap_t>>
   Sweeper<SweeperTrait, Enabled>::integrate(const typename SweeperTrait::time_t& dt)
@@ -491,6 +513,9 @@ namespace pfasst
     return this->converged(false);
   }
 
+  /**
+   * @throws std::runtime_error in case the right node (i.e. the time end point) is not a quadrature node
+   */
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::integrate_end_state(const typename SweeperTrait::time_t& dt)
@@ -510,6 +535,9 @@ namespace pfasst
     }
   }
 
+  /**
+   * @throws std::runtime_error if not overwritten in specialized implementation
+   */
   template<class SweeperTrait, typename Enabled>
   void
   Sweeper<SweeperTrait, Enabled>::compute_residuals(const bool& only_last)
