@@ -64,7 +64,7 @@ namespace pfasst
   {
     Sweeper<SweeperTrait, Enabled>::pre_predict();
 
-    assert(this->get_quadrature() != nullptr);
+//    assert(this->get_quadrature() != nullptr);
 //     auto nodes = this->get_quadrature()->get_nodes();
 //     nodes.insert(nodes.begin(), time_type(0.0));
 //     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
@@ -444,6 +444,9 @@ namespace pfasst
     this->compute_residuals(false);
   }
 
+  /**
+   * @throws std::runtime_error if not overwritten in specialized implementation
+   */
   template<class SweeperTrait, typename Enabled>
   shared_ptr<typename SweeperTrait::encap_t>
   IMEX<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_t& t,
@@ -453,6 +456,9 @@ namespace pfasst
     throw std::runtime_error("evaluation of explicit part of right-hand-side");
   }
 
+  /**
+   * @throws std::runtime_error if not overwritten in specialized implementation
+   */
   template<class SweeperTrait, typename Enabled>
   shared_ptr<typename SweeperTrait::encap_t>
   IMEX<SweeperTrait, Enabled>::evaluate_rhs_impl(const typename SweeperTrait::time_t& t,
@@ -462,6 +468,9 @@ namespace pfasst
     throw std::runtime_error("evaluation of implicit part of right-hand-side");
   }
 
+  /**
+   * @throws std::runtime_error if not overwritten in specialized implementation
+   */
   template<class SweeperTrait, typename Enabled>
   void
   IMEX<SweeperTrait, Enabled>::implicit_solve(shared_ptr<typename SweeperTrait::encap_t> f,
@@ -482,7 +491,8 @@ namespace pfasst
     const size_t num_nodes = this->get_quadrature()->get_num_nodes();
     auto nodes = this->get_quadrature()->get_nodes();
     if (this->get_quadrature()->left_is_node()) {
-      ML_CLOG(ERROR, this->get_logger_id(), "Don't know how to compute delta matrices for quadrature containing left time point.");
+      ML_CLOG(ERROR, this->get_logger_id(),
+              "Don't know how to compute delta matrices for quadrature containing left time point.");
       throw std::runtime_error("IMEX with quadrature containing left time point");
     } else {
       nodes.insert(nodes.begin(), typename traits::time_t(0.0));
@@ -502,12 +512,14 @@ namespace pfasst
 
     ML_CVLOG(5, this->get_logger_id(), "QE:");
     for (int row = 0; row < this->_q_delta_expl.rows(); ++row) {
-      ML_CVLOG(5, this->get_logger_id(), "  " << LOG_FIXED << this->_q_delta_expl.block(row, 0, 1, this->_q_delta_expl.cols()));
+      ML_CVLOG(5, this->get_logger_id(),
+               "  " << LOG_FIXED << this->_q_delta_expl.block(row, 0, 1, this->_q_delta_expl.cols()));
     }
 
     ML_CVLOG(5, this->get_logger_id(), "QI:");
     for (int row = 0; row < this->_q_delta_impl.rows(); ++row) {
-      ML_CVLOG(5, this->get_logger_id(), "  " << LOG_FIXED << this->_q_delta_impl.block(row, 0, 1, this->_q_delta_impl.cols()));
+      ML_CVLOG(5, this->get_logger_id(),
+               "  " << LOG_FIXED << this->_q_delta_impl.block(row, 0, 1, this->_q_delta_impl.cols()));
     }
   }
 }  // ::pfasst
