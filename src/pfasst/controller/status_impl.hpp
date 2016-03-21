@@ -77,6 +77,10 @@ namespace pfasst
   }
 #endif
 
+  /**
+   * @details It actually replaces the internal data storage by a new object throwing away current
+   *   data.
+   */
   template<typename precision>
   void
   Status<precision>::clear()
@@ -84,6 +88,13 @@ namespace pfasst
     this->_detail = StatusDetail<precision_t>();
   }
 
+  /**
+   * @details The following values are reset to their initial/default values:
+   *   * primary state
+   *   * iteration
+   *   * abs_res_norm
+   *   * rel_res_norm
+   */
   template<typename precision>
   void
   Status<precision>::reset()
@@ -213,6 +224,10 @@ namespace pfasst
     return this->_detail.secondary_state;
   }
 
+  /**
+   * @throws std::runtime_error if @p state can not be combined with the currently stored
+   *                            PrimaryState.
+   */
   template<typename precision>
   void
   Status<precision>::set_secondary_state(const SecondaryState& state)
