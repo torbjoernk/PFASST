@@ -100,13 +100,17 @@ struct PP_CAT(static_warning,__LINE__) { \
 }
 
 /**
- * @param[in] token must be a program-wide unique identifier.
+ * @param[in] token  must be a program-wide unique identifier
+ * @param[in] cond
+ * @param[in] msg
  *
  * @note Using `STATIC_WARNING_TEMPLATE` changes the meaning of a program in a small way.
- *  It introduces a member/variable declaration.
+ *  It introduces a member variable declaration.
  *  This means at least one byte of space in each structure/class instantiation.
  *  @ref STATIC_WARNING should be preferred in any non-template situation.
+ *
  * @since v0.6.0
+ *
  * @see [Stackoverflow Q&A](http://stackoverflow.com/a/8990275/588243)
  *   for reference
  *

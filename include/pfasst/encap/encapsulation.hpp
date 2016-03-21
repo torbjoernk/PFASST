@@ -71,7 +71,7 @@ namespace pfasst
      * @tparam        EncapsulationTrait type traits for Encapsulations @p x and @p y
      * @param[in,out] x                  target Encapsulation
      * @param[in]     a                  scalar factor to scale the matrix-vector product of @p mat and @p y with
-     * @param[in]     mat                matrix
+     * @param[in]     matrix             matrix
      * @param[in]     y                  second Encapsulation used as vector in \\( aMy \\)
      * @param[in]     zero_vec_x         if `true` @p x is zeroed before adding the result of the scaled matrix-vector
      *                                   product
@@ -99,7 +99,7 @@ namespace pfasst
      * @tparam    EncapsulationTrait type traits for Encapsulations @p x
      * @param[in] x                  data used as vector
      * @param[in] a                  scalar factor to scale the matrix-vector product of @p mat and @p x with
-     * @param[in] mat                matrix
+     * @param[in] matrix             matrix
      * @returns result of \\( aMx \\)
      *
      * @see pfasst::encap_traits
@@ -160,8 +160,6 @@ namespace pfasst
         using traits = EncapsulationTrait;
         using factory_t = EncapsulationFactory<traits>;
 
-      //! @internal
-      //! time_type must be an arithmetic type
       static_assert(std::is_arithmetic<typename traits::time_t>::value,
                     "time precision must be an arithmetic type");
       static_assert(std::is_arithmetic<typename traits::spatial_t>::value,
@@ -185,7 +183,6 @@ namespace pfasst
       STATIC_WARNING(std::is_copy_assignable<typename traits::data_t>::value,
                      "Data Type should be copy assignable");
       //! @endcond
-      //! @endinternal
 
       protected:
         //! @{
@@ -220,14 +217,18 @@ namespace pfasst
          * @returns encapsulated data for modification, e.g. as an lvalue
          */
         virtual       typename EncapsulationTrait::data_t& data();
-        /**
-         * Read-only accessor for encapsulated data.
-         *
-         * @returns encapsulated data
-         */
+        //! Read-only version of `data()`.
         virtual const typename EncapsulationTrait::data_t& get_data() const;
 
+        /**
+         * Total number of spatial degrees of freedom.
+         */
         virtual size_t get_total_num_dofs() const;
+        /**
+         * Total number of spatial degrees of freedom for each dimension.
+         *
+         * @returns array of DOFs per dimension; length of array matches `traits::DIM`.
+         */
         virtual std::array<int, EncapsulationTrait::DIM> get_dimwise_num_dofs() const;
 
         /**

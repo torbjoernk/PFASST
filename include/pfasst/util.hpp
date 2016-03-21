@@ -20,13 +20,14 @@ namespace pfasst
   /**
    * Compares absolute difference against zero.
    *
-   * Takes the absolute value of the difference between @p a and @p b and compares it to the machine precision scaled
-   * to the magnitude of @p a and @p b up to the desired precision in units in the last place.
+   * Takes the absolute value of the difference between @p a and @p b and compares it to the machine
+   * precision scaled to the magnitude of @p a and @p b up to the desired precision in units in the
+   * last place.
    *
-   * @tparam    precision value type of @p a and @p b
+   * @tparam    precision  value type of @p a and @p b
    * @param[in] a
    * @param[in] b
-   * @param[in] digits    number of digits to compare
+   * @param[in] digits     number of digits to compare
    * @ingroup Utilities
    */
   template<typename precision>
@@ -43,12 +44,13 @@ namespace pfasst
   }
 
   /**
-   * Compares against smalles machine epsilon.
+   * Compares against smallest machine epsilon.
    *
-   * Takes the absolute value of @p a and compares it against `std::numeric_limits<precision>::epsilon()`.
+   * Takes the absolute value of @p a and compares it against `std::numeric_limits::epsilon()`.
    *
-   * @tparam    precision value type of @p a, e.g. `double`
-   * @param[in] a         value to compare
+   * @tparam    precision  value type of @p a, e.g. `double`
+   * @param[in] a          value to compare
+   *
    * @returns   `true` if @p a is closer to zero than the machine precision, `false` otherwise.
    *
    * @ingroup Utilities

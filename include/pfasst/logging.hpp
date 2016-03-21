@@ -223,7 +223,6 @@ namespace pfasst
      * The local rank number as given by pfasst::config::get_rank() is filled from the left with the
      * @p fill character.
      *
-     * @param[in] width width of the formatted rank
      * @param[in] fill  character used for left-filling
      * @returns formatted rank
      *
@@ -277,7 +276,7 @@ namespace pfasst
      *
      * @param[in,out] conf         configuration to extend and set
      * @param[in]     default_conf optional, default configuration set to be used to retreive
-     *   default options
+     *                             default options
      *
      * @since v1.0.0
      *
@@ -503,8 +502,10 @@ namespace pfasst
      * Usually, you want to pass the command line arguments given to `%main(int, char**)` in here
      * and let easylogging++ figure out what it needs.
      *
-     * @param[in] argc number of command line arguments as provided by `%main(int, char**)`
-     * @param[in] argv command line arguments as provided by `%main(int, char**)`
+     * @param[in] argc               number of command line arguments as provided by
+     *                               `%main(int, char**)`
+     * @param[in] argv               command line arguments as provided by `%main(int, char**)`
+     * @param[in] no_custom_loggers
      *
      * @note This function should not be called directly from user code but through pfasst::init.
      *

@@ -1,5 +1,5 @@
 /**
- * @file pfasst/quadrature/interface.hpp
+ * @file pfasst/quadrature/quadrature.hpp
  * @since v0.3.0
  */
 #ifndef _PFASST__QUADRATURE__INTERFACE_HPP_
