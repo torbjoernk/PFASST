@@ -225,6 +225,8 @@ namespace pfasst
 
       /**
        * Setter for the logger ID.
+       *
+       * @param[in] logger_id  new name of the Sweeper instance in the logs.
        */
       virtual       void  set_logger_id(const string& logger_id);
       /**

@@ -121,6 +121,10 @@ namespace pfasst
     return this->_logger_id.c_str();
   }
 
+  /**
+   * @note Sets the maximum number of iterations and time end point from the command line arguments
+   *   or leaves set values unchanged if not given on the command line.
+   */
   template<class TransferT, class CommT>
   void
   Controller<TransferT, CommT>::set_options()
@@ -158,6 +162,11 @@ namespace pfasst
     return this->_transfer;
   }
 
+  /**
+   * @throws std::logic_error  if configured @p t_end is zero or negative.
+   * @throws std::logic_error  if computed total number of steps times the configured time step
+   *                           width @p dt does not lead to the desired @p t_end.
+   */
   template<class TransferT, class CommT>
   void
   Controller<TransferT, CommT>::setup()
@@ -175,7 +184,8 @@ namespace pfasst
 
     this->compute_num_steps();
     const auto num_steps = this->get_status()->get_num_steps();
-    if (!almost_equal(this->get_status()->get_time() + num_steps * this->get_status()->get_dt(), this->get_status()->get_t_end())) {
+    if (!almost_equal(this->get_status()->get_time() + num_steps * this->get_status()->get_dt(),
+                      this->get_status()->get_t_end())) {
       ML_CLOG(ERROR, this->get_logger_id(), "End time point not an integral multiple of time delta. " << LOG_FIXED
         << " (" << num_steps << " * " << this->get_status()->get_dt()
         << " = " << num_steps * this->get_status()->get_dt() << " != " << this->get_status()->get_t_end() << ")");
@@ -189,6 +199,9 @@ namespace pfasst
     this->ready() = true;
   }
 
+  /**
+   * @throws std::logic_error if `is_ready()` returns `false`
+   */
   template<class TransferT, class CommT>
   void
   Controller<TransferT, CommT>::run()
