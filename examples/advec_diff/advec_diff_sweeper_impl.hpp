@@ -30,6 +30,14 @@ namespace pfasst
   {
     namespace advec_diff
     {
+      /**
+       * | option          | description                                              |
+       * |-----------------|----------------------------------------------------------|
+       * | `num_dofs`      | number spatial degrees of freedom on finest level        |
+       * | `coarse_factor` | coarsening factor from one level to the next coarser one |
+       * | `nu`            | diffusivity coefficient                                  |
+       * | `vel`           | velocity of advection                                    |
+       */
       template<class SweeperTrait, typename Enabled>
       void
       AdvecDiff<SweeperTrait, Enabled>::init_opts()
@@ -71,6 +79,14 @@ namespace pfasst
         this->_v = config::get_value<typename traits::spatial_t>("vel", DEFAULT_VELOCITY);
       }
 
+      /**
+       * The exact solution is computed on the spatial interval @f$ [-2.5, 2.5] @f$ as an
+       * overlay of five Gaussian bells with the formula for each spatial component:
+       * @f[
+       *   u_i = \sum^{2}_{a=-2} \frac{1}{\sqrt{4 \pi \nu (t + t_0)}} e^{- \left(\frac{i}{N}
+       *            - 0.5 + a - t * v \right)^2 / \left( 4 \nu (t + t_0) \right)}
+       * @f]
+       */
       template<class SweeperTrait, typename Enabled>
       shared_ptr<typename SweeperTrait::encap_t>
       AdvecDiff<SweeperTrait, Enabled>::exact(const typename SweeperTrait::time_t& t)
@@ -111,6 +127,10 @@ namespace pfasst
         this->_num_impl_solves = 0;
       }
 
+      /**
+       * If @p pre_check is `false`, it computes the absolute and relative errors at all time nodes
+       * logs the norms of the residuals and errors at all time nodes.
+       */
       template<class SweeperTrait, typename Enabled>
       bool
       AdvecDiff<SweeperTrait, Enabled>::converged(const bool pre_check)
@@ -219,6 +239,13 @@ namespace pfasst
         return rel_error;
       }
 
+      /**
+       * @details Evaluates the explicit part of right hand side of the problem equation - the
+       *   advection - in Fourier space.
+       *   I.e., the spatial data @p u is transformed into Fourier space and propagated in time by
+       *    applying the Fourier discretization of the gradient w.r.t. to the velocity
+       *    `AdvecDiff::_v`.
+       */
       template<class SweeperTrait, typename Enabled>
       shared_ptr<typename SweeperTrait::encap_t>
       AdvecDiff<SweeperTrait, Enabled>::evaluate_rhs_expl(const typename SweeperTrait::time_t& t,
@@ -243,6 +270,13 @@ namespace pfasst
         return result;
       }
 
+      /**
+       * @details Evaluates the implicit part of right hand side of the problem equation - the
+       *   diffusion - in Fourier space.
+       *   I.e., the spatial data @p u is transformed into Fourier space and propagated in time by
+       *   applying the Fourier discretization of the Laplacian w.r.t. to the diffusivity
+       *   coefficient `AdvecDiff::_nu`.
+       */
       template<class SweeperTrait, typename Enabled>
       shared_ptr<typename SweeperTrait::encap_t>
       AdvecDiff<SweeperTrait, Enabled>::evaluate_rhs_impl(const typename SweeperTrait::time_t& t,
@@ -267,6 +301,11 @@ namespace pfasst
         return result;
       }
 
+      /**
+       * @details The implicit part here is the discretization of the Laplacian of the diffusion
+       *    in the problem equation.
+       *    This is solved in Fourier space.
+       */
       template<class SweeperTrait, typename Enabled>
       void
       AdvecDiff<SweeperTrait, Enabled>::implicit_solve(shared_ptr<typename SweeperTrait::encap_t> f,
