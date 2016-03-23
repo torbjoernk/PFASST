@@ -10,6 +10,10 @@ cc_wrapper.sh
 3rdparty/Boost
 3rdparty/Eigen3
 3rdparty/fftw3
+<<<<<<< Updated upstream
+=======
+3rdparty/gtest
+>>>>>>> Stashed changes
 3rdparty/gmock
 
 .python-version

@@ -17,7 +17,7 @@ set_directory_properties(PROPERTIES EP_PREFIX "${3rdparty_PREFIX}")
 
 
 option(pfasst_DISABLE_LIBCXX    "Disable use of LLVM's libc++ when compiling with Clang." ON )
-option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 ON )
+option(BUILD_SHARED_LIBS        "Build shared libraries."                                 OFF)
 
 option(pfasst_BUILD_EXAMPLES    "Build example programs."                                 ON )
 cmake_dependent_option(
