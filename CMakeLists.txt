@@ -27,6 +27,7 @@ cmake_dependent_option(
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
 
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 ON )
+option(pfasst_SYSTEM_BOOST      "Use system's Boost library; fail if not found"           OFF)
 option(pfasst_SYSTEM_FFTW       "Use system's FFTW library; fail if not found"            OFF)
 option(pfasst_SYSTEM_EIGEN      "Use system's Eigen3 library; fail if not found"          OFF)
 

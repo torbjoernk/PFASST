@@ -9,37 +9,127 @@ set(3rdparty_DOWNLOAD_TIMEOUT "60")
 message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "Boost")
 
-set(Boost_USE_MULTITHREADED ON)
-if(${pfasst_BUILD_SHARED_LIBS})
-    set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_SOURCE_NAME "boost_1_60_0.tar.bz2")
+set(Boost_SOURCE_MD5 "65a840e1a0b13a558ff19eeb2c4f0cbe")
+message(STATUS "  using version: 1.60.0  (file: ${Boost_SOURCE_NAME})")
+
+if(NOT Boost_SOURCES)
+    set(Boost_SOURCE_LOCATION "https://downloads.sourceforge.net/project/boost/boost/1.60.0")
+    message(STATUS "  going to download from: ${Boost_SOURCE_LOCATION}")
+    message(STATUS "    HINT: specify -DBoost_SOURCES=/local/directory/with/${Boost_SOURCE_NAME} to avoid redownloading")
 else()
-    set(Boost_USE_STATIC_LIBS ON)
-endif()
-set(Boost_ADDITIONAL_VERSIONS "1.60.0" "1.59" "1.59.0" "1.58" "1.58.0" "1.57" "1.57.0" ${Boost_ADDITIONAL_VERSIONS})
-
-if(${compiler_version_available} AND ${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
-    set(Boost_COMPILER "-clang${CMAKE_CXX_COMPILER_VERSION_MAJOR}${CMAKE_CXX_COMPILER_VERSION_MINOR}")
+    set(Boost_SOURCE_LOCATION ${Boost_SOURCES})
+    message(STATUS "  using pre-downloaded sources at: ${Boost_SOURCE_LOCATION}")
 endif()
 
-if(BOOST_ROOT)
-    set(Boost_NO_SYSTEM_PATHS ON)
-endif()
+set(Boost_COMPONENTS "program_options")
 
-set(Boost_MIN_VERSION 1.55.0)
-set(Boost_COMPONETS program_options)
+set(Boost_PREFIX "${3rdparty_PREFIX}/Boost")
+set(Boost_TMP_PREFIX "${3rdparty_TMP_PREFIX}/Boost")
 
-find_package(Boost ${Boost_MIN_VERSION} COMPONENTS ${Boost_COMPONETS} REQUIRED)
-set_package_properties(Boost
-    PROPERTIES
-      DESCRIPTION "C++ libraries"
-      URL "http://boost.org/"
-      TYPE REQUIRED
-      PURPOSE "command line parameter parsing"
+set(Boost_TMP_DIR "${Boost_TMP_PREFIX}/tmp")
+set(Boost_STAMP_DIR "${Boost_TMP_PREFIX}/stamp")
+set(Boost_DOWNLOAD_DIR "${Boost_PREFIX}/download")
+set(Boost_SOURCE_DIR "${Boost_PREFIX}/src")
+set(Boost_BINARY_DIR "${Boost_TMP_PREFIX}/build")
+set(Boost_INSTALL_DIR "${Boost_PREFIX}/install")
+
+set(Boost_build_CMD "${Boost_SOURCE_DIR}/bootstrap.sh")
+list(APPEND Boost_build_CMD
+    --prefix=${Boost_INSTALL_DIR}
+    --with-libraries=${Boost_COMPONENTS}
 )
-message(STATUS "Boost include path: ${Boost_INCLUDE_DIRS}")
-message(STATUS "Boost library path: ${Boost_LIBRARY_DIRS}")
-list(APPEND 3rdparty_INCLUDES ${Boost_INCLUDE_DIRS})
-list(APPEND 3rdparty_DEPENDEND_LIBS "-L${Boost_LIBRARY_DIRS}" ${Boost_LIBRARIES})
+if(CMAKE_CXX_COMPILER_ID MATCHES "^(Apple)?Clang$")
+    list(APPEND Boost_build_CMD toolset=clang)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    list(APPEND Boost_build_CMD toolset=gcc)
+endif()
+
+ExternalProject_Add(boost_build
+    LIST_SEPARATOR " "
+    TMP_DIR "${Boost_TMP_DIR}"
+    STAMP_DIR "${Boost_STAMP_DIR}"
+    DOWNLOAD_DIR "${Boost_DOWNLOAD_DIR}"
+    SOURCE_DIR "${Boost_SOURCE_DIR}"
+    # BINARY_DIR "${Boost_BINARY_DIR}"  # not used as in-source build is specified
+    INSTALL_DIR "${Boost_INSTALL_DIR}"
+
+    URL ${Boost_SOURCE_LOCATION}/${Boost_SOURCE_NAME}
+    URL_MD5 ${Boost_SOURCE_MD5}
+    TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
+
+    UPDATE_COMMAND ""
+    PATCH_COMMAND ""
+    BUILD_IN_SOURCE ON
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ${Boost_build_CMD}
+    TEST_COMMAND ""
+    INSTALL_COMMAND ""
+
+    LOG_DOWNLOAD ON
+    LOG_CONFIGURE ON
+    LOG_BUILD ON
+)
+
+set(BOOST_LIBRARIES)
+set(BOOST_LIBRARY_DIR ${Boost_SOURCE_DIR}/stage/lib)
+set(BOOST_INCLUDE_DIR ${Boost_SOURCE_DIR})
+
+message(STATUS "  using components:")
+foreach(component ${Boost_COMPONENTS})
+    message(STATUS "    ${component}")
+
+    set(Boost_${component}_BUILD_CMD ${Boost_SOURCE_DIR}/b2)
+    list(APPEND Boost_${component}_BUILD_CMD
+        --build-dir=${Boost_BINARY_DIR}
+        --with-${component}
+        address-model=64
+        cxxflags=-std=c++11
+        cxxflags=-fPIC
+        link=static
+        threading=multi
+        runtime-link=shared
+        variant=release
+    )
+    if(CMAKE_CXX_COMPILER_ID MATCHES "^(Apple)?Clang$")
+        list(APPEND Boost_${component}_BUILD_CMD toolset=clang)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        list(APPEND Boost_${component}_BUILD_CMD toolset=gcc)
+    endif()
+
+    ExternalProject_Add(boost_${component}
+        LIST_SEPARATOR " "
+        TMP_DIR "${Boost_TMP_DIR}"
+        STAMP_DIR "${Boost_STAMP_DIR}"
+        DOWNLOAD_DIR "${Boost_DOWNLOAD_DIR}"
+        SOURCE_DIR "${Boost_SOURCE_DIR}"
+        # BINARY_DIR "${Boost_BINARY_DIR}"  # not used as in-source build is specified
+        INSTALL_DIR "${Boost_INSTALL_DIR}"
+
+        DEPENDS boost_build
+
+        DOWNLOAD_COMMAND ""
+        UPDATE_COMMAND ""
+        PATCH_COMMAND ""
+        BUILD_IN_SOURCE ON
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ${Boost_${component}_BUILD_CMD} stage
+        TEST_COMMAND ""
+        INSTALL_COMMAND ""
+
+        LOG_DOWNLOAD ON
+        LOG_CONFIGURE ON
+        LOG_BUILD ON
+    )
+
+    list(APPEND pfasst_DEPENDEND_TARGETS boost_${component})
+    list(APPEND BOOST_LIBRARIES ${BOOST_LIBRARY_DIR}/libboost_${component}.a)
+endforeach()
+
+message(STATUS "Boost include path: ${BOOST_INCLUDE_DIR}")
+message(STATUS "Boost library path: ${BOOST_LIBRARY_DIR}")
+list(APPEND 3rdparty_INCLUDES ${BOOST_INCLUDE_DIR})
+list(APPEND 3rdparty_DEPENDEND_LIBS ${BOOST_LIBRARIES})
 
 
 message(STATUS "--------------------------------------------------------------------------------")
@@ -104,7 +194,6 @@ if(NOT EIGEN3_FOUND)
             CONFIGURE_COMMAND ""
             BUILD_COMMAND ""
             TEST_COMMAND ""
-            INSTALL_DIR ""
             INSTALL_COMMAND ""
 
             LOG_DOWNLOAD ON
@@ -114,7 +203,6 @@ if(NOT EIGEN3_FOUND)
 
         # Specify include dir
         set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}")
-        set(Eigen3_FOUND TRUE)
 
         list(APPEND pfasst_DEPENDEND_TARGETS Eigen3)
 
@@ -187,9 +275,7 @@ if(NOT FFTW_FOUND)
         set(FFTW_INCLUDE_PATH ${fftw3_INSTALL_DIR}/include)
         set(FFTW_LIBRARIES ${fftw3_INSTALL_DIR}/lib/libfftw3.a)
 
-        set(FFTW_FOUND TRUE)
-
-        list(APPEND pfasst_DEPENDEND_LIBS FFTW)
+        list(APPEND pfasst_DEPENDEND_LIBS fftw3)
 
         msg_not_installed("FFTW3")
     endif()
