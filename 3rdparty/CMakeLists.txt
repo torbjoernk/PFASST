@@ -39,20 +39,25 @@ set_package_properties(Boost
 message(STATUS "Boost include path: ${Boost_INCLUDE_DIRS}")
 message(STATUS "Boost library path: ${Boost_LIBRARY_DIRS}")
 list(APPEND 3rdparty_INCLUDES ${Boost_INCLUDE_DIRS})
-list(APPEND 3rdparty_DEPENDEND_LIBS ${Boost_LIBRARIES})
+list(APPEND 3rdparty_DEPENDEND_LIBS "-L${Boost_LIBRARY_DIRS}" ${Boost_LIBRARIES})
 
 
-###
-# Leathers
+message(STATUS "--------------------------------------------------------------------------------")
+message(STATUS "Leathers")
 list(APPEND 3rdparty_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/leathers)
-# BetterEnums
+
+
+message(STATUS "--------------------------------------------------------------------------------")
+message(STATUS "Better Enums")
 list(APPEND 3rdparty_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/better-enums)
 
 
 message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "Eigen3")
 
-find_package(Eigen3)
+if(pfasst_SYSTEM_EIGEN)
+    find_package(Eigen3)
+endif()
 set_package_properties(Eigen3
     PROPERTIES
       DESCRIPTION "linear algebra library"
@@ -62,40 +67,59 @@ set_package_properties(Eigen3
 )
 
 if(NOT EIGEN3_FOUND)
-    set(EIGEN3_SOURCE_URL "http://bitbucket.org/eigen/eigen/get/3.2.2.tar.bz2")
-    set(EIGEN3_SOURCE_MD5 "fc2e814ae449d16b331f7e1f4e272bd3")
+    if(pfasst_SYSTEM_EIGEN)
+        message(FATAL "Eigen3 was not found but requested to only use a system's installation.")
+    else()
+        set(Eigen3_SOURCE_URL "http://bitbucket.org/eigen/eigen/get/3.2.2.tar.bz2")
+        set(Eigen3_SOURCE_MD5 "fc2e814ae449d16b331f7e1f4e272bd3")
 
-    message(STATUS "Eigen3 not found on your system")
-    message(STATUS " going to download sources from:")
-    message(STATUS "  ${EIGEN3_SOURCE_URL}")
-    set(Eigen3_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/Eigen3")
+        message(STATUS "going to download from: ${Eigen3_SOURCE_URL}")
 
-    ExternalProject_Add(
-        Eigen3
-        LIST_SEPARATOR " "
-        URL ${EIGEN3_SOURCE_URL}
-        URL_MD5 ${EIGEN3_SOURCE_MD5}
-        TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
-        UPDATE_COMMAND ""
-        PATCH_COMMAND ""
-        BUILD_IN_SOURCE ON
-        CONFIGURE_COMMAND ""
-        BUILD_COMMAND ""
-        TEST_COMMAND ""
-        INSTALL_DIR ""
-        INSTALL_COMMAND ""
-        LOG_DOWNLOAD ON
-        LOG_CONFIGURE OFF
-        LOG_BUILD OFF
-    )
+        set(Eigen3_PREFIX "${3rdparty_PREFIX}/Eigen3")
+        set(Eigen3_TMP_PREFIX "${3rdparty_TMP_PREFIX}/Eigen3")
 
-    # Specify include dir
-    set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}")
-    set(Eigen3_FOUND TRUE)
+        set(Eigen3_TMP_DIR "${Eigen3_TMP_PREFIX}/tmp")
+        set(Eigen3_STAMP_DIR "${Eigen3_TMP_PREFIX}/stamp")
+        set(Eigen3_DOWNLOAD_DIR "${Eigen3_PREFIX}/download")
+        set(Eigen3_SOURCE_DIR "${Eigen3_PREFIX}/src")
+        set(Eigen3_BINARY_DIR "${Eigen3_TMP_PREFIX}/build")
+        set(Eigen3_INSTALL_DIR "${Eigen3_PREFIX}/install")
 
-    list(APPEND pfasst_DEPENDEND_TARGETS Eigen3)
+        ExternalProject_Add(Eigen3
+            LIST_SEPARATOR " "
+            TMP_DIR "${Eigen3_TMP_DIR}"
+            STAMP_DIR "${Eigen3_STAMP_DIR}"
+            DOWNLOAD_DIR "${Eigen3_DOWNLOAD_DIR}"
+            SOURCE_DIR "${Eigen3_SOURCE_DIR}"
+            # BINARY_DIR "${Eigen3_BINARY_DIR}"  # not used as in-source build is specified
+            INSTALL_DIR "${Eigen3_INSTALL_DIR}"
 
-    msg_not_installed("Eigen3")
+            URL ${Eigen3_SOURCE_URL}
+            URL_MD5 ${Eigen3_SOURCE_MD5}
+            TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
+
+            UPDATE_COMMAND ""
+            PATCH_COMMAND ""
+            BUILD_IN_SOURCE ON
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ""
+            TEST_COMMAND ""
+            INSTALL_DIR ""
+            INSTALL_COMMAND ""
+
+            LOG_DOWNLOAD ON
+            LOG_CONFIGURE OFF
+            LOG_BUILD OFF
+        )
+
+        # Specify include dir
+        set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}")
+        set(Eigen3_FOUND TRUE)
+
+        list(APPEND pfasst_DEPENDEND_TARGETS Eigen3)
+
+        msg_not_installed("Eigen3")
+    endif()
 endif()
 
 list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_PATH}")
@@ -104,7 +128,9 @@ list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_PATH}")
 message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "FFTW3")
 
-find_package(FFTW)
+if(pfasst_SYSTEM_FFTW)
+    find_package(FFTW)
+endif()
 set_package_properties(FFTW
     PROPERTIES
       DESCRIPTION "FFTW3"
@@ -114,42 +140,59 @@ set_package_properties(FFTW
 )
 
 if(NOT FFTW_FOUND)
-    set(FFTW3_SOURCE_URL "http://fftw.org/fftw-3.3.4.tar.gz")
-    set(FFTW3_SOURCE_MD5 "2edab8c06b24feeb3b82bbb3ebf3e7b3")
+    if(pfasst_SYSTEM_FFTW)
+        message(FATAL "FFTW was not found but requested to only use a system's installation.")
+    else()
+        set(fftw3_SOURCE_URL "http://fftw.org/fftw-3.3.4.tar.gz")
+        set(fftw3_SOURCE_MD5 "2edab8c06b24feeb3b82bbb3ebf3e7b3")
 
-    message(STATUS "FFTW3 not found on your system")
-    message(STATUS " going to download and compile it from sources retrieved from:")
-    message(STATUS "  ${FFTW3_SOURCE_URL}")
-    set(fftw3_SOURCE_DIR "${pfasst_BINARY_DIR}/3rdparty/src/fftw3")
-    set(fftw3_INSTALL_DIR "${pfasst_BINARY_DIR}/3rdparty/src/fftw3-install")
+        message(STATUS "going to download and compile from sources retrieved from: ${fftw3_SOURCE_URL}")
 
-    ExternalProject_Add(
-        fftw3
-        LIST_SEPARATOR " "
-        URL ${FFTW3_SOURCE_URL}
-        URL_MD5 ${FFTW3_SOURCE_MD5}
-        TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
-        UPDATE_COMMAND ""
-        PATCH_COMMAND ""
-        BUILD_IN_SOURCE ON
-        CONFIGURE_COMMAND ${fftw3_SOURCE_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} --prefix=${fftw3_INSTALL_DIR} --libdir=${fftw3_INSTALL_DIR}/lib
-        BUILD_COMMAND make
-        TEST_COMMAND ""
-        INSTALL_DIR ${fftw3_SOURCE_DIR}-install
-        INSTALL_COMMAND make install
-        LOG_DOWNLOAD ON
-        LOG_CONFIGURE ON
-        LOG_BUILD ON
-    )
-    # Specify include dir
-    set(FFTW_INCLUDE_PATH ${fftw3_INSTALL_DIR}/include)
-    set(FFTW_LIBRARIES ${fftw3_INSTALL_DIR}/lib/libfftw3.a)
+        set(fftw3_PREFIX "${3rdparty_PREFIX}/fftw3")
+        set(fftw3_TMP_PREFIX "${3rdparty_TMP_PREFIX}/fftw3")
 
-    set(FFTW_FOUND TRUE)
+        set(fftw3_TMP_DIR "${fftw3_TMP_PREFIX}/tmp")
+        set(fftw3_STAMP_DIR "${fftw3_TMP_PREFIX}/stamp")
+        set(fftw3_DOWNLOAD_DIR "${fftw3_PREFIX}/download")
+        set(fftw3_SOURCE_DIR "${fftw3_PREFIX}/src")
+        set(fftw3_BINARY_DIR "${fftw3_TMP_PREFIX}/build")
+        set(fftw3_INSTALL_DIR "${fftw3_PREFIX}/install")
 
-    list(APPEND pfasst_DEPENDEND_LIBS FFTW)
+        ExternalProject_Add(fftw3
+            LIST_SEPARATOR " "
+            TMP_DIR "${fftw3_TMP_DIR}"
+            STAMP_DIR "${fftw3_STAMP_DIR}"
+            DOWNLOAD_DIR "${fftw3_DOWNLOAD_DIR}"
+            SOURCE_DIR "${fftw3_SOURCE_DIR}"
+            # BINARY_DIR "${fftw3_BINARY_DIR}"  # not used as in-source build is specified
+            INSTALL_DIR "${fftw3_INSTALL_DIR}"
 
-    msg_not_installed("FFTW3")
+            URL ${fftw3_SOURCE_URL}
+            URL_MD5 ${fftw3_SOURCE_MD5}
+            TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
+
+            UPDATE_COMMAND ""
+            PATCH_COMMAND ""
+            BUILD_IN_SOURCE ON
+            CONFIGURE_COMMAND ${fftw3_SOURCE_DIR}/configure CC=${CMAKE_C_COMPILER} CXX=${CMAKE_CXX_COMPILER} CXXFLAGS=${CMAKE_CXX_FLAGS} --prefix=${fftw3_INSTALL_DIR} --libdir=${fftw3_INSTALL_DIR}/lib
+            BUILD_COMMAND make
+            TEST_COMMAND ""
+            INSTALL_COMMAND make install
+
+            LOG_DOWNLOAD ON
+            LOG_CONFIGURE ON
+            LOG_BUILD ON
+        )
+        # Specify include dir
+        set(FFTW_INCLUDE_PATH ${fftw3_INSTALL_DIR}/include)
+        set(FFTW_LIBRARIES ${fftw3_INSTALL_DIR}/lib/libfftw3.a)
+
+        set(FFTW_FOUND TRUE)
+
+        list(APPEND pfasst_DEPENDEND_LIBS FFTW)
+
+        msg_not_installed("FFTW3")
+    endif()
 else()
     set(FFTW_INCLUDE_PATH ${FFTW_INCLUDE_PATH} PARENT_SCOPE)
     set(FFTW_LIBRARIES ${FFTW_LIBRARIES} PARENT_SCOPE)
@@ -167,7 +210,6 @@ if(pfasst_BUILD_TESTS)
     message(STATUS "--------------------------------------------------------------------------------")
     message(STATUS "Google Testing Framework (gtest & gmock)")
 
-    find_package(GMock)
     set_package_properties(GMock
         PROPERTIES
           DESCRIPTION "GMock"
@@ -176,50 +218,53 @@ if(pfasst_BUILD_TESTS)
           PURPOSE "Google testing and mocking framework"
     )
 
-    if(NOT GMOCK_FOUND)
-        set(GMOCK_SOURCE_URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip")
-        set(GMOCK_SOURCE_MD5 "073b984d8798ea1594f5e44d85b20d66")
+    set(gmock_SOURCE_URL "http://googlemock.googlecode.com/files/gmock-1.7.0.zip")
+    set(gmock_SOURCE_MD5 "073b984d8798ea1594f5e44d85b20d66")
 
-        message(STATUS " going to download and compile it from sources retrieved from:")
-        message(STATUS "   ${GMOCK_SOURCE_URL}")
+    message(STATUS "going to download and compile from sources retrieved from: ${gmock_SOURCE_URL}")
 
-        # Add gmock
-        ExternalProject_Add(
-          googlemock
-          URL ${GMOCK_SOURCE_URL}
-          URL_MD5 ${GMOCK_SOURCE_MD5}
-          TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
-          UPDATE_COMMAND ""
-          PATCH_COMMAND ""
-          CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release
-            -DCMAKE_C_COMPILE=${CMAKE_C_COMPILER}
-            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-            -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-            -DGTEST_USE_OWN_TR1_TUPLE=ON
-            -Dgtest_force_shared_crt=ON
-            -Dgmock_build_tests=OFF
-          # Disable install step
-          INSTALL_COMMAND ""
-          # Wrap download, configure and build steps in a script to log output
-          LOG_DOWNLOAD ON
-          LOG_CONFIGURE ON
-          LOG_BUILD ON
-        )
+    set(gmock_PREFIX "${3rdparty_PREFIX}/gmock")
+    set(gmock_TMP_PREFIX "${3rdparty_TMP_PREFIX}/gmock")
 
-        # Specify include dir
-        ExternalProject_Get_Property(googlemock source_dir)
-        list(APPEND TESTS_3rdparty_INCLUDES ${source_dir}/include ${source_dir}/gtest/include)
+    set(gmock_TMP_DIR "${gmock_TMP_PREFIX}/tmp")
+    set(gmock_STAMP_DIR "${gmock_TMP_PREFIX}/stamp")
+    set(gmock_DOWNLOAD_DIR "${gmock_PREFIX}/download")
+    set(gmock_SOURCE_DIR "${gmock_PREFIX}/src")
+    set(gmock_BINARY_DIR "${gmock_TMP_PREFIX}/build")
+    set(gmock_INSTALL_DIR "${gmock_PREFIX}/install")
 
-        ExternalProject_Get_Property(googlemock binary_dir)
-        set(Suffix ".a")
-        set(Pthread "-pthread")
-        list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${binary_dir}/${CMAKE_FIND_LIBRARY_PREFIXES}gmock${Suffix})
-        list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${Pthread})
-        list(APPEND pfasst_TESTS_DEPENDEND_TARGETS googlemock)
-    else()
-        list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${GMOCK_LIBRARIES} "-pthread")
-        list(APPEND TESTS_3rdparty_INCLUDES ${GMOCK_INCLUDE_DIRS})
-    endif(NOT GMOCK_FOUND)
+    # Add gmock
+    ExternalProject_Add(gmock
+        TMP_DIR "${gmock_TMP_DIR}"
+        STAMP_DIR "${gmock_STAMP_DIR}"
+        DOWNLOAD_DIR "${gmock_DOWNLOAD_DIR}"
+        SOURCE_DIR "${gmock_SOURCE_DIR}"
+        BINARY_DIR "${gmock_BINARY_DIR}"
+        INSTALL_DIR "${gmock_INSTALL_DIR}"
+        
+        URL ${gmock_SOURCE_URL}
+        URL_MD5 ${gmock_SOURCE_MD5}
+        TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
+
+        UPDATE_COMMAND ""
+        PATCH_COMMAND ""
+        CMAKE_ARGS "-DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILE=${CMAKE_C_COMPILER} -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS} -DGTEST_USE_OWN_TR1_TUPLE=ON -Dgtest_force_shared_crt=ON -Dgmock_build_tests=OFF"
+
+        INSTALL_COMMAND ""
+
+        LOG_DOWNLOAD ON
+        LOG_CONFIGURE ON
+        LOG_BUILD ON
+    )
+
+    # Specify include dir
+    list(APPEND TESTS_3rdparty_INCLUDES ${gmock_SOURCE_DIR}/include ${gmock_SOURCE_DIR}/gtest/include)
+
+    set(Suffix ".a")
+    set(Pthread "-pthread")
+    list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${gmock_BINARY_DIR}/${CMAKE_FIND_LIBRARY_PREFIXES}gmock${Suffix})
+    list(APPEND TESTS_3rdparty_DEPENDEND_LIBS ${Pthread})
+    list(APPEND pfasst_TESTS_DEPENDEND_TARGETS gmock)
 endif()
 
 # propagate include lists to parent directory

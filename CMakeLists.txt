@@ -10,8 +10,11 @@ include(FeatureSummary)
 
 list(APPEND CMAKE_FIND_ROOT_PATH ${pfasst_SOURCE_DIR}/stack)
 
+set(3rdparty_PREFIX "${CMAKE_SOURCE_DIR}/3rdparty")
+set(3rdparty_TMP_PREFIX "${CMAKE_BINARY_DIR}/3rdparty")
 # Set default ExternalProject root directory
-set_directory_properties(PROPERTIES EP_PREFIX ${CMAKE_BINARY_DIR}/3rdparty)
+set_directory_properties(PROPERTIES EP_PREFIX "${3rdparty_PREFIX}")
+
 
 option(pfasst_DISABLE_LIBCXX    "Disable use of LLVM's libc++ when compiling with Clang." ON )
 option(pfasst_BUILD_SHARED_LIBS "Build shared libraries."                                 ON )
@@ -24,6 +27,8 @@ cmake_dependent_option(
 option(pfasst_BUILD_TESTS       "Build test suite for PFASST."                            ON )
 
 option(pfasst_WITH_MPI          "Build with MPI enabled."                                 ON )
+option(pfasst_SYSTEM_FFTW       "Use system's FFTW library; fail if not found"            OFF)
+option(pfasst_SYSTEM_EIGEN      "Use system's Eigen3 library; fail if not found"          OFF)
 
 option(pfasst_WITH_GCC_PROF     "Enable excessive debugging & profiling output with GCC." OFF)
 cmake_dependent_option(
