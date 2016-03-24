@@ -87,6 +87,16 @@ set(FFTW3_LIBRARIES ${FFTW3_LIBRARIES} PARENT_SCOPE)
 set(FFTW3_INCLUDE_PATH ${FFTW3_INCLUDE_PATH} PARENT_SCOPE)
 
 
+message(STATUS "--------------------------------------------------------------------------------")
+message(STATUS "Dune")
+
+include(Dune.cmake)
+
+set(dune_FOUND ${dune_FOUND} PARENT_SCOPE)
+set(dune_LIBRARIES ${dune_LIBRARIES} PARENT_SCOPE)
+set(dune_INCLUDE_PATHS ${dune_INCLUDE_PATHS} PARENT_SCOPE)
+
+
 if(pfasst_BUILD_TESTS)
     set(TESTS_3rdparty_INCLUDES ${TESTS_3rdparty_INCLUDES})
     set(TESTS_3rdparty_DEPENDEND_LIBS ${TESTS_3rdparty_DEPENDEND_LIBS})

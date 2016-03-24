@@ -66,8 +66,8 @@ else()
     set(FFTW3_LIBRARY_DIR ${fftw3_INSTALL_DIR}/lib)
     add_library(fftw3_lib STATIC IMPORTED GLOBAL)
     set_property(TARGET fftw3_lib
-            PROPERTY IMPORTED_LOCATION ${FFTW3_LIBRARY_DIR}/libfftw3.a
-            )
+        PROPERTY IMPORTED_LOCATION ${FFTW3_LIBRARY_DIR}/libfftw3.a
+    )
     add_dependencies(fftw3_lib fftw3)
     set(FFTW3_LIBRARIES fftw3_lib)
     message(STATUS "  include path: ${FFTW3_INCLUDE_PATH}")

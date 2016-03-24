@@ -183,6 +183,8 @@ message(STATUS "Configuring 3rd party libraries")
 #  - Google test and mock libraries in TESTS_3rdparty_DEPENDEND_LIBS (if pfasst_BUILD_TESTS)
 #  - FFTW3_INCLUDE_PATH
 #  - FFTW3_LIBRARIES
+#  - dune_INCLUDE_PATHS
+#  - dune_LIBRARIES
 add_subdirectory(3rdparty)
 
 message(STATUS "********************************************************************************")
