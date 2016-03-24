@@ -177,12 +177,12 @@ endif(pfasst_BUILD_TESTS)
 message(STATUS "********************************************************************************")
 message(STATUS "Configuring 3rd party libraries")
 # makes available:
-#  - Boost headers in 3rdparty_INCLUDES
-#  - Boost libraries in Boost_LIBRARY_DIRS
-#  - Eigen headers in 3rdparty_INCLUDES
-#  - Google test and mock headers in 3rdparty_INCLUDES (if pfasst_BUILD_TESTS)
-#  - FFTW_INCLUDE_PATH (if pfasst_BUILD_EXAMPLES)
-#  - FFTW_LIBRARIES (if pfasst_BUILD_EXAMPLES)
+#  - required headers in 3rdparty_INCLUDES
+#  - required libraries in 3rdparty_DEPENDEND_LIBS and pfasst_DEPENDEND_LIBS
+#  - Google test and mock headers in TESTS_3rdparty_INCLUDES (if pfasst_BUILD_TESTS)
+#  - Google test and mock libraries in TESTS_3rdparty_DEPENDEND_LIBS (if pfasst_BUILD_TESTS)
+#  - FFTW3_INCLUDE_PATH
+#  - FFTW3_LIBRARIES
 add_subdirectory(3rdparty)
 
 message(STATUS "********************************************************************************")
