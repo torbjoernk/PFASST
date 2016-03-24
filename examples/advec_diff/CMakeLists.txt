@@ -4,7 +4,7 @@ message(STATUS "  Advection-Diffusion")
 include_directories(
     ${3rdparty_INCLUDES}
     ${pfasst_INCLUDES}
-    ${FFTW3_INCLUDE_DIR}
+    ${FFTW3_INCLUDE_PATH}
 )
 
 set(advecdiff_examples
@@ -25,13 +25,11 @@ endif()
 if(NOT ${pfasst_WITH_MPI})
     foreach(example ${advecdiff_examples})
         add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
-        add_dependencies(${example}
-            ${pfasst_DEPENDEND_TARGETS}
-        )
+        add_dependencies(${example} ${pfasst_DEPENDEND_TARGETS})
         target_link_libraries(${example}
-            fftw3_lib
             ${3rdparty_DEPENDEND_LIBS}
             ${pfasst_DEPENDEND_LIBS}
+            ${FFTW3_LIBRARIES}
         )
         if(pfasst_INSTALL_EXAMPLES)
             install(TARGETS ${example} RUNTIME DESTINATION bin)
@@ -41,11 +39,11 @@ else()
     include_directories(${MPI_CXX_INCLUDE_PATH})
     foreach(example ${advecdiff_mpi_examples})
         add_executable(${example} ${CMAKE_CURRENT_SOURCE_DIR}/${example}.cpp)
-        add_dependencies(${example} fftw3)
         add_dependencies(${example} ${pfasst_DEPENDEND_TARGETS})
         target_link_libraries(${example}
             ${3rdparty_DEPENDEND_LIBS}
             ${pfasst_DEPENDEND_LIBS}
+            ${FFTW3_LIBRARIES}
         )
         if(pfasst_INSTALL_EXAMPLES)
             install(TARGETS ${example} RUNTIME DESTINATION bin)

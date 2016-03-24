@@ -4,7 +4,7 @@ include_directories(
     ${TESTS_3rdparty_INCLUDES}
     ${pfasst_INCLUDES}
     ${CMAKE_CURRENT_SOURCE_DIR}
-    ${FFTW3_INCLUDE_DIR}
+    ${FFTW3_INCLUDE_PATH}
 )
 
 set(TESTS
@@ -25,10 +25,10 @@ if(NOT pfasst_WITH_MPI)
         add_executable(${test} ${test}.cpp)
         add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS})
         target_link_libraries(${test}
-            fftw3_lib
             ${3rdparty_DEPENDEND_LIBS}
             ${TESTS_3rdparty_DEPENDEND_LIBS}
             ${pfasst_DEPENDEND_LIBS}
+            ${FFTW3_LIBRARIES}
         )
         if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
             set_target_properties(${test}
@@ -47,10 +47,10 @@ else()
         add_executable(${test} ${test}.cpp)
         add_dependencies(${test} ${pfasst_DEPENDEND_TARGETS})
         target_link_libraries(${test}
-            fftw3_lib
             ${3rdparty_DEPENDEND_LIBS}
             ${TESTS_3rdparty_DEPENDEND_LIBS}
             ${pfasst_DEPENDEND_LIBS}
+            ${FFTW3_LIBRARIES}
         )
         if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
             set_target_properties(${test}

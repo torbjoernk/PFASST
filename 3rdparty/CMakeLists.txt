@@ -64,97 +64,53 @@ list(APPEND 3rdparty_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/better-enums)
 message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "Boost")
 
-set(Boost_SOURCE_NAME "boost_1_60_0.tar.bz2")
-set(Boost_SOURCE_MD5 "65a840e1a0b13a558ff19eeb2c4f0cbe")
-message(STATUS "  using version: 1.60.0  (file: ${Boost_SOURCE_NAME})")
-
-if(NOT Boost_SOURCES)
-    set(Boost_SOURCE_LOCATION "https://downloads.sourceforge.net/project/boost/boost/1.60.0")
-    message(STATUS "  going to download from: ${Boost_SOURCE_LOCATION}")
-    message(STATUS "    HINT: specify -DBoost_SOURCES=/local/directory/with/${Boost_SOURCE_NAME} to avoid redownloading")
-else()
-    set(Boost_SOURCE_LOCATION ${Boost_SOURCES})
-    message(STATUS "  using pre-downloaded sources at: ${Boost_SOURCE_LOCATION}")
-endif()
-
 set(Boost_COMPONENTS "program_options")
 
-set(Boost_PREFIX "${3rdparty_PREFIX}/Boost")
-set(Boost_TMP_PREFIX "${3rdparty_TMP_PREFIX}/Boost")
+if(pfasst_SYSTEM_BOOST)
+    message(STATUS "trying to use system's Boost")
+    set(Boost_USE_MULTITHREADED ON)
 
-set(Boost_TMP_DIR "${Boost_TMP_PREFIX}/tmp")
-set(Boost_STAMP_DIR "${Boost_TMP_PREFIX}/stamp")
-set(Boost_DOWNLOAD_DIR "${Boost_PREFIX}/download")
-set(Boost_SOURCE_DIR "${Boost_PREFIX}/src")
-set(Boost_BINARY_DIR "${Boost_TMP_PREFIX}/build")
-set(Boost_INSTALL_DIR "${Boost_PREFIX}/install")
+    find_package(Boost 1.53.0 QUIET COMPONENTS ${Boost_COMPONENTS} REQUIRED)
 
-set(Boost_build_CMD "${Boost_SOURCE_DIR}/bootstrap.sh")
-list(APPEND Boost_build_CMD
-    --prefix=${Boost_INSTALL_DIR}
-    --with-libraries=${Boost_COMPONENTS}
-)
-if(CMAKE_CXX_COMPILER_ID MATCHES "^(Apple)?Clang$")
-    list(APPEND Boost_build_CMD toolset=clang)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    list(APPEND Boost_build_CMD toolset=gcc)
-endif()
+    message(STATUS "  found version: ${Boost_MAJOR_VERSION}.${Boost_MINOR_VERSION}.${Boost_SUBMINOR_VERSION}")
+    message(STATUS "  include path: ${Boost_INCLUDE_DIRS}")
+    message(STATUS "  library path: ${Boost_LIBRARY_DIRS}")
+else()
+    set(Boost_SOURCE_NAME "boost_1_60_0.tar.bz2")
+    set(Boost_SOURCE_MD5 "65a840e1a0b13a558ff19eeb2c4f0cbe")
+    message(STATUS "  using version: 1.60.0  (file: ${Boost_SOURCE_NAME})")
 
-ExternalProject_Add(boost_build
-    LIST_SEPARATOR " "
-    TMP_DIR "${Boost_TMP_DIR}"
-    STAMP_DIR "${Boost_STAMP_DIR}"
-    DOWNLOAD_DIR "${Boost_DOWNLOAD_DIR}"
-    SOURCE_DIR "${Boost_SOURCE_DIR}"
-    # BINARY_DIR "${Boost_BINARY_DIR}"  # not used as in-source build is specified
-    INSTALL_DIR "${Boost_INSTALL_DIR}"
-
-    EXCLUDE_FROM_ALL ON
-
-    URL ${Boost_SOURCE_LOCATION}/${Boost_SOURCE_NAME}
-    URL_MD5 ${Boost_SOURCE_MD5}
-    TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
-
-    UPDATE_COMMAND ""
-    PATCH_COMMAND ""
-    BUILD_IN_SOURCE ON
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${Boost_build_CMD}
-    TEST_COMMAND ""
-    INSTALL_COMMAND ""
-
-    LOG_DOWNLOAD ON
-    LOG_CONFIGURE ON
-    LOG_BUILD ON
-)
-
-set(BOOST_LIBRARIES)
-set(BOOST_LIBRARY_DIR ${Boost_SOURCE_DIR}/stage/lib)
-set(BOOST_INCLUDE_DIR ${Boost_SOURCE_DIR})
-
-message(STATUS "  using components:")
-foreach(component ${Boost_COMPONENTS})
-    message(STATUS "    ${component}")
-
-    set(Boost_${component}_BUILD_CMD ${Boost_SOURCE_DIR}/b2)
-    list(APPEND Boost_${component}_BUILD_CMD
-        --build-dir=${Boost_BINARY_DIR}
-        --with-${component}
-        address-model=64
-        cxxflags=-std=c++11
-        cxxflags=-fPIC
-        link=static
-        threading=multi
-        runtime-link=shared
-        variant=release
-    )
-    if(CMAKE_CXX_COMPILER_ID MATCHES "^(Apple)?Clang$")
-        list(APPEND Boost_${component}_BUILD_CMD toolset=clang)
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-        list(APPEND Boost_${component}_BUILD_CMD toolset=gcc)
+    if(NOT Boost_SOURCES)
+        set(Boost_SOURCE_LOCATION "https://downloads.sourceforge.net/project/boost/boost/1.60.0")
+        message(STATUS "  going to download from: ${Boost_SOURCE_LOCATION}")
+        message(STATUS "    HINT: specify -DBoost_SOURCES=/local/directory/with/${Boost_SOURCE_NAME} to avoid redownloading")
+    else()
+        set(Boost_SOURCE_LOCATION ${Boost_SOURCES})
+        message(STATUS "  using pre-downloaded sources at: ${Boost_SOURCE_LOCATION}")
     endif()
 
-    ExternalProject_Add(boost_${component}
+    set(Boost_PREFIX "${3rdparty_PREFIX}/Boost")
+    set(Boost_TMP_PREFIX "${3rdparty_TMP_PREFIX}/Boost")
+
+    set(Boost_TMP_DIR "${Boost_TMP_PREFIX}/tmp")
+    set(Boost_STAMP_DIR "${Boost_TMP_PREFIX}/stamp")
+    set(Boost_DOWNLOAD_DIR "${Boost_PREFIX}/download")
+    set(Boost_SOURCE_DIR "${Boost_PREFIX}/src")
+    set(Boost_BINARY_DIR "${Boost_TMP_PREFIX}/build")
+    set(Boost_INSTALL_DIR "${Boost_PREFIX}/install")
+
+    set(Boost_build_CMD "${Boost_SOURCE_DIR}/bootstrap.sh")
+    list(APPEND Boost_build_CMD
+        --prefix=${Boost_INSTALL_DIR}
+        --with-libraries=${Boost_COMPONENTS}
+    )
+    if(CMAKE_CXX_COMPILER_ID MATCHES "^(Apple)?Clang$")
+        list(APPEND Boost_build_CMD toolset=clang)
+    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        list(APPEND Boost_build_CMD toolset=gcc)
+    endif()
+
+    ExternalProject_Add(boost_build
         LIST_SEPARATOR " "
         TMP_DIR "${Boost_TMP_DIR}"
         STAMP_DIR "${Boost_STAMP_DIR}"
@@ -164,14 +120,141 @@ foreach(component ${Boost_COMPONENTS})
         INSTALL_DIR "${Boost_INSTALL_DIR}"
 
         EXCLUDE_FROM_ALL ON
-        DEPENDS boost_build
 
-        DOWNLOAD_COMMAND ""
+        URL ${Boost_SOURCE_LOCATION}/${Boost_SOURCE_NAME}
+        URL_MD5 ${Boost_SOURCE_MD5}
+        TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
+
         UPDATE_COMMAND ""
         PATCH_COMMAND ""
         BUILD_IN_SOURCE ON
         CONFIGURE_COMMAND ""
-        BUILD_COMMAND ${Boost_${component}_BUILD_CMD} -j4 stage
+        BUILD_COMMAND ${Boost_build_CMD}
+        TEST_COMMAND ""
+        INSTALL_COMMAND ""
+
+        LOG_DOWNLOAD ON
+        LOG_CONFIGURE ON
+        LOG_BUILD ON
+    )
+
+    set(Boost_LIBRARIES)
+    set(Boost_INCLUDE_DIRS ${Boost_SOURCE_DIR})
+    set(Boost_LIBRARY_DIR ${Boost_SOURCE_DIR}/stage/lib)
+
+    message(STATUS "  using components:")
+    foreach(component ${Boost_COMPONENTS})
+        message(STATUS "    ${component}")
+
+        set(Boost_${component}_BUILD_CMD ${Boost_SOURCE_DIR}/b2)
+        list(APPEND Boost_${component}_BUILD_CMD
+            --build-dir=${Boost_BINARY_DIR}
+            --with-${component}
+            address-model=64
+            cxxflags=-std=c++11
+            cxxflags=-fPIC
+            link=static
+            threading=multi
+            runtime-link=shared
+            variant=release
+        )
+        if(CMAKE_CXX_COMPILER_ID MATCHES "^(Apple)?Clang$")
+            list(APPEND Boost_${component}_BUILD_CMD toolset=clang)
+        elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+            list(APPEND Boost_${component}_BUILD_CMD toolset=gcc)
+        endif()
+
+        ExternalProject_Add(boost_${component}
+            LIST_SEPARATOR " "
+            TMP_DIR "${Boost_TMP_DIR}"
+            STAMP_DIR "${Boost_STAMP_DIR}"
+            DOWNLOAD_DIR "${Boost_DOWNLOAD_DIR}"
+            SOURCE_DIR "${Boost_SOURCE_DIR}"
+            # BINARY_DIR "${Boost_BINARY_DIR}"  # not used as in-source build is specified
+            INSTALL_DIR "${Boost_INSTALL_DIR}"
+
+            EXCLUDE_FROM_ALL ON
+            DEPENDS boost_build
+
+            DOWNLOAD_COMMAND ""
+            UPDATE_COMMAND ""
+            PATCH_COMMAND ""
+            BUILD_IN_SOURCE ON
+            CONFIGURE_COMMAND ""
+            BUILD_COMMAND ${Boost_${component}_BUILD_CMD} -j4 stage
+            TEST_COMMAND ""
+            INSTALL_COMMAND ""
+
+            LOG_DOWNLOAD ON
+            LOG_CONFIGURE ON
+            LOG_BUILD ON
+            LOG_INSTALL ON
+        )
+
+        list(APPEND pfasst_DEPENDEND_TARGETS boost_${component})
+        list(APPEND Boost_LIBRARIES ${Boost_LIBRARY_DIR}/libboost_${component}.a)
+    endforeach()
+
+    message(STATUS "  include path: ${Boost_INCLUDE_DIRS}")
+    message(STATUS "  library path: ${Boost_LIBRARY_DIR}")
+endif()
+list(APPEND 3rdparty_INCLUDES ${Boost_INCLUDE_DIRS})
+list(APPEND 3rdparty_DEPENDEND_LIBS ${Boost_LIBRARIES})
+
+
+message(STATUS "--------------------------------------------------------------------------------")
+message(STATUS "Eigen3")
+
+if(pfasst_SYSTEM_BOOST)
+    message(STATUS "trying to use system's Eigen3")
+
+    find_package(Eigen3 QUIET REQUIRED)
+
+    message(STATUS "  include path: ${Eigen3_INCLUDE_PATH}")
+else()
+    set(Eigen3_SOURCE_NAME "3.2.5.tar.bz2")
+    set(Eigen3_SOURCE_MD5 "21a928f6e0f1c7f24b6f63ff823593f5")
+    message(STATUS "  using version: 3.2.5  (file: ${Eigen3_SOURCE_NAME})")
+
+    if(NOT Eigen3_SOURCES)
+        set(Eigen3_SOURCE_LOCATION "https://bitbucket.org/eigen/eigen/get")
+        message(STATUS "  going to download from: ${Eigen3_SOURCE_LOCATION}")
+        message(STATUS "    HINT: specify -DEigen3_SOURCES=/local/directory/with/${Eigen3_SOURCE_NAME} to avoid redownloading")
+    else()
+        set(Eigen3_SOURCE_LOCATION ${Eigen3_SOURCES})
+        message(STATUS "  using pre-downloaded sources at: ${Eigen3_SOURCE_LOCATION}")
+    endif()
+
+    set(Eigen3_PREFIX "${3rdparty_PREFIX}/Eigen3")
+    set(Eigen3_TMP_PREFIX "${3rdparty_TMP_PREFIX}/Eigen3")
+
+    set(Eigen3_TMP_DIR "${Eigen3_TMP_PREFIX}/tmp")
+    set(Eigen3_STAMP_DIR "${Eigen3_TMP_PREFIX}/stamp")
+    set(Eigen3_DOWNLOAD_DIR "${Eigen3_PREFIX}/download")
+    set(Eigen3_SOURCE_DIR "${Eigen3_PREFIX}/src")
+    set(Eigen3_BINARY_DIR "${Eigen3_TMP_PREFIX}/build")
+    set(Eigen3_INSTALL_DIR "${Eigen3_PREFIX}/install")
+
+    ExternalProject_Add(Eigen3
+        LIST_SEPARATOR " "
+        TMP_DIR "${Eigen3_TMP_DIR}"
+        STAMP_DIR "${Eigen3_STAMP_DIR}"
+        DOWNLOAD_DIR "${Eigen3_DOWNLOAD_DIR}"
+        SOURCE_DIR "${Eigen3_SOURCE_DIR}"
+        # BINARY_DIR "${Eigen3_BINARY_DIR}"  # not used as in-source build is specified
+        INSTALL_DIR "${Eigen3_INSTALL_DIR}"
+
+        EXCLUDE_FROM_ALL ON
+
+        URL ${Eigen3_SOURCE_LOCATION}/${Eigen3_SOURCE_NAME}
+        URL_MD5 ${Eigen3_SOURCE_MD5}
+        TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
+
+        UPDATE_COMMAND ""
+        PATCH_COMMAND ""
+        BUILD_IN_SOURCE ON
+        CONFIGURE_COMMAND ""
+        BUILD_COMMAND ""
         TEST_COMMAND ""
         INSTALL_COMMAND ""
 
@@ -181,150 +264,96 @@ foreach(component ${Boost_COMPONENTS})
         LOG_INSTALL ON
     )
 
-    list(APPEND pfasst_DEPENDEND_TARGETS boost_${component})
-    list(APPEND BOOST_LIBRARIES ${BOOST_LIBRARY_DIR}/libboost_${component}.a)
-endforeach()
+    # Specify include dir
+    set(Eigen3_INCLUDE_PATH "${Eigen3_SOURCE_DIR}")
+    message(STATUS "  include path: ${Eigen3_INCLUDE_PATH}")
 
-message(STATUS "  Boost include path: ${BOOST_INCLUDE_DIR}")
-message(STATUS "  Boost library path: ${BOOST_LIBRARY_DIR}")
-list(APPEND 3rdparty_INCLUDES ${BOOST_INCLUDE_DIR})
-list(APPEND 3rdparty_DEPENDEND_LIBS ${BOOST_LIBRARIES})
-
-
-message(STATUS "--------------------------------------------------------------------------------")
-message(STATUS "Eigen3")
-
-set(Eigen3_SOURCE_NAME "3.2.5.tar.bz2")
-set(Eigen3_SOURCE_MD5 "21a928f6e0f1c7f24b6f63ff823593f5")
-message(STATUS "  using version: 3.2.5  (file: ${Eigen3_SOURCE_NAME})")
-
-if(NOT Eigen3_SOURCES)
-    set(Eigen3_SOURCE_LOCATION "https://bitbucket.org/eigen/eigen/get")
-    message(STATUS "  going to download from: ${Eigen3_SOURCE_LOCATION}")
-    message(STATUS "    HINT: specify -DEigen3_SOURCES=/local/directory/with/${Eigen3_SOURCE_NAME} to avoid redownloading")
-else()
-    set(Eigen3_SOURCE_LOCATION ${Eigen3_SOURCES})
-    message(STATUS "  using pre-downloaded sources at: ${Eigen3_SOURCE_LOCATION}")
+    list(APPEND pfasst_DEPENDEND_TARGETS Eigen3)
 endif()
-
-set(Eigen3_PREFIX "${3rdparty_PREFIX}/Eigen3")
-set(Eigen3_TMP_PREFIX "${3rdparty_TMP_PREFIX}/Eigen3")
-
-set(Eigen3_TMP_DIR "${Eigen3_TMP_PREFIX}/tmp")
-set(Eigen3_STAMP_DIR "${Eigen3_TMP_PREFIX}/stamp")
-set(Eigen3_DOWNLOAD_DIR "${Eigen3_PREFIX}/download")
-set(Eigen3_SOURCE_DIR "${Eigen3_PREFIX}/src")
-set(Eigen3_BINARY_DIR "${Eigen3_TMP_PREFIX}/build")
-set(Eigen3_INSTALL_DIR "${Eigen3_PREFIX}/install")
-
-ExternalProject_Add(Eigen3
-    LIST_SEPARATOR " "
-    TMP_DIR "${Eigen3_TMP_DIR}"
-    STAMP_DIR "${Eigen3_STAMP_DIR}"
-    DOWNLOAD_DIR "${Eigen3_DOWNLOAD_DIR}"
-    SOURCE_DIR "${Eigen3_SOURCE_DIR}"
-    # BINARY_DIR "${Eigen3_BINARY_DIR}"  # not used as in-source build is specified
-    INSTALL_DIR "${Eigen3_INSTALL_DIR}"
-
-    EXCLUDE_FROM_ALL ON
-
-    URL ${Eigen3_SOURCE_LOCATION}/${Eigen3_SOURCE_NAME}
-    URL_MD5 ${Eigen3_SOURCE_MD5}
-    TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
-
-    UPDATE_COMMAND ""
-    PATCH_COMMAND ""
-    BUILD_IN_SOURCE ON
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    TEST_COMMAND ""
-    INSTALL_COMMAND ""
-
-    LOG_DOWNLOAD ON
-    LOG_CONFIGURE ON
-    LOG_BUILD ON
-    LOG_INSTALL ON
-)
-
-# Specify include dir
-set(Eigen3_INCLUDE_DIR "${Eigen3_SOURCE_DIR}")
-message(STATUS "  include path: ${Eigen3_INCLUDE_DIR}")
-
-list(APPEND pfasst_DEPENDEND_TARGETS Eigen3)
-list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_DIR}")
+list(APPEND 3rdparty_INCLUDES "${Eigen3_INCLUDE_PATH}")
 
 
 message(STATUS "--------------------------------------------------------------------------------")
 message(STATUS "FFTW3")
 
-set(fftw3_SOURCE_NAME "fftw-3.3.4.tar.gz")
-set(fftw3_SOURCE_MD5 "2edab8c06b24feeb3b82bbb3ebf3e7b3")
-message(STATUS "  using version: 3.3.4  (file: ${fftw3_SOURCE_NAME})")
+if(pfasst_SYSTEM_FFTW3)
+    message(STATUS "trying to use system's FFTW3")
+    find_package(FFTW QUIET REQUIRED)
 
-if(NOT fftw3_SOURCES)
-    set(fftw3_SOURCE_LOCATION "http://www.fftw.org")
-    message(STATUS "  going to download from: ${fftw3_SOURCE_LOCATION}")
-    message(STATUS "    HINT: specify -Dfftw3_SOURCES=/local/directory/with/${fftw3_SOURCE_NAME} to avoid redownloading")
+    message(STATUS "  include path: ${FFTW3_INCLUDE_PATH}")
+    message(STATUS "  libraries: ${FFTW3_LIBRARIES}")
 else()
-    set(fftw3_SOURCE_LOCATION ${fftw3_SOURCES})
-    message(STATUS "  using pre-downloaded sources at: ${fftw3_SOURCE_LOCATION}")
+    set(fftw3_SOURCE_NAME "fftw-3.3.4.tar.gz")
+    set(fftw3_SOURCE_MD5 "2edab8c06b24feeb3b82bbb3ebf3e7b3")
+    message(STATUS "  using version: 3.3.4  (file: ${fftw3_SOURCE_NAME})")
+
+    if(NOT fftw3_SOURCES)
+        set(fftw3_SOURCE_LOCATION "http://www.fftw.org")
+        message(STATUS "  going to download from: ${fftw3_SOURCE_LOCATION}")
+        message(STATUS "    HINT: specify -Dfftw3_SOURCES=/local/directory/with/${fftw3_SOURCE_NAME} to avoid redownloading")
+    else()
+        set(fftw3_SOURCE_LOCATION ${fftw3_SOURCES})
+        message(STATUS "  using pre-downloaded sources at: ${fftw3_SOURCE_LOCATION}")
+    endif()
+
+    set(fftw3_PREFIX "${3rdparty_PREFIX}/fftw3")
+    set(fftw3_TMP_PREFIX "${3rdparty_TMP_PREFIX}/fftw3")
+
+    set(fftw3_TMP_DIR "${fftw3_TMP_PREFIX}/tmp")
+    set(fftw3_STAMP_DIR "${fftw3_TMP_PREFIX}/stamp")
+    set(fftw3_DOWNLOAD_DIR "${fftw3_PREFIX}/download")
+    set(fftw3_SOURCE_DIR "${fftw3_PREFIX}/src")
+    set(fftw3_BINARY_DIR "${fftw3_TMP_PREFIX}/build")
+    set(fftw3_INSTALL_DIR "${fftw3_PREFIX}/install")
+
+    ExternalProject_Add(fftw3
+        LIST_SEPARATOR " "
+        TMP_DIR "${fftw3_TMP_DIR}"
+        STAMP_DIR "${fftw3_STAMP_DIR}"
+        DOWNLOAD_DIR "${fftw3_DOWNLOAD_DIR}"
+        SOURCE_DIR "${fftw3_SOURCE_DIR}"
+        # BINARY_DIR "${fftw3_BINARY_DIR}"  # not used as in-source build is specified
+        INSTALL_DIR "${fftw3_INSTALL_DIR}"
+
+        EXCLUDE_FROM_ALL ON
+
+        URL ${fftw3_SOURCE_LOCATION}/${fftw3_SOURCE_NAME}
+        URL_MD5 ${fftw3_SOURCE_MD5}
+        TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
+
+        UPDATE_COMMAND ""
+        PATCH_COMMAND ""
+        BUILD_IN_SOURCE ON
+        CONFIGURE_COMMAND ${fftw3_SOURCE_DIR}/configure
+            CC=${CMAKE_C_COMPILER}
+            CXX=${CMAKE_CXX_COMPILER}
+            CXXFLAGS=${CMAKE_CXX_FLAGS}
+            --prefix=${fftw3_INSTALL_DIR}
+            --libdir=${fftw3_INSTALL_DIR}/lib
+        BUILD_COMMAND make -j4
+        TEST_COMMAND ""
+        INSTALL_COMMAND make install
+
+        LOG_DOWNLOAD ON
+        LOG_CONFIGURE ON
+        LOG_BUILD ON
+        LOG_INSTALL ON
+    )
+
+    set(FFTW3_INCLUDE_PATH ${fftw3_INSTALL_DIR}/include)
+    set(FFTW3_LIBRARY_DIR ${fftw3_INSTALL_DIR}/lib)
+    add_library(fftw3_lib STATIC IMPORTED GLOBAL)
+    set_property(TARGET fftw3_lib
+        PROPERTY IMPORTED_LOCATION ${FFTW3_LIBRARY_DIR}/libfftw3.a
+    )
+    add_dependencies(fftw3_lib fftw3)
+    set(FFTW3_LIBRARIES fftw3_lib)
+    message(STATUS "  include path: ${FFTW3_INCLUDE_PATH}")
+    message(STATUS "  library path: ${FFTW3_LIBRARY_DIR}")
 endif()
 
-set(fftw3_PREFIX "${3rdparty_PREFIX}/fftw3")
-set(fftw3_TMP_PREFIX "${3rdparty_TMP_PREFIX}/fftw3")
-
-set(fftw3_TMP_DIR "${fftw3_TMP_PREFIX}/tmp")
-set(fftw3_STAMP_DIR "${fftw3_TMP_PREFIX}/stamp")
-set(fftw3_DOWNLOAD_DIR "${fftw3_PREFIX}/download")
-set(fftw3_SOURCE_DIR "${fftw3_PREFIX}/src")
-set(fftw3_BINARY_DIR "${fftw3_TMP_PREFIX}/build")
-set(fftw3_INSTALL_DIR "${fftw3_PREFIX}/install")
-
-ExternalProject_Add(fftw3
-    LIST_SEPARATOR " "
-    TMP_DIR "${fftw3_TMP_DIR}"
-    STAMP_DIR "${fftw3_STAMP_DIR}"
-    DOWNLOAD_DIR "${fftw3_DOWNLOAD_DIR}"
-    SOURCE_DIR "${fftw3_SOURCE_DIR}"
-    # BINARY_DIR "${fftw3_BINARY_DIR}"  # not used as in-source build is specified
-    INSTALL_DIR "${fftw3_INSTALL_DIR}"
-
-    EXCLUDE_FROM_ALL ON
-
-    URL ${fftw3_SOURCE_LOCATION}/${fftw3_SOURCE_NAME}
-    URL_MD5 ${fftw3_SOURCE_MD5}
-    TIMEOUT ${3rdparty_DOWNLOAD_TIMEOUT}
-
-    UPDATE_COMMAND ""
-    PATCH_COMMAND ""
-    BUILD_IN_SOURCE ON
-    CONFIGURE_COMMAND ${fftw3_SOURCE_DIR}/configure
-        CC=${CMAKE_C_COMPILER}
-        CXX=${CMAKE_CXX_COMPILER}
-        CXXFLAGS=${CMAKE_CXX_FLAGS}
-        --prefix=${fftw3_INSTALL_DIR}
-        --libdir=${fftw3_INSTALL_DIR}/lib
-    BUILD_COMMAND make -j4
-    TEST_COMMAND ""
-    INSTALL_COMMAND make install
-
-    LOG_DOWNLOAD ON
-    LOG_CONFIGURE ON
-    LOG_BUILD ON
-    LOG_INSTALL ON
-)
-
-set(FFTW3_INCLUDE_DIR ${fftw3_INSTALL_DIR}/include)
-set(FFTW3_LIBRARY_DIR ${fftw3_INSTALL_DIR}/lib)
-add_library(fftw3_lib STATIC IMPORTED GLOBAL)
-set_property(TARGET fftw3_lib
-    PROPERTY IMPORTED_LOCATION ${FFTW3_LIBRARY_DIR}/libfftw3.a
-)
-add_dependencies(fftw3_lib fftw3)
-message(STATUS "  include path: ${FFTW3_INCLUDE_DIR}")
-message(STATUS "  library path: ${FFTW3_LIBRARY_DIR}")
-
-set(FFTW3_INCLUDE_DIR ${FFTW3_INCLUDE_DIR} PARENT_SCOPE)
+set(FFTW3_LIBRARIES ${FFTW3_LIBRARIES} PARENT_SCOPE)
+set(FFTW3_INCLUDE_PATH ${FFTW3_INCLUDE_PATH} PARENT_SCOPE)
 
 
 if(pfasst_BUILD_TESTS)
