@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 2.8.6)
+# CMake 3.1 is first version which supports 'EXCLUDE_FROM_ALL' for ExternalProject_Add
+cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 project(pfasst)
 
 list(APPEND CMAKE_MODULE_PATH ${pfasst_SOURCE_DIR}/cmake)
@@ -74,13 +75,39 @@ if(pfasst_WITH_EXTRA_WRAPPER)
 endif()
 
 # Check for C++11 support
+set(pfasst_CXX_FEATURES
+    cxx_alias_templates
+    cxx_auto_type
+    cxx_constexpr
+    cxx_decltype
+    cxx_defaulted_functions
+    cxx_defaulted_move_initializers
+    cxx_delegating_constructors
+    cxx_deleted_functions
+    cxx_explicit_conversions
+    cxx_final
+    cxx_generalized_initializers
+    cxx_inheriting_constructors
+    cxx_lambdas
+    cxx_noexcept
+    cxx_nonstatic_member_init
+    cxx_nullptr
+    cxx_override
+    cxx_range_for
+    cxx_raw_string_literals
+    cxx_reference_qualified_functions
+    cxx_right_angle_brackets
+    cxx_rvalue_references
+    cxx_sizeof_member
+    cxx_static_assert
+    cxx_strong_enums
+    cxx_variadic_templates
+    cxx_template_template_parameters
+)
+#set(CMAKE_CXX_STANDARD 11)
+#set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
-    check_cxx_compiler_flag(-std=c++11 HAVE_STD11)
-    if(HAVE_STD11)
-        add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-std=c++11")
-    else()
-        message(FATAL_ERROR "No advanced standard C++ support of your GCC (-std=c++11 not defined).")
-    endif()
     if(pfasst_WITH_GCC_PROF)
         add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-ggdb3 -pg")
     endif(pfasst_WITH_GCC_PROF)
@@ -91,29 +118,15 @@ if(${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
         set(CMAKE_MODULE_LINKER_FLAGS_RELEASE "${CMAKE_MODULE_LINKER_FLAGS_RELEASE} -flto")
     endif()
 elseif(${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
-    check_cxx_compiler_flag(-std=c++11 HAVE_STD11)
-    if(HAVE_STD11)
-        if(pfasst_DISABLE_LIBCXX AND NOT APPLE)
-            add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-std=c++11")
-            add_to_string_list("${CMAKE_CXX_LINK_FLAGS}" CMAKE_CXX_LINK_FLAGS "-std=c++11")
-        else()
-            if(APPLE)
-                message(WARNING "You are on an Apple system. libc++ is forcly enabled.")
-            endif(APPLE)
-            add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-std=c++11" "-stdlib=libc++")
-            add_to_string_list("${CMAKE_CXX_LINK_FLAGS}" CMAKE_CXX_LINK_FLAGS "-std=c++11" "-stdlib=libc++")
-        endif()
-    else()
-        message(FATAL_ERROR "No C++11 support for Clang version. Please upgrade Clang to a version supporting C++11.")
+    if(NOT pfasst_DISABLE_LIBCXX)
+        if(APPLE)
+            message(WARNING "You are on an Apple system. libc++ is forcly enabled.")
+        endif(APPLE)
+        add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-stdlib=libc++")
+        add_to_string_list("${CMAKE_CXX_LINK_FLAGS}" CMAKE_CXX_LINK_FLAGS "-stdlib=libc++")
     endif()
     add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-Wdeprecated -fdiagnostics-show-category=name -fdiagnostics-show-template-tree")
 elseif(${CMAKE_CXX_COMPILER_ID} MATCHES Intel)
-    check_cxx_compiler_flag(-std=c++11 HAVE_STD11)
-    if(HAVE_STD11)
-        add_to_string_list("${CMAKE_CXX_FLAGS}" CMAKE_CXX_FLAGS "-std=c++11")
-    else()
-        message(FATAL_ERROR "No advanced standard C++ support for your Intel compiler (-std=c++11 not defined).")
-    endif()
 elseif(${CMAKE_CXX_COMPILER_ID} MATCHES XL)
     message(FATAL_ERROR "IMB XL C/C++ does not support C++11 features PFASST++ is utilizing.")
 else()
