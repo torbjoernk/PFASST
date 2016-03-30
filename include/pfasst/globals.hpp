@@ -20,6 +20,10 @@ template<typename precision>
 using Index = typename Matrix<precision>::Index;
 
 
+constexpr double PI = 3.141592653589793238462643383279502884e+00;
+constexpr double TWO_PI = 6.283185307179586476925286766559005768e+00;
+constexpr double PI_SQR = 9.869604401089358618834490999876151135e+00;
+
 /**
  * Denoting unused function parameters for omitting compiler warnings.
  *

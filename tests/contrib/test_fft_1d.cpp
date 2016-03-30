@@ -9,13 +9,6 @@ using ::testing::NotNull;
 #include <vector>
 using namespace std;
 
-#include <leathers/push>
-#include <leathers/all>
-#include <boost/math/constants/constants.hpp>
-#include <leathers/pop>
-using namespace boost::math::constants;
-
-
 #include <pfasst/contrib/fft.hpp>
 using pfasst::contrib::FFT;
 
@@ -24,6 +17,7 @@ using encap_t = pfasst::encap::VectorEncapsulation<double, double, 1>;
 using fft_t = FFT<encap_t>;
 
 #include <pfasst/logging.hpp>
+#include <pfasst/globals.hpp>
 
 
 using FFTTypes = ::testing::Types<fft_t>;
@@ -63,7 +57,7 @@ class DiscreteFastFourierTransform
       transform(vec->get_data().cbegin(), vec->get_data().cend(),
                 result.begin(),
                 [ndofs, k](const double& t) {
-                  return exp(complex<double>(0.0, 1.0) * (two_pi<double>() / double(ndofs) * k * t));
+                  return exp(complex<double>(0.0, 1.0) * (TWO_PI / double(ndofs) * k * t));
                 });
 
       return result;
@@ -77,7 +71,7 @@ class DiscreteFastFourierTransform
       transform(vec->get_data().cbegin(), vec->get_data().cend(),
                 result.begin(),
                 [k](const double& t) {
-                  return cos(two_pi<double>() * k * t);
+                  return cos(TWO_PI * k * t);
                 });
 
       return result;
@@ -134,7 +128,7 @@ TEST_P(DiscreteFastFourierTransform, backward_transform)
   }
 }
 
-auto values_3 = make_shared<encap_t>(vector<double>{0.0, third<double>(), two_thirds<double>()});
+auto values_3 = make_shared<encap_t>(vector<double>{0.0, (1.0/3.0), (2.0/3.0)});
 auto values_4 = make_shared<encap_t>(vector<double>{0.0, 0.25, 0.5, 0.75});
 auto values_5 = make_shared<encap_t>(vector<double>{0.0, 0.2, 0.4, 0.6, 0.8});
 auto values_10 = make_shared<encap_t>(vector<double>{0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9});

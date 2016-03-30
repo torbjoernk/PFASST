@@ -9,13 +9,6 @@
 using std::shared_ptr;
 using std::vector;
 
-#include <leathers/push>
-#include <leathers/all>
-#include <boost/math/constants/constants.hpp>
-#include <leathers/pop>
-using boost::math::constants::two_pi;
-using boost::math::constants::pi_sqr;
-
 #include <pfasst/globals.hpp>
 #include <pfasst/util.hpp>
 #include <pfasst/logging.hpp>
@@ -48,7 +41,7 @@ namespace pfasst
         this->encap_factory()->set_size(ndofs);
 
         for (size_t i = 0; i < ndofs; ++i) {
-          spatial_t kx = two_pi<spatial_t>()
+          spatial_t kx = TWO_PI
                             * ((i <= ndofs / 2) ? spatial_t(i)
                                                 : spatial_t(i) - spatial_t(ndofs));
           this->_lap[i] = pfasst::almost_zero(pow(kx, 2)) ? 0.0 : -pow(kx, 2);
@@ -75,8 +68,7 @@ namespace pfasst
         //   me.values = np.sin(2 * np.pi * xvalues) * np.exp(-t * (2 * np.pi)**2 * self.nu)
         const spatial_t dx = 1.0 / spatial_t(this->get_num_dofs());
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
-          result->data()[i] = std::sin(two_pi<spatial_t>() * i * dx)
-                                * exp(-t * 4 * pi_sqr<spatial_t>() * this->_nu);
+          result->data()[i] = std::sin(TWO_PI * i * dx) * exp(-t * 4 * PI_SQR * this->_nu);
         }
 
         return result;

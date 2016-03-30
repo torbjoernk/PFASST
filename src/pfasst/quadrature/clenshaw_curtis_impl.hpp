@@ -2,12 +2,7 @@
 
 #include <stdexcept>
 
-#include <leathers/push>
-#include <leathers/all>
-#include <boost/math/constants/constants.hpp>
-using boost::math::constants::pi;
-#include <leathers/pop>
-
+#include "pfasst/globals.hpp"
 #include "pfasst/quadrature/polynomial.hpp"
 
 
@@ -45,7 +40,7 @@ namespace pfasst
       auto roots = Polynomial<precision>::legendre(this->num_nodes).roots();
 
       for (size_t j = 0; j < this->num_nodes; j++) {
-        this->nodes[j] = 0.5 * (1.0 - cos(j * pi<precision>() / (this->num_nodes - 1)));
+        this->nodes[j] = 0.5 * (1.0 - cos(j * PI / (this->num_nodes - 1)));
       }
     }
   }  // ::pfasst::quadrature

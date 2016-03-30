@@ -10,14 +10,6 @@
 using std::shared_ptr;
 using std::vector;
 
-#include <leathers/push>
-#include <leathers/all>
-#include <boost/math/constants/constants.hpp>
-#include <leathers/pop>
-using boost::math::constants::pi;
-using boost::math::constants::two_pi;
-using boost::math::constants::pi_sqr;
-
 #include <pfasst/globals.hpp>
 #include <pfasst/util.hpp>
 #include <pfasst/logging.hpp>
@@ -61,7 +53,7 @@ namespace pfasst
         this->encap_factory()->set_size(ndofs);
 
         for (size_t i = 0; i < ndofs; ++i) {
-          typename traits::spatial_t kx = two_pi<typename traits::spatial_t>()
+          typename traits::spatial_t kx = TWO_PI
                             * ((i <= ndofs / 2) ? typename traits::spatial_t(i)
                                                 : typename traits::spatial_t(i) - typename traits::spatial_t(ndofs));
           this->_ddx[i] = std::complex<typename traits::spatial_t>(0.0, 1.0) * kx;
@@ -93,7 +85,7 @@ namespace pfasst
       {
         auto result = this->get_encap_factory().create();
 
-        const typename traits::spatial_t dx = 1.0 / sqrt(4.0 * pi<typename traits::spatial_t>() * this->_nu * (t + this->_t0));
+        const typename traits::spatial_t dx = 1.0 / sqrt(4.0 * PI * this->_nu * (t + this->_t0));
 
         for (size_t i = 0; i < this->get_num_dofs(); ++i) {
           result->data()[i] = 0.0;

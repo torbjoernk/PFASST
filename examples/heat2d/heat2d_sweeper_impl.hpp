@@ -11,14 +11,6 @@
 using std::shared_ptr;
 using std::vector;
 
-#include <leathers/push>
-#include <leathers/all>
-#include <boost/math/constants/constants.hpp>
-#include <leathers/pop>
-using boost::math::constants::pi;
-using boost::math::constants::two_pi;
-using boost::math::constants::pi_sqr;
-
 #include <pfasst/globals.hpp>
 #include <pfasst/util.hpp>
 #include <pfasst/logging.hpp>
@@ -51,7 +43,7 @@ namespace pfasst
         this->encap_factory()->set_size(ndofs * ndofs);
 
         auto compute_kdi = [&ndofs](const size_t di) {
-          return two_pi<spatial_t>() * ((di <= ndofs / 2) ? spatial_t(di) : spatial_t(di) - spatial_t(ndofs));
+          return TWO_PI * ((di <= ndofs / 2) ? spatial_t(di) : spatial_t(di) - spatial_t(ndofs));
         };
 
         for (size_t yi = 0; yi < ndofs; ++yi) {
@@ -94,9 +86,9 @@ namespace pfasst
 
         for (size_t yi = 0; yi < dofs_p_dim; ++yi) {
           for (size_t xi = 0; xi < dofs_p_dim; ++xi) {
-            result->data()[lin_index(yi, xi)] = (std::sin(two_pi<spatial_t>() * yi * dy)
-                                                 + std::sin(two_pi<spatial_t>() * xi * dx))
-                                                * std::exp(-t * 4 * pi_sqr<spatial_t>() * this->_nu);
+            result->data()[lin_index(yi, xi)] = (std::sin(TWO_PI * yi * dy)
+                                                 + std::sin(TWO_PI * xi * dx))
+                                                * std::exp(-t * 4 * PI_SQR * this->_nu);
           }
         }
 
