@@ -22,6 +22,7 @@ foreach(example ${fftw_examples})
         ${pfasst_DEPENDEND_LIBS}
         ${FFTW3_LIBRARIES}
     )
+    target_compile_features(${example} PRIVATE ${pfasst_CXX_FEATURES})
     if(pfasst_INSTALL_EXAMPLES)
         install(TARGETS ${example} RUNTIME DESTINATION bin)
     endif()

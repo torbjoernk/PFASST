@@ -25,6 +25,7 @@ if(NOT ${pfasst_WITH_MPI})
             ${TESTS_3rdparty_DEPENDEND_LIBS}
             ${pfasst_DEPENDEND_LIBS}
         )
+        target_compile_features(${test} PRIVATE ${pfasst_CXX_FEATURES})
         if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
             set_target_properties(${test}
                 PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -ftest-coverage -fprofile-arcs"
@@ -46,6 +47,7 @@ else()
             ${TESTS_3rdparty_DEPENDEND_LIBS}
             ${pfasst_DEPENDEND_LIBS}
         )
+        target_compile_features(${test} PRIVATE ${pfasst_CXX_FEATURES})
         if(pfasst_WITH_GCC_PROF AND ${CMAKE_CXX_COMPILER_ID} MATCHES GNU)
             set_target_properties(${test}
                 PROPERTIES COMPILE_FLAGS "${CMAKE_CXX_FLAGS} -ftest-coverage -fprofile-arcs"
