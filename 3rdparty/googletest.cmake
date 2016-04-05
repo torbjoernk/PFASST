@@ -30,8 +30,8 @@ set(gmock_TMP_PREFIX "${3rdparty_TMP_PREFIX}/gmock")
 
 set(gmock_TMP_DIR "${gmock_TMP_PREFIX}/tmp")
 set(gmock_STAMP_DIR "${gmock_TMP_PREFIX}/stamp")
-set(gmock_DOWNLOAD_DIR "${gmock_PREFIX}/download")
-set(gmock_SOURCE_DIR "${gmock_PREFIX}/src")
+set(gmock_DOWNLOAD_DIR "${gmock_TMP_PREFIX}/download")
+set(gmock_SOURCE_DIR "${gmock_TMP_PREFIX}/src")
 set(gmock_BINARY_DIR "${gmock_TMP_PREFIX}/build")
 
 set(gtest_PREFIX "${3rdparty_PREFIX}/gtest")
@@ -39,9 +39,9 @@ set(gtest_TMP_PREFIX "${3rdparty_TMP_PREFIX}/gtest")
 
 set(gtest_TMP_DIR "${gtest_TMP_PREFIX}/tmp")
 set(gtest_STAMP_DIR "${gtest_TMP_PREFIX}/stamp")
-set(gtest_DOWNLOAD_DIR "${gtest_PREFIX}/download")
+set(gtest_DOWNLOAD_DIR "${gtest_TMP_PREFIX}/download")
 # gtest sources should be in a subdir of gmock sources
-set(gtest_SOURCE_DIR "${gmock_PREFIX}/gtest")
+set(gtest_SOURCE_DIR "${gmock_TMP_PREFIX}/gtest")
 # and gtest is build by gmock
 set(gtest_BINARY_DIR "${gmock_BINARY_DIR}/gtest")
 

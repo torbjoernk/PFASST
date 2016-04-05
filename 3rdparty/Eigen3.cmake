@@ -1,4 +1,4 @@
-if(pfasst_SYSTEM_BOOST)
+if(pfasst_SYSTEM_EIGEN3)
     message(STATUS "trying to use system's Eigen3")
 
     find_package(Eigen3 QUIET REQUIRED)
@@ -23,10 +23,10 @@ else()
 
     set(Eigen3_TMP_DIR "${Eigen3_TMP_PREFIX}/tmp")
     set(Eigen3_STAMP_DIR "${Eigen3_TMP_PREFIX}/stamp")
-    set(Eigen3_DOWNLOAD_DIR "${Eigen3_PREFIX}/download")
-    set(Eigen3_SOURCE_DIR "${Eigen3_PREFIX}/src")
+    set(Eigen3_DOWNLOAD_DIR "${Eigen3_TMP_PREFIX}/download")
+    set(Eigen3_SOURCE_DIR "${Eigen3_TMP_PREFIX}/src")
     set(Eigen3_BINARY_DIR "${Eigen3_TMP_PREFIX}/build")
-    set(Eigen3_INSTALL_DIR "${Eigen3_PREFIX}/install")
+    set(Eigen3_INSTALL_DIR "${Eigen3_TMP_PREFIX}/install")
 
     ExternalProject_Add(Eigen3
         LIST_SEPARATOR " "

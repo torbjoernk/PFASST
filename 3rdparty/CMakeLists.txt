@@ -66,6 +66,8 @@ message(STATUS "Boost")
 
 include(Boost.cmake)
 
+message("${Boost_INCLUDE_DIRS} - ${Boost_LIBRARIES}")
+
 list(APPEND 3rdparty_INCLUDES ${Boost_INCLUDE_DIRS})
 list(APPEND 3rdparty_DEPENDEND_LIBS ${Boost_LIBRARIES})
 

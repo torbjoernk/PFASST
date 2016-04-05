@@ -18,6 +18,8 @@ try:
 except subprocess.CalledProcessError:
     # `git describe` will fail in case the Git tags are not fetched
     #  this happens when cloning the repo only from a fork pruned of tags
+    print("Could not determine PFASST version. "
+          "Inspect the output of 'git describe --dirty' for errors.")
     version = 'unknown'
 
 # read in site_config.hpp

@@ -28,10 +28,10 @@ else()
 
     set(Boost_TMP_DIR "${Boost_TMP_PREFIX}/tmp")
     set(Boost_STAMP_DIR "${Boost_TMP_PREFIX}/stamp")
-    set(Boost_DOWNLOAD_DIR "${Boost_PREFIX}/download")
-    set(Boost_SOURCE_DIR "${Boost_PREFIX}/src")
+    set(Boost_DOWNLOAD_DIR "${Boost_TMP_PREFIX}/download")
+    set(Boost_SOURCE_DIR "${Boost_TMP_PREFIX}/src")
     set(Boost_BINARY_DIR "${Boost_TMP_PREFIX}/build")
-    set(Boost_INSTALL_DIR "${Boost_PREFIX}/install")
+    set(Boost_INSTALL_DIR "${Boost_TMP_PREFIX}/install")
 
     set(Boost_build_CMD "${Boost_SOURCE_DIR}/bootstrap.sh")
     list(APPEND Boost_build_CMD

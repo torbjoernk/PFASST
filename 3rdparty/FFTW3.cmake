@@ -23,10 +23,10 @@ else()
 
     set(fftw3_TMP_DIR "${fftw3_TMP_PREFIX}/tmp")
     set(fftw3_STAMP_DIR "${fftw3_TMP_PREFIX}/stamp")
-    set(fftw3_DOWNLOAD_DIR "${fftw3_PREFIX}/download")
-    set(fftw3_SOURCE_DIR "${fftw3_PREFIX}/src")
+    set(fftw3_DOWNLOAD_DIR "${fftw3_TMP_PREFIX}/download")
+    set(fftw3_SOURCE_DIR "${fftw3_TMP_PREFIX}/src")
     set(fftw3_BINARY_DIR "${fftw3_TMP_PREFIX}/build")
-    set(fftw3_INSTALL_DIR "${fftw3_PREFIX}/install")
+    set(fftw3_INSTALL_DIR "${fftw3_TMP_PREFIX}/install")
 
     ExternalProject_Add(fftw3
         LIST_SEPARATOR " "
